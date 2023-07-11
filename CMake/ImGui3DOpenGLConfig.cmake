@@ -1,6 +1,6 @@
 message(STATUS "Adding ImGUI 3D OpenGL CMake Config")
 
-set(IMGUI_3D_OPENGL_DIR ${CMAKE_SOURCE_DIR}/FlowCV_SDK/third-party/imgui_wrapper)
+set(IMGUI_3D_OPENGL_DIR ${CMAKE_SOURCE_DIR}/3rdparty/imgui_wrapper)
 include_directories(${IMGUI_3D_OPENGL_DIR})
 include_directories(${IMGUI_3D_OPENGL_DIR}/gl_helpers)
 

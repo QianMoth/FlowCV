@@ -34,5 +34,3 @@ DerivePointerAlignment: false
 DisableFormat: false
 SpaceAfterTemplateKeyword: false
 UseTab: Never
-
-...

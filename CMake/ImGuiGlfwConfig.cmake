@@ -2,7 +2,7 @@ message(STATUS "Adding ImGUI GLFW CMake Config")
 
 add_compile_definitions(IMGUI_DISABLE_DEMO_WINDOWS)
 
-set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/FlowCV_SDK/third-party)
+set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/3rdparty)
 set(IMGUI_DIR ${THIRD_PARTY_DIR}/imgui)
 
 include_directories(${THIRD_PARTY_DIR})
@@ -15,12 +15,14 @@ list(APPEND IMGUI_SRC "${IMGUI_DIR}/imgui_tables.cpp")
 list(APPEND IMGUI_SRC "${IMGUI_DIR}/backends/imgui_impl_glfw.cpp")
 list(APPEND IMGUI_SRC "${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp")
 
-if (WIN32)
+if(WIN32)
     add_compile_definitions(IMGUI_IMPL_OPENGL_LOADER_GLAD)
     set(_GLFW_Arch 32)
-    if (${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+
+    if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
         set(_GLFW_Arch 64)
     endif()
+
     list(APPEND IMGUI_SRC "${THIRD_PARTY_DIR}/glad/glad.c")
     set(GLFW_DIR ${IMGUI_DIR}/examples/libs/glfw)
     include_directories("${GLFW_DIR}/include")
@@ -29,15 +31,14 @@ if (WIN32)
     list(APPEND IMGUI_LIBS "shell32.lib")
     list(APPEND IMGUI_LIBS "${GLFW_DIR}/lib-vc2019-${_GLFW_Arch}/glfw3.lib")
 else()
-
     find_package(OpenGL REQUIRED)
-    include_directories( ${OPENGL_INCLUDE_DIRS})
+    include_directories(${OPENGL_INCLUDE_DIRS})
 
     find_package(glfw3 REQUIRED)
     include_directories(${GLFW_INCLUDE_DIRS})
     link_libraries(${GLFW_LIBRARY_DIRS})
 
-    if (APPLE)
+    if(APPLE)
         add_compile_definitions(IMGUI_IMPL_OPENGL_LOADER_GLAD)
         find_library(COCOA_LIBRARY Cocoa)
         find_library(OpenGL_LIBRARY OpenGL)
@@ -57,5 +58,4 @@ else()
         list(APPEND IMGUI_LIBS "${OPENGL_LIBRARIES}")
         list(APPEND IMGUI_LIBS "${GLEW_LIBRARIES}")
     endif()
-
 endif()

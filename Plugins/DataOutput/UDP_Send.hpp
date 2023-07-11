@@ -8,7 +8,7 @@
 #include "FlowCV_Types.hpp"
 #include "imgui_wrapper.hpp"
 #include "imgui_opencv.hpp"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include <asio2/udp/udp_client.hpp>
 
 namespace DSPatch::DSPatchables

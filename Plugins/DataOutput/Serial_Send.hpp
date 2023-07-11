@@ -8,7 +8,7 @@
 #include "FlowCV_Types.hpp"
 #include "imgui_wrapper.hpp"
 #include "imgui_opencv.hpp"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include <asio2/serial_port/serial_port.hpp>
 #include "serial_enumerator.hpp"
 

@@ -8,7 +8,7 @@
 #include "FlowCV_Types.hpp"
 #include "imgui_wrapper.hpp"
 #include "imgui_opencv.hpp"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include <asio2/external/asio.hpp>
 #include <asio2/tcp/tcp_client.hpp>
 

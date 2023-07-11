@@ -9,7 +9,7 @@
 #include "FlowCV_Types.hpp"
 #include "imgui_internal.h"
 #include "imgui_wrapper.hpp"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 using namespace DSPatch;
 

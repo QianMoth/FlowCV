@@ -11,7 +11,7 @@ from optparse import OptionParser
 
 
 def IoTypesList():
-    ioTypesFile = open("../FlowCV_SDK/third-party/dspatch/include/dspatch/ComponentTypes.hpp", 'r')
+    ioTypesFile = open("../3rdparty/dspatch/include/dspatch/ComponentTypes.hpp", 'r')
     Lines = ioTypesFile.readlines()
     ioTypesFile.close()
     ioList = []
@@ -43,7 +43,7 @@ def IoTypesList():
 
 
 def CategoryList():
-    catTypesFile = open("../FlowCV_SDK/third-party/dspatch/include/dspatch/ComponentTypes.hpp", 'r')
+    catTypesFile = open("../3rdparty/dspatch/include/dspatch/ComponentTypes.hpp", 'r')
     Lines = catTypesFile.readlines()
     catTypesFile.close()
     catList = []

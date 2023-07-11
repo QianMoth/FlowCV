@@ -9,7 +9,7 @@
 #include "FlowCV_Properties.hpp"
 #include "imgui_wrapper.hpp"
 #include "imgui_opencv.hpp"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace DSPatch::DSPatchables
 {

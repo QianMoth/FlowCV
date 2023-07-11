@@ -9,7 +9,7 @@
 #include "FlowCV_Types.hpp"
 #include "imgui_wrapper.hpp"
 #include "imgui_opencv.hpp"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include "camera_enumerator.hpp"
 
 namespace DSPatch::DSPatchables

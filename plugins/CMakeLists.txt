@@ -1,0 +1,10 @@
+# FlowCV Plugin Modules
+add_subdirectory(VideoCapture)
+add_subdirectory(VideoWriter)
+add_subdirectory(ImageLoader)
+add_subdirectory(VideoLoader)
+add_subdirectory(ShapeColorizer)
+add_subdirectory(ShapeCounter)
+add_subdirectory(SimpleBlobTracker)
+add_subdirectory(DataOutput)
+add_subdirectory(ImageWriter)

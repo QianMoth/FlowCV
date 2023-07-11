@@ -1,3 +1,6 @@
 [submodule "Docs"]
 	path = Docs
 	url = https://github.com/FlowCV-org/FlowCV_Documentation.git
+[submodule "3rdparty/json"]
+	path = 3rdparty/json
+	url = https://github.com/nlohmann/json.git

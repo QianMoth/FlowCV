@@ -2,7 +2,7 @@
 // Common App Setting Code
 //
 
-#include "app_settings.h"
+#include "settings.h"
 
 void ApplicationLoadSettings(AppSettings &settings)
 {

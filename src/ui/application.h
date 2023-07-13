@@ -7,7 +7,7 @@
 #include <deque>
 #include <nlohmann/json.hpp>
 
-#include "app_settings.h"
+#include "utils/settings.h"
 #include "imgui_internal.h"
 #include "imgui_wrapper.hpp"
 #include "node_editor.h"

@@ -29,7 +29,7 @@ IndentWidth: 4
 KeepEmptyLinesAtTheStartOfBlocks: true
 Language: Cpp
 PointerAlignment: Right
-SortIncludes: false
+SortIncludes: true
 DerivePointerAlignment: false
 DisableFormat: false
 SpaceAfterTemplateKeyword: false

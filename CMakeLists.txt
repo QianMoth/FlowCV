@@ -1,20 +1,25 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(FLOWCV_VERSION_MAJOR 1)
-set(FLOWCV_VERSION_MINOR 1)
-set(FLOWCV_VERSION_PATCH 0)
-set(FLOWCV_VERSION_TWEAK 1)
-set(FLOWCV_VERSION_STATUS "")
-set(FLOWCV_VERSION ${FLOWCV_VERSION_MAJOR}.${FLOWCV_VERSION_MINOR}.${FLOWCV_VERSION_PATCH}.${FLOWCV_VERSION_TWEAK})
+set(PROJECT_VERSION_MAJOR 1)
+set(PROJECT_VERSION_MINOR 1)
+set(PROJECT_VERSION_PATCH 0)
+set(PROJECT_VERSION_TWEAK 1)
+set(PROJECT_VERSION_STATUS "")
+set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}.${PROJECT_VERSION_TWEAK})
+set(PROJECT_DESCRIPTION "An Open Source Data Flow Framework and Node Editor UI For Computer Vision")
+set(PROJECT_HOMEPAGE_URL "http://www.flowcv.org")
 
 project(
     FlowCV
-    VERSION ${FLOWCV_VERSION}
+    VERSION ${PROJECT_VERSION}
+    DESCRIPTION ${PROJECT_DESCRIPTION}
+    HOMEPAGE_URL ${PROJECT_HOMEPAGE_URL}
 )
 
 message(STATUS "[${PROJECT_NAME}] Project ${PROJECT_NAME} v${PROJECT_VERSION}")
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Options
 option(USE_LOCAL_OPENCV_PACKAGE "Use locally OpenCV Package" ON)
@@ -34,8 +39,9 @@ include(${CMAKE_SOURCE_DIR}/cmake/ImGuiFileDialogConfig.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/DSPatchConfig.cmake)
 
 # header
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/json/include) # JSON
-include_directories(${CMAKE_SOURCE_DIR}/3rdparty/tclap/include) # cmdline
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/json/include) # json
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/cmdline/include) # cli
+include_directories(${CMAKE_SOURCE_DIR}/3rdparty/spdlog/include) # log
 
 include_directories(${CMAKE_SOURCE_DIR}/include) # sdk header
 

@@ -2,8 +2,8 @@
 // Common App Setting Header
 //
 
-#ifndef FLOWCV_APP_SETTINGS_H_
-#define FLOWCV_APP_SETTINGS_H_
+#pragma once
+
 #include <deque>
 #include <filesystem>
 #include <fstream>
@@ -13,16 +13,15 @@
 
 struct AppSettings
 {
-    std::string configPath;
+    std::string configPath;  // 配置路径
     std::vector<std::string> extPluginDir;
     int recentListSize;
     std::deque<std::string> recentFiles;
     bool showFPS;
     bool useVSync;
+    int logLevel;  // 日志等级
     int flowBufferCount;
 };
 
 void ApplicationLoadSettings(AppSettings &settings);
 void ApplicationSaveSettings(const AppSettings &settings);
-
-#endif  // FLOWCV_APP_SETTINGS_H_

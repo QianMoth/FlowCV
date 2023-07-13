@@ -1,18 +1,23 @@
-#include "ui/application.h"
-#include <cstdio>
-#include <iomanip>
-#include <algorithm>
-#include <cstdint>
-#include <fstream>
-#include <filesystem>
 #include <ImGuiFileBrowser.h>
-#include <tclap/CmdLine.h>
+
+#include <algorithm>
+#include <cmdline/cmdline>
+#include <cstdint>
+#include <cstdio>
+#include <filesystem>
+#include <fstream>
+#include <iomanip>
+
+#include "core/CoreApplication.h"
+#include "ui/application.h"
+
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
 #endif
 
-using namespace TCLAP;
-
+///@brief 获取应用全局信息
+///
+///@return ApplicationGlobals*
 ApplicationGlobals *GetApplicationGlobals()
 {
     static auto app_globals = new ApplicationGlobals;
@@ -20,6 +25,10 @@ ApplicationGlobals *GetApplicationGlobals()
     return app_globals;
 }
 
+///@brief 添加文件路径到最近打开
+///
+///@param settings 配置类
+///@param filePath
 void AddFileToRecent(AppSettings &settings, const std::string &filePath)
 {
     settings.recentFiles.emplace_back(filePath);
@@ -29,6 +38,9 @@ void AddFileToRecent(AppSettings &settings, const std::string &filePath)
     ApplicationSaveSettings(settings);
 }
 
+///@brief About对话框
+///
+///@param dialogState
 void ApplicationAboutDialog(bool &dialogState)
 {
     auto viewCenter = ImGui::GetMainViewport()->GetCenter();
@@ -41,6 +53,10 @@ void ApplicationAboutDialog(bool &dialogState)
     ImGui::End();
 }
 
+///@brief 设置对话框
+///
+///@param settings
+///@param windowState
 void ApplicationSettingsDialog(AppSettings &settings, bool &windowState)
 {
     static int plugin_path_select = -1;
@@ -135,6 +151,12 @@ void ApplicationSettingsDialog(AppSettings &settings, bool &windowState)
     ImGui::End();
 }
 
+///@brief 保存flow文件
+///
+///@param imgui
+///@param flowMan
+///@param filename
+///@return std::string
 std::string SaveFlowFile(ImGuiWrapper &imgui, FlowCV::FlowCV_Manager &flowMan, std::string filename)
 {
     auto appGlobals = GetApplicationGlobals();
@@ -154,13 +176,24 @@ std::string SaveFlowFile(ImGuiWrapper &imgui, FlowCV::FlowCV_Manager &flowMan, s
     return appTitle;
 }
 
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
 int main(int argc, char *argv[])
 {
+
+    std::string appDir = FlowCV::CoreApplication::applicationDirPath();
+    std::string cfgDir = appDir;
+
     FlowCV::FlowCV_Manager flowMan;
     ImGuiWrapper imgui;
     std::string pluginDir;
-    std::string appDir;
-    std::string cfgDir;
     std::string configFile;
     auto appGlobals = GetApplicationGlobals();
     AppSettings appSettings;
@@ -169,60 +202,23 @@ int main(int argc, char *argv[])
     appSettings.showFPS = false;
     appSettings.useVSync = false;
 
-    CmdLine cmd("FlowCV Node Editor", ' ', FLOWCV_EDITOR_VERSION_STR);
-    ValueArg<std::string> cfg_file_arg("c", "cfg", "Default Config File Override", false, "", "string");
-    cmd.add(cfg_file_arg);
+    // 命令行解析器
+    cmdline::parser cmdParser;
+    cmdParser.set_program_name(std::string{"FlowCV Node Editor "} + FLOWCV_EDITOR_VERSION_STR);
+    cmdParser.add<std::string>("cfg", 'c', "Default Config File Override", false);
+    cmdParser.parse_check(argc, argv);
 
-    cmd.parse(argc, argv);
-
-    // Load App Settings
-#ifdef __linux__
-    char result[PATH_MAX];
-    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
-    const char *path;
-    if (count != -1) {
-        path = dirname(result);
-    }
-    appDir = path;
-    cfgDir = path;
-#endif
-#ifdef _WINDOWS
-    appDir = std::filesystem::current_path().string();
-    size_t requiredSize;
-    getenv_s(&requiredSize, nullptr, 0, "APPDATA");
-    if (requiredSize != 0) {
-        char *libVar = new char[requiredSize];
-        getenv_s(&requiredSize, libVar, requiredSize, "APPDATA");
-        cfgDir = libVar;
-        cfgDir += std::filesystem::path::preferred_separator;
-        cfgDir += "FlowCV";
-        if (!std::filesystem::exists(cfgDir)) {
-            std::filesystem::create_directories(cfgDir);
+    if (cmdParser.exist("cfg")) {
+        auto cfg_file_arg = cmdParser.get<std::string>("cfg");
+        if (cfg_file_arg.empty()) {
+            configFile = cfgDir;
+            configFile += std::filesystem::path::preferred_separator;
+            configFile += "flowcv_editor.cfg";
         }
-        delete[] libVar;
+        else {
+            configFile = cfg_file_arg;
+        }
     }
-    else {
-        cfgDir = appDir;
-    }
-#endif
-#if __APPLE__
-    char path[1024];
-    uint32_t size = sizeof(path);
-    if (_NSGetExecutablePath(path, &size) == 0) {
-        std::filesystem::path p = path;
-        appDir = p.parent_path();
-    }
-    else
-        appDir = std::filesystem::current_path().string();
-    cfgDir = appDir;
-#endif
-    if (cfg_file_arg.getValue().empty()) {
-        configFile = cfgDir;
-        configFile += std::filesystem::path::preferred_separator;
-        configFile += "flowcv_editor.cfg";
-    }
-    else
-        configFile = cfg_file_arg.getValue();
 
     appSettings.configPath = configFile;
     ApplicationLoadSettings(appSettings);

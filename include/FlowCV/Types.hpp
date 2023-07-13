@@ -7,6 +7,10 @@
 #include <map>
 #include <string>
 
+namespace DSPatch {
+enum class Category;
+}  // namespace DSPatch
+
 namespace FlowCV {
 
 enum GuiInterfaceType
@@ -30,8 +34,10 @@ struct NodeDescription
 }  // End Namespace FlowCV
 
 namespace DSPatch {
-///@brief 获取目录
+
+///@brief 获取节点目录
 ///
 ///@return const std::map<DSPatch::Category, const char *>&
 const std::map<DSPatch::Category, const char *> &getCategories();
+
 }  // namespace DSPatch

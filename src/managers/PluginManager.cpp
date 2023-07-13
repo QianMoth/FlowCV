@@ -53,14 +53,14 @@ void PluginManager::ScanDirForPlugins(const char *dir_path, bool recursive)
                     std::shared_ptr<DSPatch::Component> plugin_instance =
                         pi.plugin_handle->Create();
 
-                    // // 组件名称
-                    // pi.plugin_desc.name = plugin_instance->GetComponentName();
-                    // // 组件所在目录
-                    // pi.plugin_desc.category = plugin_instance->GetComponentCategory();
-                    // // 组件作者
-                    // pi.plugin_desc.author = plugin_instance->GetComponentAuthor();
-                    // // 组件版本
-                    // pi.plugin_desc.version = plugin_instance->GetComponentVersion();
+                    // 组件名称
+                    pi.plugin_desc.name = plugin_instance->GetComponentName();
+                    // 组件所在目录
+                    pi.plugin_desc.category = plugin_instance->GetComponentCategory();
+                    // 组件作者
+                    pi.plugin_desc.author = plugin_instance->GetComponentAuthor();
+                    // 组件版本
+                    pi.plugin_desc.version = plugin_instance->GetComponentVersion();
                     // 输入端口数
                     pi.plugin_desc.input_count = plugin_instance->GetInputCount();
                     // 输出端口数

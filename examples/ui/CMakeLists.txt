@@ -18,9 +18,7 @@ project(
 # 加入一个配置头文件，用于处理 CMake 对源码的设置
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
-if(WIN32)
-    set(APP_ICON_RESOURCE_WINDOWS ${CMAKE_CURRENT_SOURCE_DIR}/resources/appicon.rc)
-elseif(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE)
     add_link_options(-fno-pie -no-pie -Wl,--disable-new-dtags)
     set(STB_IMAGE_LIB stb_image)
     FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Node_Editor_Resource)
@@ -32,7 +30,7 @@ file(GLOB_RECURSE INCS *.hpp *.h)
 
 add_executable(${PROJECT_NAME})
 
-target_sources(${PROJECT_NAME} PRIVATE ${INCS} ${SRCS} ${APP_ICON_RESOURCE_WINDOWS})
+target_sources(${PROJECT_NAME} PRIVATE ${INCS} ${SRCS})
 
 target_link_libraries(${PROJECT_NAME} FlowCVEngine)
 

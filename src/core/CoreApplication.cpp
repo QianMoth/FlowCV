@@ -13,8 +13,7 @@
 #include <mach-o/dyld.h>
 #endif
 
-namespace FlowCV
-{
+namespace FlowCV {
 
 std::string CoreApplication::applicationName()
 {
@@ -55,8 +54,7 @@ std::string CoreApplication::applicationDirPath()
             std::filesystem::create_directories(cfgDir);
         }
         delete[] libVar;
-    }
-    else {
+    } else {
         return appDir;
     }
 #endif

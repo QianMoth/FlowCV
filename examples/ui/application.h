@@ -10,7 +10,6 @@
 
 #include "imgui_internal.h"
 #include "imgui_wrapper.hpp"
-#include "node_editor.h"
 
 struct ApplicationGlobals
 {
@@ -29,7 +28,6 @@ struct ApplicationGlobals
 };
 
 ApplicationGlobals *GetApplicationGlobals();
-const char *Application_GetName();
 void Application_Initialize(std::string &appPath);
 void Application_Finalize();
 void Application_Frame(FlowCV::FlowCV_Manager &flowMan, const AppSettings &settings);

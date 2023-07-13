@@ -26,6 +26,8 @@ option(BUILD_PLUGINS "Build Plugins" ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+message(STATUS "[${PROJECT_NAME}] Project is top? ${PROJECT_IS_TOP_LEVEL}")
+
 if(PROJECT_IS_TOP_LEVEL)
     # 设置输出路径
     include(GNUInstallDirs)
@@ -52,8 +54,6 @@ include(${CMAKE_SOURCE_DIR}/cmake/ImGuiPlotConfig.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/ImGuiNodeEditorConfig.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/ImGuiFileDialogConfig.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/DSPatchConfig.cmake)
-
-message(STATUS "[${PROJECT_NAME}] Project is top? ${PROJECT_IS_TOP_LEVEL}")
 
 # header
 include_directories(${CMAKE_SOURCE_DIR}/3rdparty/json/include) # json

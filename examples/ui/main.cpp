@@ -9,11 +9,14 @@
 #include <fstream>
 #include <iomanip>
 
+#include "FlowCV/FlowCV_Manager.hpp"
 #include "application.h"
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
 #endif
+
+#include "config.h"
 
 ///@brief 获取应用全局信息
 ///
@@ -47,7 +50,7 @@ void ApplicationAboutDialog(bool &dialogState)
     ImGui::SetNextWindowPos(viewCenter, ImGuiCond_Appearing);
     ImGui::Begin("About FlowCV", &dialogState,
                  ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse);
-    ImGui::Text("FlowCV %s", FLOWCV_EDITOR_VERSION_STR);
+    ImGui::Text("FlowCV %s", PROJECT_VER);
     ImGui::Separator();
     ImGui::Text("By Richard Wardlow");
     ImGui::Text("An OpenCV Dataflow Framework and Node Editor UI");
@@ -176,7 +179,7 @@ std::string SaveFlowFile(ImGuiWrapper &imgui, FlowCV::FlowCV_Manager &flowMan,
     std::ofstream o(filename);
     o << std::setw(4) << state << std::endl;
     o.close();
-    std::string appTitle = Application_GetName();
+    std::string appTitle = FlowCV::CoreApplication::applicationName();
     appTitle += " - ";
     appTitle += filename;
     imgui.SetWindowTitle(appTitle.c_str());
@@ -198,14 +201,18 @@ std::string SaveFlowFile(ImGuiWrapper &imgui, FlowCV::FlowCV_Manager &flowMan,
 
 int main(int argc, char *argv[])
 {
+    ImGuiWrapper imgui;
+
     std::string appDir = FlowCV::CoreApplication::applicationDirPath();
     std::string cfgDir = appDir;
 
     FlowCV::FlowCV_Manager flowMan;
-    ImGuiWrapper imgui;
+
     std::string pluginDir;
     std::string configFile;
     auto appGlobals = GetApplicationGlobals();
+
+    // 设置
     AppSettings appSettings;
     appSettings.recentListSize = 8;
     appSettings.flowBufferCount = 1;
@@ -214,7 +221,7 @@ int main(int argc, char *argv[])
 
     // 命令行解析器
     cmdline::parser cmdParser;
-    cmdParser.set_program_name(std::string{"FlowCV Node Editor "} + FLOWCV_EDITOR_VERSION_STR);
+    cmdParser.set_program_name(std::string{"FlowCV Node Editor "} + PROJECT_VER);
     cmdParser.add<std::string>("cfg", 'c', "Default Config File Override", false);
     cmdParser.parse_check(argc, argv);
 
@@ -232,7 +239,7 @@ int main(int argc, char *argv[])
     appSettings.configPath = configFile;
     ApplicationLoadSettings(appSettings);
 
-    // Get Main App Plugins
+    // 获取可执行行文件目录下的plugins文件夹下的插件
     pluginDir = appDir;
     pluginDir += std::filesystem::path::preferred_separator;
     pluginDir += "Plugins";
@@ -240,7 +247,7 @@ int main(int argc, char *argv[])
         flowMan.plugin_manager_->LoadPlugins(pluginDir.c_str());
     }
 
-    // Get Extra Plugins
+    // 获取其他路径的插件
     if (!appSettings.extPluginDir.empty()) {
         for (const auto &path : appSettings.extPluginDir) {
             if (std::filesystem::exists(path)) {
@@ -252,7 +259,7 @@ int main(int argc, char *argv[])
     // 创建一个图像显示窗
     flowMan.CreateNewNodeInstance("Viewer");
 
-    std::string appTitle = Application_GetName();
+    std::string appTitle = FlowCV::CoreApplication::applicationName();
     imgui.Init(1280, 720, appTitle.c_str(), ImGuiConfigFlags_ViewportsEnable);
     ImGuiIO &io = ImGui::GetIO();
 #ifdef __linux__  // Fix to make sure ini file goes into the app dir instead of working dir
@@ -286,15 +293,15 @@ int main(int argc, char *argv[])
 
     std::string currently_opened_flow_file;
 
-    io.DeltaTime = 0.008333;  // Default FPS = 120
+    io.DeltaTime = 0.008333F;  // Default FPS = 120
     if (appSettings.useVSync) {
         glfwSwapInterval(1);
     } else {
         glfwSwapInterval(0);
     }
 
-    // Main loop
-    bool closeOnceGood = false;
+    // 主循环
+    bool closeOnceGood = false;  // 退出界面程序
     while (!closeOnceGood) {
         ImGuiWrapper::PollEvents();
         ImGuiWrapper::NewFrame();
@@ -303,7 +310,7 @@ int main(int argc, char *argv[])
         if (appGlobals->stateHasChanged) {
             if (appGlobals->stateIndicatorOnce) {
                 if (!currently_opened_flow_file.empty()) {
-                    appTitle = Application_GetName();
+                    appTitle = FlowCV::CoreApplication::applicationName();
                     appTitle += " - *";
                     appTitle += currently_opened_flow_file;
                     imgui.SetWindowTitle(appTitle.c_str());
@@ -315,7 +322,7 @@ int main(int argc, char *argv[])
         // Handle Node Editor Operation Requests
         if (appGlobals->newFlow) {
             flowMan.NewState();
-            appTitle = Application_GetName();
+            appTitle = FlowCV::CoreApplication::applicationName();
             imgui.SetWindowTitle(appTitle.c_str());
             currently_opened_flow_file = "";
             appGlobals->firstLoad = true;
@@ -335,7 +342,7 @@ int main(int argc, char *argv[])
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("New", "CTRL+N")) {
                     flowMan.NewState();
-                    appTitle = Application_GetName();
+                    appTitle = FlowCV::CoreApplication::applicationName();
                     imgui.SetWindowTitle(appTitle.c_str());
                     currently_opened_flow_file = "";
                     appGlobals->firstLoad = true;
@@ -367,7 +374,7 @@ int main(int argc, char *argv[])
                             i >> state;
                             i.close();
                             bool res = Application_SetState(flowMan, state);
-                            appTitle = Application_GetName();
+                            appTitle = FlowCV::CoreApplication::applicationName();
                             appTitle += " - ";
                             appTitle += currently_opened_flow_file;
                             imgui.SetWindowTitle(appTitle.c_str());
@@ -408,8 +415,7 @@ int main(int argc, char *argv[])
                     std::string op;
 #ifdef _WIN32
                     op = std::string("start ").append(url);
-#endif
-#ifdef __linux__
+#elif __linux__
                     op = std::string("xdg-open ").append(url);
 #endif
                     system(op.c_str());
@@ -504,7 +510,7 @@ int main(int argc, char *argv[])
                 errorMsg = "There Were Errors Loading FLow";
                 ImGui::OpenPopup("Error Dialog");
             }
-            appTitle = Application_GetName();
+            appTitle = FlowCV::CoreApplication::applicationName();
             appTitle += " - ";
             appTitle += currently_opened_flow_file;
             imgui.SetWindowTitle(appTitle.c_str());
@@ -601,7 +607,7 @@ int main(int argc, char *argv[])
 
         ImGuiWrapper::FrameEnd();
         imgui.Update();
-    }
+    }  // 主循环结束
 
     Application_Finalize();
 

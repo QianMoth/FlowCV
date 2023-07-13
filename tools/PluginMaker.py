@@ -6,12 +6,14 @@ Tool to help create new FlowCV plugins both internal and external types.
 Run with --help for usage information.
 """
 
-import sys, os
+import sys
+import os
 from optparse import OptionParser
 
 
 def IoTypesList():
-    ioTypesFile = open("../3rdparty/dspatch/include/dspatch/ComponentTypes.hpp", 'r')
+    ioTypesFile = open(
+        "../3rdparty/dspatch/include/dspatch/ComponentTypes.hpp", 'r')
     Lines = ioTypesFile.readlines()
     ioTypesFile.close()
     ioList = []
@@ -43,7 +45,8 @@ def IoTypesList():
 
 
 def CategoryList():
-    catTypesFile = open("../3rdparty/dspatch/include/dspatch/ComponentTypes.hpp", 'r')
+    catTypesFile = open(
+        "../3rdparty/dspatch/include/dspatch/ComponentTypes.hpp", 'r')
     Lines = catTypesFile.readlines()
     catTypesFile.close()
     catList = []
@@ -117,10 +120,12 @@ def Make_Plugin(options):
 
     # Make CMake File
     if options.ext == 1:
-        cmakeTemplateFile = open('../Templates/' + inputDirName + '/CMakeLists.txt', 'r')
+        cmakeTemplateFile = open(
+            '../Templates/' + inputDirName + '/CMakeLists.txt', 'r')
         cmakeLines = cmakeTemplateFile.readlines()
         cmakeTemplateFile.close()
-        cmakeOutFile = open('../Plugins/' + pluginClassName + '/CMakeLists.txt', 'w')
+        cmakeOutFile = open(
+            '../Plugins/' + pluginClassName + '/CMakeLists.txt', 'w')
         for line in cmakeLines:
             if 'project(Plugin_Name)' in line:
                 line = 'project(' + pluginClassName + ')\n'
@@ -130,11 +135,13 @@ def Make_Plugin(options):
         cmakeOutFile.close()
 
     # Make hpp File
-    hppTemplateFile = open('../Templates/' + inputDirName + '/' + inputTempBaseName + '.hpp', 'r')
+    hppTemplateFile = open('../Templates/' + inputDirName +
+                           '/' + inputTempBaseName + '.hpp', 'r')
     hppLines = hppTemplateFile.readlines()
     hppTemplateFile.close()
     hppOutFile = ''
-    hppOutFile = open('../' + outputDirName + '/' + pluginClassName + '/' + sourceFileBaseName + '.hpp', 'w')
+    hppOutFile = open('../' + outputDirName + '/' +
+                      pluginClassName + '/' + sourceFileBaseName + '.hpp', 'w')
 
     for line in hppLines:
         if '// Plugin Template' in line:
@@ -157,16 +164,19 @@ def Make_Plugin(options):
         for line in hppLines:
             if len(line) <= 1:
                 if writeOnce:
-                    incFile.write('#include "' + pluginClassName + '/' + sourceFileBaseName + '.hpp"\n')
+                    incFile.write('#include "' + pluginClassName +
+                                  '/' + sourceFileBaseName + '.hpp"\n')
                     writeOnce = False
             incFile.write(line)
         incFile.close()
 
     # Make cpp File
-    cppTemplateFile = open('../Templates/' + inputDirName + '/' + inputTempBaseName + '.cpp', 'r')
+    cppTemplateFile = open('../Templates/' + inputDirName +
+                           '/' + inputTempBaseName + '.cpp', 'r')
     cppLines = cppTemplateFile.readlines()
     cppTemplateFile.close()
-    cppOutFile = open('../' + outputDirName + '/' + pluginClassName + '/' + sourceFileBaseName + '.cpp', 'w')
+    cppOutFile = open('../' + outputDirName + '/' +
+                      pluginClassName + '/' + sourceFileBaseName + '.cpp', 'w')
     inputList = []
     inTypeList = []
     if options.inputs is not '':
@@ -225,7 +235,8 @@ def Make_Plugin(options):
                 line = line.replace('1', '0')
         if 'SetOutputCount_' in line:
             if len(outputList) > 0:
-                newOutputs = '    SetOutputCount_( ' + str(len(outputList)) + ', '
+                newOutputs = '    SetOutputCount_( ' + \
+                    str(len(outputList)) + ', '
                 outName = '{'
                 cnt = 0
                 for output in outputList:
@@ -251,7 +262,8 @@ def Make_Plugin(options):
                 if ioList[int(inTypeList[0])][1] == 'CvMat':
                     inputHandler = inputHandler.replace('type', 'cv::Mat')
                 else:
-                    inputHandler = inputHandler.replace('type', ioList[int(inTypeList[0])][1].lower())
+                    inputHandler = inputHandler.replace(
+                        'type', ioList[int(inTypeList[0])][1].lower())
                 inputHandler += '    if ( !in1 ) {\n'
                 inputHandler += '        return;\n'
                 inputHandler += '    }\n'
@@ -307,13 +319,15 @@ def Make_Plugin(options):
                     if len(line) <= 2:
                         foundPluginEnd = True
                 if foundPluginStart and foundPluginEnd and not alreadyAdded:
-                    line = '    add_subdirectory(./Plugins/' + pluginClassName + ')\n\n'
+                    line = '    add_subdirectory(./Plugins/' + \
+                        pluginClassName + ')\n\n'
                     foundPluginStart = False
                     foundPluginEnd = False
 
                 newProjFile.write(line)
 
             newProjFile.close()
+
 
 def Main():
     parser = OptionParser()
@@ -398,8 +412,8 @@ def Main():
             print('  ', io[0], ' = ', io[1])
         return 0
     elif options.name is not None and \
-        options.author is not None and \
-        options.category is not None:
+            options.author is not None and \
+            options.category is not None:
         Make_Plugin(options)
     else:
         print("Need to Specify All Parameters")

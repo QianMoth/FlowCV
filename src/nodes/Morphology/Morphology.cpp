@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Morphology::Morphology() : Component(ProcessOrder::OutOfOrder)
 {
@@ -53,18 +52,20 @@ void Morphology::Process_(SignalBus const &inputs, SignalBus &outputs)
             cv::Mat frame;
             try {
                 // Process Image
-                cv::Mat element = getStructuringElement(morph_shape_, cv::Size(2 * morph_amt_ + 1, 2 * morph_amt_ + 1), cv::Point(morph_amt_, morph_amt_));
-                morphologyEx(*in1, frame, op_, element, cv::Point(-1, -1), iterations_, border_type_,
-                    cv::Scalar(border_color_.z * 255, border_color_.y * 255, border_color_.x * 255));
-            }
-            catch (const std::exception &e) {
+                cv::Mat element = getStructuringElement(
+                    morph_shape_, cv::Size(2 * morph_amt_ + 1, 2 * morph_amt_ + 1),
+                    cv::Point(morph_amt_, morph_amt_));
+                morphologyEx(*in1, frame, op_, element, cv::Point(-1, -1), iterations_,
+                             border_type_,
+                             cv::Scalar(border_color_.z * 255, border_color_.y * 255,
+                                        border_color_.x * 255));
+            } catch (const std::exception &e) {
                 std::cout << e.what() << std::endl;
             }
 
             if (!frame.empty())
                 outputs.SetValue(0, frame);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -72,8 +73,9 @@ void Morphology::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Morphology::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -88,17 +90,22 @@ void Morphology::UpdateGui(void *context, int interface)
 
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         ImGui::SetNextItemWidth(120);
-        ImGui::Combo(CreateControlString("Operation", GetInstanceName()).c_str(), &op_, "Erode\0Dilate\0Open\0Close\0Gradient\0Tophat\0Blackhat\0\0");
+        ImGui::Combo(CreateControlString("Operation", GetInstanceName()).c_str(), &op_,
+                     "Erode\0Dilate\0Open\0Close\0Gradient\0Tophat\0Blackhat\0\0");
         ImGui::SetNextItemWidth(120);
-        ImGui::Combo(CreateControlString("Morph Shape", GetInstanceName()).c_str(), &morph_shape_, "Rect\0Cross\0Ellipse\0\0");
+        ImGui::Combo(CreateControlString("Morph Shape", GetInstanceName()).c_str(), &morph_shape_,
+                     "Rect\0Cross\0Ellipse\0\0");
         ImGui::SetNextItemWidth(80);
-        ImGui::DragInt(CreateControlString("Morph Amt", GetInstanceName()).c_str(), &morph_amt_, 0.25f, 1, 200);
+        ImGui::DragInt(CreateControlString("Morph Amt", GetInstanceName()).c_str(), &morph_amt_,
+                       0.25f, 1, 200);
         ImGui::SetNextItemWidth(80);
-        ImGui::DragInt(CreateControlString("Iter", GetInstanceName()).c_str(), &iterations_, 0.25f, 1, 50);
+        ImGui::DragInt(CreateControlString("Iter", GetInstanceName()).c_str(), &iterations_, 0.25f,
+                       1, 50);
         ImGui::SetNextItemWidth(120);
-        ImGui::Combo(
-            CreateControlString("Border Type", GetInstanceName()).c_str(), &border_type_, "Constant\0Replicate\0Reflect\0Wrap\0Default\0Transparent\0\0");
-        ImGui::ColorEdit3(CreateControlString("Border Color", GetInstanceName()).c_str(), (float *)&border_color_);
+        ImGui::Combo(CreateControlString("Border Type", GetInstanceName()).c_str(), &border_type_,
+                     "Constant\0Replicate\0Reflect\0Wrap\0Default\0Transparent\0\0");
+        ImGui::ColorEdit3(CreateControlString("Border Color", GetInstanceName()).c_str(),
+                          (float *)&border_color_);
     }
 }
 

@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 CopyMakeBorder::CopyMakeBorder() : Component(ProcessOrder::OutOfOrder)
 {
@@ -74,8 +73,7 @@ void CopyMakeBorder::Process_(SignalBus const &inputs, SignalBus &outputs)
                 borderAmtY = abs(newHeight - in1->rows) * 0.5f;
                 top = borderAmtY;
                 left = borderAmtX;
-            }
-            else {
+            } else {
                 borderAmtX = abs(newWidth - in1->cols);
                 borderAmtY = abs(newHeight - in1->rows);
             }
@@ -83,15 +81,14 @@ void CopyMakeBorder::Process_(SignalBus const &inputs, SignalBus &outputs)
             if (borderAmtX >= 0 && borderAmtY >= 0) {
                 cv::Mat dst;
                 copyMakeBorder(*in1, dst, top, borderAmtY, left, borderAmtX, border_type_,
-                    cv::Scalar(border_color_.z * 255, border_color_.y * 255, border_color_.x * 255));
+                               cv::Scalar(border_color_.z * 255, border_color_.y * 255,
+                                          border_color_.x * 255));
                 if (!dst.empty())
                     outputs.SetValue(0, dst);
-            }
-            else {
+            } else {
                 outputs.SetValue(0, *in1);
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -99,7 +96,8 @@ void CopyMakeBorder::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool CopyMakeBorder::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -112,18 +110,23 @@ void CopyMakeBorder::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         ImGui::Checkbox(CreateControlString("Center", GetInstanceName()).c_str(), &center_);
         ImGui::SetNextItemWidth(100);
-        ImGui::DragInt(CreateControlString("Border Width", GetInstanceName()).c_str(), &add_width_, 0.5, 0, 500);
+        ImGui::DragInt(CreateControlString("Border Width", GetInstanceName()).c_str(), &add_width_,
+                       0.5, 0, 500);
         ImGui::SetNextItemWidth(100);
-        ImGui::DragInt(CreateControlString("Border Height", GetInstanceName()).c_str(), &add_height_, 0.5, 0, 500);
+        ImGui::DragInt(CreateControlString("Border Height", GetInstanceName()).c_str(),
+                       &add_height_, 0.5, 0, 500);
         ImGui::SetNextItemWidth(120);
-        ImGui::Combo(CreateControlString("Border Type", GetInstanceName()).c_str(), &border_type_, "Constant\0Replicate\0Reflect\0Wrap\0Default\0\0");
+        ImGui::Combo(CreateControlString("Border Type", GetInstanceName()).c_str(), &border_type_,
+                     "Constant\0Replicate\0Reflect\0Wrap\0Default\0\0");
         if (border_type_ == 0) {
-            ImGui::ColorEdit3(CreateControlString("Border Color", GetInstanceName()).c_str(), (float *)&border_color_);
+            ImGui::ColorEdit3(CreateControlString("Border Color", GetInstanceName()).c_str(),
+                              (float *)&border_color_);
         }
     }
 }

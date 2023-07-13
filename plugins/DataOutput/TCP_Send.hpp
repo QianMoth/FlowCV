@@ -6,18 +6,16 @@
 #define FLOWCV_PLUGIN_TCP_SEND_HPP_
 #include <DSPatch.h>
 
+#include <FlowCV/Types.hpp>
 #include <asio2/external/asio.hpp>
 #include <asio2/tcp/tcp_client.hpp>
 #include <nlohmann/json.hpp>
 
-#include "Types.hpp"
 #include "imgui_opencv.hpp"
 #include "imgui_wrapper.hpp"
 
-namespace DSPatch::DSPatchables
-{
-namespace internal
-{
+namespace DSPatch::DSPatchables {
+namespace internal {
 class TcpSend;
 }
 
@@ -36,7 +34,8 @@ class DLLEXPORT TcpSend final : public Component
     void OpenTcpConn_();
     void CloseTcpConn_();
     void SetEOLSeq_();
-    template<typename T> std::vector<uint8_t> GenerateOutBuffer_(T data);
+    template <typename T>
+    std::vector<uint8_t> GenerateOutBuffer_(T data);
 
   private:
     std::unique_ptr<internal::TcpSend> p;

@@ -6,8 +6,7 @@
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 Viewer::Viewer() : Component(ProcessOrder::InOrder)
 {
     // Name and Category
@@ -36,7 +35,9 @@ void Viewer::Process_(SignalBus const &inputs, SignalBus &outputs)
     if (io_mutex_.try_lock()) {
         if (!in1) {
             std::chrono::steady_clock::time_point current_time_ = std::chrono::steady_clock::now();
-            auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ - last_input_update_).count();
+            auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ -
+                                                                               last_input_update_)
+                             .count();
             if (delta > 500) {
                 if (!frame_.empty())
                     frame_.setTo(cv::Scalar(0));
@@ -45,16 +46,14 @@ void Viewer::Process_(SignalBus const &inputs, SignalBus &outputs)
                 io_mutex_.unlock();
                 return;
             }
-        }
-        else {
+        } else {
             try {
                 if (!in1->empty()) {
                     in1->copyTo(frame_);
                     has_update_ = true;
                     last_input_update_ = std::chrono::steady_clock::now();
                 }
-            }
-            catch (const std::exception &e) {
+            } catch (const std::exception &e) {
                 std::cout << e.what() << std::endl;
             }
         }
@@ -77,7 +76,6 @@ void Viewer::UpdateGui(void *context, int interface)
     ImGui::SetCurrentContext(imCurContext);
 
     if (interface == (int)FlowCV::GuiInterfaceType_Main) {
-
         std::string title = "Viewer_" + std::to_string(GetInstanceCount());
         if (!frame_.empty() && has_update_) {
             cv::Mat frame;
@@ -86,8 +84,7 @@ void Viewer::UpdateGui(void *context, int interface)
             has_update_ = false;
             io_mutex_.unlock();
             viewer_.Update(title.c_str(), frame, ImOpenCvWindowAspectFlag_LockH);
-        }
-        else {
+        } else {
             cv::Mat frame;
             io_mutex_.lock();
             frame_.copyTo(frame);
@@ -99,7 +96,6 @@ void Viewer::UpdateGui(void *context, int interface)
 
 std::string Viewer::GetState()
 {
-
     std::string stateSerialized;
 
     return stateSerialized;

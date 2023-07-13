@@ -2,8 +2,7 @@
 
 #include <string>
 
-namespace FlowCV
-{
+namespace FlowCV {
 
 class CoreApplication
 {

@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Sharpen::Sharpen() : Component(ProcessOrder::OutOfOrder)
 {
@@ -87,27 +86,24 @@ void Sharpen::Process_(SignalBus const &inputs, SignalBus &outputs)
                         kernel3.at<double>(2, 2) = -2.0;
                     }
                     filter2D(*in1, frame, -1, kernel3, cv::Point(-1, -1), 0, cv::BORDER_DEFAULT);
-                }
-                else {
+                } else {
                     in1->copyTo(frame);
                 }
-            }
-            else {
+            } else {
                 cv::Mat tmp_frame;
                 cv::Mat lapFrame;
                 if (in1->channels() > 1) {
                     cv::cvtColor(*in1, tmp_frame, cv::COLOR_BGR2GRAY);
-                    cv::Laplacian(tmp_frame, tmp_frame, -1, 3, (float)-amt, 0.0, cv::BORDER_DEFAULT);
-                }
-                else {
+                    cv::Laplacian(tmp_frame, tmp_frame, -1, 3, (float)-amt, 0.0,
+                                  cv::BORDER_DEFAULT);
+                } else {
                     cv::Laplacian(*in1, tmp_frame, -1, 3, (float)-amt, 0.0, cv::BORDER_DEFAULT);
                 }
                 cv::Mat to_color;
                 cv::cvtColor(tmp_frame, to_color, cv::COLOR_GRAY2BGR);
                 cv::addWeighted(*in1, 1.0, to_color, (float)amt, 0.0, frame);
             }
-        }
-        else {
+        } else {
             in1->copyTo(frame);
         }
 
@@ -118,7 +114,8 @@ void Sharpen::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Sharpen::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -138,8 +135,7 @@ void Sharpen::UpdateGui(void *context, int interface)
             props_.SetMax("sharpen_amt", 3);
             if (props_.GetW<int>("sharpen_amt") > props_.GetMax<int>("sharpen_amt"))
                 props_.Set("sharpen_amt", props_.GetMax<int>("sharpen_amt"));
-        }
-        else
+        } else
             props_.SetMax("sharpen_amt", 5);
     }
 }

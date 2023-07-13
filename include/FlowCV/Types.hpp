@@ -7,8 +7,7 @@
 #include <map>
 #include <string>
 
-namespace FlowCV
-{
+namespace FlowCV {
 
 enum GuiInterfaceType
 {
@@ -30,8 +29,7 @@ struct NodeDescription
 };
 }  // End Namespace FlowCV
 
-namespace DSPatch
-{
+namespace DSPatch {
 ///@brief 获取目录
 ///
 ///@return const std::map<DSPatch::Category, const char *>&

@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Resize::Resize() : Component(ProcessOrder::OutOfOrder)
 {
@@ -23,7 +22,8 @@ Resize::Resize() : Component(ProcessOrder::OutOfOrder)
     global_inst_counter++;
 
     // 2 inputs
-    SetInputCount_(3, {"in", "ref", "size"}, {IoType::Io_Type_CvMat, IoType::Io_Type_CvMat, IoType::Io_Type_Int_Array});
+    SetInputCount_(3, {"in", "ref", "size"},
+                   {IoType::Io_Type_CvMat, IoType::Io_Type_CvMat, IoType::Io_Type_Int_Array});
 
     // 1 outputs
     SetOutputCount_(1, {"out"}, {IoType::Io_Type_CvMat});
@@ -47,8 +47,7 @@ void Resize::Process_(SignalBus const &inputs, SignalBus &outputs)
     }
     if (!in2) {
         has_ref_frame_ = false;
-    }
-    else {
+    } else {
         if (!in2->empty())
             has_ref_frame_ = true;
         else
@@ -56,8 +55,7 @@ void Resize::Process_(SignalBus const &inputs, SignalBus &outputs)
     }
     if (!in3) {
         has_size_input_ = false;
-    }
-    else {
+    } else {
         if (in3->size() == 2)
             has_size_input_ = true;
         else
@@ -70,8 +68,7 @@ void Resize::Process_(SignalBus const &inputs, SignalBus &outputs)
             if (has_ref_frame_) {
                 width_ = in2->cols;
                 height_ = in2->rows;
-            }
-            else if (has_size_input_) {
+            } else if (has_size_input_) {
                 width_ = in3->at(0);
                 height_ = in3->at(1);
             }
@@ -92,8 +89,7 @@ void Resize::Process_(SignalBus const &inputs, SignalBus &outputs)
 
             if (!frame.empty())
                 outputs.SetValue(0, frame);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -101,7 +97,8 @@ void Resize::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Resize::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -114,24 +111,27 @@ void Resize::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         if (!has_size_input_ && !has_ref_frame_) {
             ImGui::SetNextItemWidth(100);
-            if (ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &width_, 0.5, 1, 10000)) {
+            if (ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &width_,
+                               0.5, 1, 10000)) {
                 if (width_ < 1)
                     width_ = 1;
             }
             ImGui::SetNextItemWidth(100);
-            if (ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &height_, 0.5, 1, 10000)) {
+            if (ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &height_,
+                               0.5, 1, 10000)) {
                 if (height_ < 1)
                     height_ = 1;
             }
         }
         ImGui::SetNextItemWidth(140);
-        ImGui::Combo(
-            CreateControlString("Interpolation", GetInstanceName()).c_str(), &interp_mode_, "Nearest\0Bilinear\0BiCubic\0Area\0Lanczos\0Bilinear Exact\0\0");
+        ImGui::Combo(CreateControlString("Interpolation", GetInstanceName()).c_str(), &interp_mode_,
+                     "Nearest\0Bilinear\0BiCubic\0Area\0Lanczos\0Bilinear Exact\0\0");
     }
 }
 

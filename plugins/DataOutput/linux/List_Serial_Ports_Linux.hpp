@@ -5,23 +5,22 @@
 
 #ifndef FLOWCV_SERIAL_PORTS_LINUX_HPP_
 #define FLOWCV_SERIAL_PORTS_LINUX_HPP_
-#include <vector>
-#include <string>
-#include <sstream>
-#include <stdexcept>
-#include <iostream>
-#include <fstream>
-#include <cstdio>
-#include <cstdarg>
-#include <cstdlib>
-
 #include <glob.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
-namespace SerialDeviceEnum
-{
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+namespace SerialDeviceEnum {
 
 struct SerialPortInfo
 {

@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Contours::Contours() : Component(ProcessOrder::OutOfOrder)
 {
@@ -68,8 +67,7 @@ void Contours::Process_(SignalBus const &inputs, SignalBus &outputs)
 
             if (!in2) {
                 frame = cv::Mat(in1->rows, in1->cols, CV_8UC3, cv::Scalar(0, 0, 0));
-            }
-            else {
+            } else {
                 in2->copyTo(frame);
             }
 
@@ -90,8 +88,10 @@ void Contours::Process_(SignalBus const &inputs, SignalBus &outputs)
                                     nlohmann::json jCont;
                                     if (draw_contours_) {
                                         cv::drawContours(frame, contours, idx,
-                                            cv::Scalar(contour_color_.z * 255, contour_color_.y * 255, contour_color_.x * 255), thickness, cv::LINE_8,
-                                            hierarchy);
+                                                         cv::Scalar(contour_color_.z * 255,
+                                                                    contour_color_.y * 255,
+                                                                    contour_color_.x * 255),
+                                                         thickness, cv::LINE_8, hierarchy);
                                         nlohmann::json cTmp1;
                                         for (auto &pt : contours.at(idx)) {
                                             nlohmann::json cTmp2;
@@ -104,7 +104,11 @@ void Contours::Process_(SignalBus const &inputs, SignalBus &outputs)
                                     if (draw_bbox_) {
                                         nlohmann::json cTmp2;
                                         cv::Rect bbox = cv::boundingRect(contours[idx]);
-                                        cv::rectangle(frame, bbox, cv::Scalar(bbox_color_.z * 255, bbox_color_.y * 255, bbox_color_.x * 255), 2);
+                                        cv::rectangle(
+                                            frame, bbox,
+                                            cv::Scalar(bbox_color_.z * 255, bbox_color_.y * 255,
+                                                       bbox_color_.x * 255),
+                                            2);
                                         cTmp2["x"] = bbox.x;
                                         cTmp2["y"] = bbox.y;
                                         cTmp2["w"] = bbox.width;
@@ -113,11 +117,13 @@ void Contours::Process_(SignalBus const &inputs, SignalBus &outputs)
                                     }
                                     jContours.emplace_back(jCont);
                                 }
-                            }
-                            else {
+                            } else {
                                 nlohmann::json jCont;
                                 if (draw_contours_) {
-                                    cv::drawContours(frame, contours, idx, cv::Scalar(contour_color_.z * 255, contour_color_.y * 255, contour_color_.x * 255),
+                                    cv::drawContours(
+                                        frame, contours, idx,
+                                        cv::Scalar(contour_color_.z * 255, contour_color_.y * 255,
+                                                   contour_color_.x * 255),
                                         thickness, cv::LINE_8, hierarchy);
                                     nlohmann::json cTmp1;
                                     for (auto &pt : contours.at(idx)) {
@@ -131,7 +137,11 @@ void Contours::Process_(SignalBus const &inputs, SignalBus &outputs)
                                 if (draw_bbox_) {
                                     nlohmann::json cTmp2;
                                     cv::Rect bbox = cv::boundingRect(contours[idx]);
-                                    cv::rectangle(frame, bbox, cv::Scalar(bbox_color_.z * 255, bbox_color_.y * 255, bbox_color_.x * 255), 2);
+                                    cv::rectangle(
+                                        frame, bbox,
+                                        cv::Scalar(bbox_color_.z * 255, bbox_color_.y * 255,
+                                                   bbox_color_.x * 255),
+                                        2);
                                     cTmp2["x"] = bbox.x;
                                     cTmp2["y"] = bbox.y;
                                     cTmp2["w"] = bbox.width;
@@ -148,12 +158,10 @@ void Contours::Process_(SignalBus const &inputs, SignalBus &outputs)
                     json_out["data"] = jContours;
                     outputs.SetValue(1, json_out);
                 }
-            }
-            catch (const std::exception &e) {
+            } catch (const std::exception &e) {
                 std::cout << e.what() << std::endl;
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -161,8 +169,9 @@ void Contours::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Contours::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -176,27 +185,36 @@ void Contours::UpdateGui(void *context, int interface)
     ImGui::SetCurrentContext(imCurContext);
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         ImGui::SetNextItemWidth(100);
-        ImGui::Combo(CreateControlString("Contour Mode", GetInstanceName()).c_str(), &mode_, "External\0List\0COMP\0Tree\0\0");
+        ImGui::Combo(CreateControlString("Contour Mode", GetInstanceName()).c_str(), &mode_,
+                     "External\0List\0COMP\0Tree\0\0");
         ImGui::SetNextItemWidth(100);
-        ImGui::Combo(CreateControlString("Contour Method", GetInstanceName()).c_str(), &method_, "None\0Simple\0TC89_L1\0TC89_KCOS\0\0");
+        ImGui::Combo(CreateControlString("Contour Method", GetInstanceName()).c_str(), &method_,
+                     "None\0Simple\0TC89_L1\0TC89_KCOS\0\0");
         ImGui::Separator();
-        ImGui::Checkbox(CreateControlString("Filter by Area", GetInstanceName()).c_str(), &filter_by_area_);
+        ImGui::Checkbox(CreateControlString("Filter by Area", GetInstanceName()).c_str(),
+                        &filter_by_area_);
         if (filter_by_area_) {
             ImGui::SetNextItemWidth(100);
-            ImGui::DragFloat(CreateControlString("Min Area", GetInstanceName()).c_str(), &area_min_, 0.1f, 1, 1000);
+            ImGui::DragFloat(CreateControlString("Min Area", GetInstanceName()).c_str(), &area_min_,
+                             0.1f, 1, 1000);
             ImGui::SetNextItemWidth(100);
-            ImGui::DragFloat(CreateControlString("Max Area", GetInstanceName()).c_str(), &area_max_, 0.1f, 1, 5000);
+            ImGui::DragFloat(CreateControlString("Max Area", GetInstanceName()).c_str(), &area_max_,
+                             0.1f, 1, 5000);
         }
         ImGui::Separator();
-        ImGui::Checkbox(CreateControlString("Draw Contours", GetInstanceName()).c_str(), &draw_contours_);
+        ImGui::Checkbox(CreateControlString("Draw Contours", GetInstanceName()).c_str(),
+                        &draw_contours_);
         if (draw_contours_) {
-            ImGui::Checkbox(CreateControlString("Fill Contours", GetInstanceName()).c_str(), &fill_contours_);
-            ImGui::ColorEdit3(CreateControlString("Contour Color", GetInstanceName()).c_str(), (float *)&contour_color_);
+            ImGui::Checkbox(CreateControlString("Fill Contours", GetInstanceName()).c_str(),
+                            &fill_contours_);
+            ImGui::ColorEdit3(CreateControlString("Contour Color", GetInstanceName()).c_str(),
+                              (float *)&contour_color_);
         }
         ImGui::Separator();
         ImGui::Checkbox(CreateControlString("Draw BBox", GetInstanceName()).c_str(), &draw_bbox_);
         if (draw_bbox_) {
-            ImGui::ColorEdit3(CreateControlString("BBox Color", GetInstanceName()).c_str(), (float *)&bbox_color_);
+            ImGui::ColorEdit3(CreateControlString("BBox Color", GetInstanceName()).c_str(),
+                              (float *)&bbox_color_);
         }
     }
 }

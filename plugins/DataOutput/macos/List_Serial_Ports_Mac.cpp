@@ -4,8 +4,7 @@
 
 #include "List_Serial_Ports_Mac.hpp"
 
-namespace SerialDeviceEnum
-{
+namespace SerialDeviceEnum {
 std::vector<SerialPortInfo> DeviceEnumerator::GetSerialPortList()
 {
     std::vector<SerialPortInfo> serPorts;
@@ -22,7 +21,8 @@ std::vector<SerialPortInfo> DeviceEnumerator::GetSerialPortList()
         si.hardware_id = device.hardware_id;
         serPorts.emplace_back(si);
 
-        // printf( "(%s, %s, %s)\n", device.port.c_str(), device.description.c_str(), device.hardware_id.c_str() );
+        // printf( "(%s, %s, %s)\n", device.port.c_str(), device.description.c_str(),
+        // device.hardware_id.c_str() );
     }
 
     return serPorts;

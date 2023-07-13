@@ -11,8 +11,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 LineIntersect::LineIntersect() : Component(ProcessOrder::OutOfOrder)
 {
@@ -108,9 +107,11 @@ void LineIntersect::Process_(SignalBus const &inputs, SignalBus &outputs)
                     for (unsigned int j = i + 1; j < lines.size(); j++) {
                         cv::Point2f int_pnt = computeIntersect(lines[i], lines[j]);
                         if (int_pnt.x >= 0 && int_pnt.y >= 0) {
-                            cv::Vec2f v1 = cv::Vec2i(lines[i][0] - lines[i][2], lines[i][1] - lines[i][3]);
+                            cv::Vec2f v1 =
+                                cv::Vec2i(lines[i][0] - lines[i][2], lines[i][1] - lines[i][3]);
                             v1 = cv::normalize(v1);
-                            cv::Vec2f v2 = cv::Vec2i(lines[j][0] - lines[j][2], lines[j][1] - lines[j][3]);
+                            cv::Vec2f v2 =
+                                cv::Vec2i(lines[j][0] - lines[j][2], lines[j][1] - lines[j][3]);
                             v2 = cv::normalize(v2);
                             float d = v1.dot(v2);
                             float angle = acos(d) * 57.2957795130823208f;
@@ -128,8 +129,11 @@ void LineIntersect::Process_(SignalBus const &inputs, SignalBus &outputs)
                                         int thickness = point_thickness_;
                                         if (point_solid_)
                                             thickness = -1;
-                                        cv::circle(ref_frame, int_pnt, point_radius_,
-                                            cv::Scalar(point_color_.z * 255, point_color_.y * 255, point_color_.x * 255), thickness);
+                                        cv::circle(
+                                            ref_frame, int_pnt, point_radius_,
+                                            cv::Scalar(point_color_.z * 255, point_color_.y * 255,
+                                                       point_color_.x * 255),
+                                            thickness);
                                     }
                                 }
                             }
@@ -152,8 +156,7 @@ void LineIntersect::Process_(SignalBus const &inputs, SignalBus &outputs)
             }
             if (!json_points.empty())
                 outputs.SetValue(1, json_points);
-        }
-        else {
+        } else {
             outputs.SetValue(1, json_points);
         }
     }
@@ -163,7 +166,8 @@ void LineIntersect::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool LineIntersect::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -179,26 +183,34 @@ void LineIntersect::UpdateGui(void *context, int interface)
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         if (line_count_ > MAX_LINE_INTERSECT_COUNT) {
             ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Too Many Input Lines");
-        }
-        else {
+        } else {
             ImGui::Text("Intersections: %i", intersect_count_);
             ImGui::Separator();
             ImGui::SetNextItemWidth(100);
-            ImGui::DragFloat(CreateControlString("Min Angle", GetInstanceName()).c_str(), &min_angle_, 0.1f, 0.0f, 360.0f);
+            ImGui::DragFloat(CreateControlString("Min Angle", GetInstanceName()).c_str(),
+                             &min_angle_, 0.1f, 0.0f, 360.0f);
             ImGui::SetNextItemWidth(100);
-            ImGui::DragFloat(CreateControlString("Min Dist", GetInstanceName()).c_str(), &min_dist_, 0.1f, 0.0f, 1000.0f);
+            ImGui::DragFloat(CreateControlString("Min Dist", GetInstanceName()).c_str(), &min_dist_,
+                             0.1f, 0.0f, 1000.0f);
             ImGui::Separator();
-            ImGui::Checkbox(CreateControlString("Draw Intersection Points", GetInstanceName()).c_str(), &draw_intersections_);
+            ImGui::Checkbox(
+                CreateControlString("Draw Intersection Points", GetInstanceName()).c_str(),
+                &draw_intersections_);
             if (draw_intersections_) {
                 ImGui::SetNextItemWidth(150);
-                ImGui::ColorEdit3(CreateControlString("Point Color", GetInstanceName()).c_str(), (float *)&point_color_);
+                ImGui::ColorEdit3(CreateControlString("Point Color", GetInstanceName()).c_str(),
+                                  (float *)&point_color_);
                 ImGui::SetNextItemWidth(100);
-                ImGui::Checkbox(CreateControlString("Solid Point", GetInstanceName()).c_str(), &point_solid_);
+                ImGui::Checkbox(CreateControlString("Solid Point", GetInstanceName()).c_str(),
+                                &point_solid_);
                 ImGui::SetNextItemWidth(100);
-                ImGui::DragInt(CreateControlString("Point Radius", GetInstanceName()).c_str(), &point_radius_, 0.1f, 1, 25);
+                ImGui::DragInt(CreateControlString("Point Radius", GetInstanceName()).c_str(),
+                               &point_radius_, 0.1f, 1, 25);
                 if (!point_solid_) {
                     ImGui::SetNextItemWidth(100);
-                    ImGui::DragInt(CreateControlString("Point Thickness", GetInstanceName()).c_str(), &point_thickness_, 0.1f, 1, 25);
+                    ImGui::DragInt(
+                        CreateControlString("Point Thickness", GetInstanceName()).c_str(),
+                        &point_thickness_, 0.1f, 1, 25);
                 }
             }
         }

@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 AddWeighted::AddWeighted() : Component(ProcessOrder::OutOfOrder)
 {
@@ -46,15 +45,15 @@ void AddWeighted::Process_(SignalBus const &inputs, SignalBus &outputs)
     if (!in1->empty() && !in2->empty()) {
         if (IsEnabled()) {
             // Process Image
-            if (in1->type() == in2->type() && in1->channels() == in2->channels() && in1->size == in2->size) {
+            if (in1->type() == in2->type() && in1->channels() == in2->channels() &&
+                in1->size == in2->size) {
                 cv::Mat frame;
                 cv::addWeighted(*in1, alpha_, *in2, beta_, gamma_, frame);
 
                 if (!frame.empty())
                     outputs.SetValue(0, frame);
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -62,7 +61,8 @@ void AddWeighted::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool AddWeighted::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -75,8 +75,9 @@ void AddWeighted::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         ImGui::SetNextItemWidth(100);
         ImGui::DragFloat(CreateControlString("Alpha", GetInstanceName()).c_str(), &alpha_, 0.05f);

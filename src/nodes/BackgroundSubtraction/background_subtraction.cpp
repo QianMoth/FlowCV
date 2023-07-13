@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 BackgroundSubtraction::BackgroundSubtraction() : Component(ProcessOrder::OutOfOrder)
 {
@@ -70,8 +69,7 @@ void BackgroundSubtraction::Process_(SignalBus const &inputs, SignalBus &outputs
                 bg_subtractor_mog2_->apply(frame, mask);
                 masked_frame.setTo(cv::Scalar(0, 0, 0));
                 cv::bitwise_and(frame, frame, masked_frame, mask);
-            }
-            else if (bkg_sub_mode_ == 1) {
+            } else if (bkg_sub_mode_ == 1) {
                 bg_subtractor_knn_->apply(frame, mask);
                 masked_frame.setTo(cv::Scalar(0, 0, 0));
                 cv::bitwise_and(frame, frame, masked_frame, mask);
@@ -80,8 +78,7 @@ void BackgroundSubtraction::Process_(SignalBus const &inputs, SignalBus &outputs
                 outputs.SetValue(0, masked_frame);
             if (!mask.empty())
                 outputs.SetValue(1, mask);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -89,8 +86,9 @@ void BackgroundSubtraction::Process_(SignalBus const &inputs, SignalBus &outputs
 
 bool BackgroundSubtraction::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -105,15 +103,19 @@ void BackgroundSubtraction::UpdateGui(void *context, int interface)
 
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         ImGui::SetNextItemWidth(100);
-        ImGui::Combo(CreateControlString("Subtraction Mode", GetInstanceName()).c_str(), &bkg_sub_mode_, "MOG2\0KNN\0\0");
+        ImGui::Combo(CreateControlString("Subtraction Mode", GetInstanceName()).c_str(),
+                     &bkg_sub_mode_, "MOG2\0KNN\0\0");
         ImGui::Separator();
         ImGui::SetNextItemWidth(100);
-        if (ImGui::DragInt(CreateControlString("History", GetInstanceName()).c_str(), &history_, 0.5f, 1, 5000))
+        if (ImGui::DragInt(CreateControlString("History", GetInstanceName()).c_str(), &history_,
+                           0.5f, 1, 5000))
             update_settings_ = true;
         ImGui::SetNextItemWidth(100);
-        if (ImGui::DragFloat(CreateControlString("Threshold", GetInstanceName()).c_str(), &threshold_, 0.01f, 0.01f, 1000.0f))
+        if (ImGui::DragFloat(CreateControlString("Threshold", GetInstanceName()).c_str(),
+                             &threshold_, 0.01f, 0.01f, 1000.0f))
             update_settings_ = true;
-        if (ImGui::Checkbox(CreateControlString("Detect Shadows", GetInstanceName()).c_str(), &detect_shadows_))
+        if (ImGui::Checkbox(CreateControlString("Detect Shadows", GetInstanceName()).c_str(),
+                            &detect_shadows_))
             update_settings_ = true;
     }
 }

@@ -5,8 +5,7 @@
 #ifndef CONVERTCOLOR_COLOR_TYPES_HPP_
 #define CONVERTCOLOR_COLOR_TYPES_HPP_
 #include <vector>
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 const int ConvertColorCodes[] = {
     /*COLOR_BGR2BGRA = */ 0,  //!< add alpha channel to RGB or BGR image
     /*COLOR_RGB2RGBA = */ 0,
@@ -14,7 +13,8 @@ const int ConvertColorCodes[] = {
     /*COLOR_BGRA2BGR = */ 1,  //!< remove alpha channel from RGB or BGR image
     /*COLOR_RGBA2RGB = */ 1,
 
-    /*COLOR_BGR2RGBA = */ 2,  //!< convert between RGB and BGR color spaces (with or without alpha channel)
+    /*COLOR_BGR2RGBA = */ 2,  //!< convert between RGB and BGR color spaces (with or without alpha
+                              //!< channel)
     /*COLOR_RGB2BGRA = */ 2,
 
     /*COLOR_RGBA2BGR = */ 3,
@@ -26,7 +26,8 @@ const int ConvertColorCodes[] = {
     /*COLOR_BGRA2RGBA = */ 5,
     /*COLOR_RGBA2BGRA = */ 5,
 
-    /*COLOR_BGR2GRAY = */ 6,  //!< convert between RGB/BGR and grayscale, @ref color_convert_rgb_gray "color conversions"
+    /*COLOR_BGR2GRAY = */ 6,  //!< convert between RGB/BGR and grayscale, @ref
+                              //!< color_convert_rgb_gray "color conversions"
     /*COLOR_RGB2GRAY = */ 7,
     /*COLOR_GRAY2BGR = */ 8,
     /*COLOR_GRAY2RGB = */ 8,
@@ -58,25 +59,31 @@ const int ConvertColorCodes[] = {
     /*COLOR_GRAY2BGR555 = */ 30,  //!< convert between grayscale and BGR555 (16-bit images)
     /*COLOR_BGR5552GRAY = */ 31,
 
-    /*COLOR_BGR2XYZ = */ 32,  //!< convert RGB/BGR to CIE XYZ, @ref color_convert_rgb_xyz "color conversions"
+    /*COLOR_BGR2XYZ = */ 32,  //!< convert RGB/BGR to CIE XYZ, @ref color_convert_rgb_xyz "color
+                              //!< conversions"
     /*COLOR_RGB2XYZ = */ 33,
     /*COLOR_XYZ2BGR = */ 34,
     /*COLOR_XYZ2RGB = */ 35,
 
-    /*COLOR_BGR2YCrCb = */ 36,  //!< convert RGB/BGR to luma-chroma (aka YCC), @ref color_convert_rgb_ycrcb "color conversions"
+    /*COLOR_BGR2YCrCb = */ 36,  //!< convert RGB/BGR to luma-chroma (aka YCC), @ref
+                                //!< color_convert_rgb_ycrcb "color conversions"
     /*COLOR_RGB2YCrCb = */ 37,
     /*COLOR_YCrCb2BGR = */ 38,
     /*COLOR_YCrCb2RGB = */ 39,
 
-    /*COLOR_BGR2HSV = */ 40,  //!< convert RGB/BGR to HSV (hue saturation value), @ref color_convert_rgb_hsv "color conversions"
+    /*COLOR_BGR2HSV = */ 40,  //!< convert RGB/BGR to HSV (hue saturation value), @ref
+                              //!< color_convert_rgb_hsv "color conversions"
     /*COLOR_RGB2HSV = */ 41,
 
-    /*COLOR_BGR2Lab = */ 44,  //!< convert RGB/BGR to CIE Lab, @ref color_convert_rgb_lab "color conversions"
+    /*COLOR_BGR2Lab = */ 44,  //!< convert RGB/BGR to CIE Lab, @ref color_convert_rgb_lab "color
+                              //!< conversions"
     /*COLOR_RGB2Lab = */ 45,
 
-    /*COLOR_BGR2Luv = */ 50,  //!< convert RGB/BGR to CIE Luv, @ref color_convert_rgb_luv "color conversions"
+    /*COLOR_BGR2Luv = */ 50,  //!< convert RGB/BGR to CIE Luv, @ref color_convert_rgb_luv "color
+                              //!< conversions"
     /*COLOR_RGB2Luv = */ 51,
-    /*COLOR_BGR2HLS = */ 52,  //!< convert RGB/BGR to HLS (hue lightness saturation), @ref color_convert_rgb_hls "color conversions"
+    /*COLOR_BGR2HLS = */ 52,  //!< convert RGB/BGR to HLS (hue lightness saturation), @ref
+                              //!< color_convert_rgb_hls "color conversions"
     /*COLOR_RGB2HLS = */ 53,
 
     /*COLOR_HSV2BGR = */ 54,  //!< backward conversions to RGB/BGR
@@ -270,7 +277,8 @@ const int ConvertColorCodes[] = {
     /*COLOR_BayerRG2RGBA = */ 139,
     /*COLOR_BayerGR2RGBA = */ 140};
 
-const std::vector<std::string> ConvertColorNames = {"BGR2BGRA", "RGB2RGBA",
+const std::vector<std::string> ConvertColorNames = {
+    "BGR2BGRA", "RGB2RGBA",
 
     "BGRA2BGR", "RGBA2RGB",
 
@@ -282,12 +290,14 @@ const std::vector<std::string> ConvertColorNames = {"BGR2BGRA", "RGB2RGBA",
 
     "BGRA2RGBA", "RGBA2BGRA",
 
-    "BGR2GRAY", "RGB2GRAY", "GRAY2BGR", "GRAY2RGB", "GRAY2BGRA", "GRAY2RGBA", "BGRA2GRAY", "RGBA2GRAY", "BGR2BGR565", "RGB2BGR565", "BGR5652BGR", "BGR5652RGB",
-    "BGRA2BGR565", "RGBA2BGR565", "BGR5652BGRA", "BGR5652RGBA",
+    "BGR2GRAY", "RGB2GRAY", "GRAY2BGR", "GRAY2RGB", "GRAY2BGRA", "GRAY2RGBA", "BGRA2GRAY",
+    "RGBA2GRAY", "BGR2BGR565", "RGB2BGR565", "BGR5652BGR", "BGR5652RGB", "BGRA2BGR565",
+    "RGBA2BGR565", "BGR5652BGRA", "BGR5652RGBA",
 
     "GRAY2BGR565", "BGR5652GRAY",
 
-    "BGR2BGR555", "RGB2BGR555", "BGR5552BGR", "BGR5552RGB", "BGRA2BGR555", "RGBA2BGR555", "BGR5552BGRA", "BGR5552RGBA",
+    "BGR2BGR555", "RGB2BGR555", "BGR5552BGR", "BGR5552RGB", "BGRA2BGR555", "RGBA2BGR555",
+    "BGR5552BGRA", "BGR5552RGBA",
 
     "GRAY2BGR555", "BGR5552GRAY",
 
@@ -318,13 +328,17 @@ const std::vector<std::string> ConvertColorNames = {"BGR2BGRA", "RGB2RGBA",
     //! YUV 4:2:0 family to RGB
     "YUV2RGB_NV12", "YUV2BGR_NV12", "YUV2RGB_NV21", "YUV2BGR_NV21", "YUV420sp2RGB", "YUV420sp2BGR",
 
-    "YUV2RGBA_NV12", "YUV2BGRA_NV12", "YUV2RGBA_NV21", "YUV2BGRA_NV21", "YUV420sp2RGBA", "YUV420sp2BGRA",
+    "YUV2RGBA_NV12", "YUV2BGRA_NV12", "YUV2RGBA_NV21", "YUV2BGRA_NV21", "YUV420sp2RGBA",
+    "YUV420sp2BGRA",
 
-    "YUV2RGB_YV12", "YUV2BGR_YV12", "YUV2RGB_IYUV", "YUV2BGR_IYUV", "YUV2RGB_I420", "YUV2BGR_I420", "YUV420p2RGB", "YUV420p2BGR",
+    "YUV2RGB_YV12", "YUV2BGR_YV12", "YUV2RGB_IYUV", "YUV2BGR_IYUV", "YUV2RGB_I420", "YUV2BGR_I420",
+    "YUV420p2RGB", "YUV420p2BGR",
 
-    "YUV2RGBA_YV12", "YUV2BGRA_YV12", "YUV2RGBA_IYUV", "YUV2BGRA_IYUV", "YUV2RGBA_I420", "YUV2BGRA_I420", "YUV420p2RGBA", "YUV420p2BGRA",
+    "YUV2RGBA_YV12", "YUV2BGRA_YV12", "YUV2RGBA_IYUV", "YUV2BGRA_IYUV", "YUV2RGBA_I420",
+    "YUV2BGRA_I420", "YUV420p2RGBA", "YUV420p2BGRA",
 
-    "YUV2GRAY_420", "YUV2GRAY_NV21", "YUV2GRAY_NV12", "YUV2GRAY_YV12", "YUV2GRAY_IYUV", "YUV2GRAY_I420", "YUV420sp2GRAY", "YUV420p2GRAY",
+    "YUV2GRAY_420", "YUV2GRAY_NV21", "YUV2GRAY_NV12", "YUV2GRAY_YV12", "YUV2GRAY_IYUV",
+    "YUV2GRAY_I420", "YUV420sp2GRAY", "YUV420p2GRAY",
 
     //! YUV 4:2:2 family to RGB
     "YUV2RGB_UYVY", "YUV2BGR_UYVY",
@@ -337,9 +351,11 @@ const std::vector<std::string> ConvertColorNames = {"BGR2BGRA", "RGB2RGBA",
     // COLOR_YUV2BGRA_VYUY = 114,
     "YUV2RGBA_Y422", "YUV2BGRA_Y422", "YUV2RGBA_UYNV", "YUV2BGRA_UYNV",
 
-    "YUV2RGB_YUY2", "YUV2BGR_YUY2", "YUV2RGB_YVYU", "YUV2BGR_YVYU", "YUV2RGB_YUYV", "YUV2BGR_YUYV", "YUV2RGB_YUNV", "YUV2BGR_YUNV",
+    "YUV2RGB_YUY2", "YUV2BGR_YUY2", "YUV2RGB_YVYU", "YUV2BGR_YVYU", "YUV2RGB_YUYV", "YUV2BGR_YUYV",
+    "YUV2RGB_YUNV", "YUV2BGR_YUNV",
 
-    "YUV2RGBA_YUY2", "YUV2BGRA_YUY2", "YUV2RGBA_YVYU", "YUV2BGRA_YVYU", "YUV2RGBA_YUYV", "YUV2BGRA_YUYV", "YUV2RGBA_YUNV", "YUV2BGRA_YUNV",
+    "YUV2RGBA_YUY2", "YUV2BGRA_YUY2", "YUV2RGBA_YVYU", "YUV2BGRA_YVYU", "YUV2RGBA_YUYV",
+    "YUV2BGRA_YUYV", "YUV2RGBA_YUNV", "YUV2BGRA_YUNV",
 
     "YUV2GRAY_UYVY", "YUV2GRAY_YUY2",
     // CV_YUV2GRAY_VYUY    = CV_YUV2GRAY_UYVY,
@@ -351,7 +367,8 @@ const std::vector<std::string> ConvertColorNames = {"BGR2BGRA", "RGB2RGBA",
     //! RGB to YUV 4:2:0 family
     "RGB2YUV_I420", "BGR2YUV_I420", "RGB2YUV_IYUV", "BGR2YUV_IYUV",
 
-    "RGBA2YUV_I420", "BGRA2YUV_I420", "RGBA2YUV_IYUV", "BGRA2YUV_IYUV", "RGB2YUV_YV12", "BGR2YUV_YV12", "RGBA2YUV_YV12", "BGRA2YUV_YV12",
+    "RGBA2YUV_I420", "BGRA2YUV_I420", "RGBA2YUV_IYUV", "BGRA2YUV_IYUV", "RGB2YUV_YV12",
+    "BGR2YUV_YV12", "RGBA2YUV_YV12", "BGRA2YUV_YV12",
 
     //! Demosaicin
     "BayerBG2BGR", "BayerGB2BGR", "BayerRG2BGR", "BayerGR2BGR",

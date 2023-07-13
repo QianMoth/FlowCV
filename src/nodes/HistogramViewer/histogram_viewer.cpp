@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 HistogramViewer::HistogramViewer() : Component(ProcessOrder::OutOfOrder)
 {
@@ -66,12 +65,15 @@ void HistogramViewer::Process_(SignalBus const &inputs, SignalBus &outputs)
         split(*in1, bgr_planes);
         cv::Mat b_hist, g_hist, r_hist;
 
-        calcHist(&bgr_planes[0], 1, 0, cv::Mat(), b_hist, 1, &hist_size, &hist_range, uniform, accumulate);
+        calcHist(&bgr_planes[0], 1, 0, cv::Mat(), b_hist, 1, &hist_size, &hist_range, uniform,
+                 accumulate);
         normalize(b_hist, b_hist, 0, bgr_planes[0].rows, cv::NORM_MINMAX, -1, cv::Mat());
         if (is_color_) {
-            calcHist(&bgr_planes[1], 1, 0, cv::Mat(), g_hist, 1, &hist_size, &hist_range, uniform, accumulate);
+            calcHist(&bgr_planes[1], 1, 0, cv::Mat(), g_hist, 1, &hist_size, &hist_range, uniform,
+                     accumulate);
             normalize(g_hist, g_hist, 0, bgr_planes[1].rows, cv::NORM_MINMAX, -1, cv::Mat());
-            calcHist(&bgr_planes[2], 1, 0, cv::Mat(), r_hist, 1, &hist_size, &hist_range, uniform, accumulate);
+            calcHist(&bgr_planes[2], 1, 0, cv::Mat(), r_hist, 1, &hist_size, &hist_range, uniform,
+                     accumulate);
             normalize(r_hist, r_hist, 0, bgr_planes[2].rows, cv::NORM_MINMAX, -1, cv::Mat());
         }
 
@@ -83,14 +85,14 @@ void HistogramViewer::Process_(SignalBus const &inputs, SignalBus &outputs)
                 values_g_.emplace_back(g_hist.at<float>(i - 1));
             }
         }
-    }
-    else
+    } else
         has_input_ = false;
 }
 
 bool HistogramViewer::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Main) {
         return true;
     }
@@ -107,7 +109,8 @@ void HistogramViewer::UpdateGui(void *context, int interface)
         std::lock_guard<std::mutex> lck(io_mutex_);
         std::string title = "Histogram_" + std::to_string(GetInstanceCount());
         ImGui::Begin(CreateControlString(title.c_str(), GetInstanceName()).c_str());
-        if (ImPlot::BeginPlot(CreateControlString("Histogram View", GetInstanceName()).c_str(), ImVec2(-1, -1))) {
+        if (ImPlot::BeginPlot(CreateControlString("Histogram View", GetInstanceName()).c_str(),
+                              ImVec2(-1, -1))) {
             ImPlot::SetupAxes("Range", "Value");
             ImPlot::SetupAxesLimits(0, 255, 0, 1024);
             if (has_input_ && !x_range_.empty()) {
@@ -126,8 +129,10 @@ void HistogramViewer::UpdateGui(void *context, int interface)
                     ImPlot::PlotLine<float>("Green", x_range_.data(), values_g_.data(), 255);
                 }
                 ImPlot::SetNextFillStyle(singleChannelColor);
-                ImPlot::PlotShaded<float>(singleChannelName.c_str(), x_range_.data(), values_b_.data(), 255, 0);
-                ImPlot::PlotLine<float>(singleChannelName.c_str(), x_range_.data(), values_b_.data(), 255);
+                ImPlot::PlotShaded<float>(singleChannelName.c_str(), x_range_.data(),
+                                          values_b_.data(), 255, 0);
+                ImPlot::PlotLine<float>(singleChannelName.c_str(), x_range_.data(),
+                                        values_b_.data(), 255);
             }
             ImPlot::EndPlot();
         }

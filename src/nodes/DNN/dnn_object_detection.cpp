@@ -3,6 +3,7 @@
 //
 
 #include "dnn_object_detection.hpp"
+
 #include <fstream>
 #include <sstream>
 
@@ -11,8 +12,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 ObjectDetection::ObjectDetection() : Component(ProcessOrder::OutOfOrder)
 {
@@ -61,8 +61,7 @@ void ObjectDetection::InitDnn_()
         std::ifstream ifs(classes_path_);
         if (!ifs.is_open()) {
             std::cerr << GetInstanceName() << ", File " + classes_path_ + " not found" << std::endl;
-        }
-        else {
+        } else {
             std::string line;
             while (std::getline(ifs, line)) {
                 class_list_.emplace_back(line);
@@ -75,8 +74,7 @@ void ObjectDetection::InitDnn_()
         net_->setPreferableBackend(current_backend_);
         net_->setPreferableTarget(current_target_);
         out_names_ = net_->getUnconnectedOutLayersNames();
-    }
-    catch (...) {
+    } catch (...) {
         std::cerr << "DNN Initialization Error" << std::endl;
         net_load_error = true;
         is_initialized_ = false;
@@ -96,22 +94,26 @@ void ObjectDetection::DrawPredictions_(int classId, float conf, cv::Rect box, cv
             label = class_list_.at(classId) + ": " + cv::format("%.2f", conf);
         else
             return;
-    }
-    else {
+    } else {
         label = cv::format("%.2f", conf);
     }
 
     rectangle(frame, cv::Point(box.x, box.y), cv::Point(box.x + box.width, box.y + box.height),
-        cv::Scalar(text_color_.z * 255, text_color_.y * 255, text_color_.x * 255), text_thickness_);
+              cv::Scalar(text_color_.z * 255, text_color_.y * 255, text_color_.x * 255),
+              text_thickness_);
 
     int baseLine;
-    cv::Size labelSize = getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, text_scale_, text_thickness_, &baseLine);
+    cv::Size labelSize =
+        getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, text_scale_, text_thickness_, &baseLine);
 
     box.y = cv::max(box.y, labelSize.height);
     rectangle(frame, cv::Point(box.x + text_pos_.x, (box.y - labelSize.height) + text_pos_.y),
-        cv::Point((box.x + labelSize.width) + text_pos_.x, (box.y + baseLine) + text_pos_.y), cv::Scalar::all(64), cv::FILLED);
-    putText(frame, label, cv::Point(box.x + text_pos_.x, box.y + text_pos_.y), cv::FONT_HERSHEY_SIMPLEX, text_scale_,
-        cv::Scalar(text_color_.z * 255, text_color_.y * 255, text_color_.x * 255), text_thickness_);
+              cv::Point((box.x + labelSize.width) + text_pos_.x, (box.y + baseLine) + text_pos_.y),
+              cv::Scalar::all(64), cv::FILLED);
+    putText(frame, label, cv::Point(box.x + text_pos_.x, box.y + text_pos_.y),
+            cv::FONT_HERSHEY_SIMPLEX, text_scale_,
+            cv::Scalar(text_color_.z * 255, text_color_.y * 255, text_color_.x * 255),
+            text_thickness_);
 }
 
 void ObjectDetection::Process_(SignalBus const &inputs, SignalBus &outputs)
@@ -133,25 +135,25 @@ void ObjectDetection::Process_(SignalBus const &inputs, SignalBus &outputs)
             if (pre_proc_resize_) {
                 if (model_res_[0] > 0 && model_res_[1] > 0) {
                     cv::resize(*in1, frame, modelSize);
-                }
-                else
+                } else
                     frame = orig;
-            }
-            else
+            } else
                 frame = orig;
 
             try {
-                cv::dnn::blobFromImage(frame, blob, 1.0, modelSize, cv::Scalar(), swap_rb_, crop_, CV_8U);
+                cv::dnn::blobFromImage(frame, blob, 1.0, modelSize, cv::Scalar(), swap_rb_, crop_,
+                                       CV_8U);
                 net_->setInput(blob, "", scale_, cv::Scalar(mean_[0], mean_[1], mean_[2]));
-                if (net_->getLayer(0)->outputNameToIndex("im_info") != -1) {  // Faster-RCNN or R-FCN
+                if (net_->getLayer(0)->outputNameToIndex("im_info") !=
+                    -1) {  // Faster-RCNN or R-FCN
                     cv::resize(frame, frame, modelSize);
-                    cv::Mat imInfo = (cv::Mat_<float>(1, 3) << modelSize.height, modelSize.width, 1.6f);
+                    cv::Mat imInfo =
+                        (cv::Mat_<float>(1, 3) << modelSize.height, modelSize.width, 1.6f);
                     net_->setInput(imInfo, "im_info");
                 }
 
                 net_->forward(outs, out_names_);
-            }
-            catch (std::exception &e) {
+            } catch (std::exception &e) {
                 std::cerr << GetInstanceName() << ", Error Computing DNN" << std::endl;
                 std::cerr << e.what() << std::endl;
                 return;
@@ -185,8 +187,7 @@ void ObjectDetection::Process_(SignalBus const &inputs, SignalBus &outputs)
                         }
                     }
                 }
-            }
-            else if (outLayerType == "DetectionOutput") {
+            } else if (outLayerType == "DetectionOutput") {
                 for (auto &out : outs) {
                     auto *data = (float *)out.data;
                     for (size_t i = 0; i < out.total(); i += 7) {
@@ -207,16 +208,17 @@ void ObjectDetection::Process_(SignalBus const &inputs, SignalBus &outputs)
                                 height = bottom - top + 1;
                             }
                             if (data[i + 1] > 0) {
-                                classIds.emplace_back((int)(data[i + 1]) - 1);  // Skip 0th background class id.
+                                classIds.emplace_back((int)(data[i + 1]) -
+                                                      1);  // Skip 0th background class id.
                                 boxes.emplace_back(left, top, width, height);
                                 confidences.emplace_back(confidence);
                             }
                         }
                     }
                 }
-            }
-            else {
-                std::cout << GetInstanceName() << ", Unknown output layer type: " << outLayerType << std::endl;
+            } else {
+                std::cout << GetInstanceName() << ", Unknown output layer type: " << outLayerType
+                          << std::endl;
                 return;
             }
 
@@ -248,8 +250,7 @@ void ObjectDetection::Process_(SignalBus const &inputs, SignalBus &outputs)
                     if (draw_class_)
                         DrawPredictions_(classIds[idx], confidences[idx], box, orig);
                 }
-            }
-            else {
+            } else {
                 for (size_t idx = 0; idx < boxes.size(); ++idx) {
                     cv::Rect box = boxes[idx];
                     nlohmann::json cTmp;
@@ -273,8 +274,7 @@ void ObjectDetection::Process_(SignalBus const &inputs, SignalBus &outputs)
                 json_out["data"] = detected;
             outputs.SetValue(1, json_out);
             outputs.SetValue(0, orig);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -282,7 +282,8 @@ void ObjectDetection::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool ObjectDetection::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -295,21 +296,24 @@ void ObjectDetection::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         if (!model_path_.empty() && !config_path_.empty()) {
             std::string button_str;
             if (net_load_error)
                 ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Error Initializing Network");
             if (needs_reinit_ && is_initialized_)
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Network Needs To Be Reinitialized!");
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+                                   "Network Needs To Be Reinitialized!");
 
             if (is_initialized_)
                 button_str = "Reinitialize Network";
             else {
                 button_str = "Initialize Network";
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Network Needs To Be Initialized!");
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+                                   "Network Needs To Be Initialized!");
             }
             if (ImGui::Button(CreateControlString(button_str.c_str(), GetInstanceName()).c_str())) {
                 std::lock_guard<std::mutex> lk(io_mutex_);
@@ -319,7 +323,10 @@ void ObjectDetection::UpdateGui(void *context, int interface)
             if (ImGui::Combo(
                     CreateControlString("Backend", GetInstanceName()).c_str(), &dnn_backend_idx_,
                     [](void *data, int idx, const char **out_text) {
-                        *out_text = ((const std::vector<std::pair<std::string, cv::dnn::Backend>> *)data)->at(idx).first.c_str();
+                        *out_text =
+                            ((const std::vector<std::pair<std::string, cv::dnn::Backend>> *)data)
+                                ->at(idx)
+                                .first.c_str();
                         return true;
                     },
                     (void *)&backend_list_, (int)backend_list_.size())) {
@@ -335,7 +342,10 @@ void ObjectDetection::UpdateGui(void *context, int interface)
             if (ImGui::Combo(
                     CreateControlString("Target", GetInstanceName()).c_str(), &dnn_target_idx_,
                     [](void *data, int idx, const char **out_text) {
-                        *out_text = ((const std::vector<std::pair<std::string, cv::dnn::Target>> *)data)->at(idx).first.c_str();
+                        *out_text =
+                            ((const std::vector<std::pair<std::string, cv::dnn::Target>> *)data)
+                                ->at(idx)
+                                .first.c_str();
                         return true;
                     },
                     (void *)&target_list_, (int)target_list_.size())) {
@@ -365,8 +375,10 @@ void ObjectDetection::UpdateGui(void *context, int interface)
         if (show_model_dialog_)
             ImGui::OpenPopup(CreateControlString("Set Model", GetInstanceName()).c_str());
 
-        if (model_dialog_.showFileDialog(CreateControlString("Set Model", GetInstanceName()), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
-                ImVec2(700, 310), ".caffemodel,.bin,.onnx,.pb,.pth,.weights,.t7,.net", &show_model_dialog_)) {
+        if (model_dialog_.showFileDialog(
+                CreateControlString("Set Model", GetInstanceName()),
+                imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310),
+                ".caffemodel,.bin,.onnx,.pb,.pth,.weights,.t7,.net", &show_model_dialog_)) {
             model_path_ = model_dialog_.selected_path;
             show_model_dialog_ = false;
             needs_reinit_ = true;
@@ -384,8 +396,10 @@ void ObjectDetection::UpdateGui(void *context, int interface)
         if (show_config_dialog_)
             ImGui::OpenPopup(CreateControlString("Set Config", GetInstanceName()).c_str());
 
-        if (config_dialog_.showFileDialog(CreateControlString("Set Config", GetInstanceName()), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
-                ImVec2(700, 310), ".prototxt,.txt,.pbtxt,.yml,.cfg,.xml", &show_config_dialog_)) {
+        if (config_dialog_.showFileDialog(CreateControlString("Set Config", GetInstanceName()),
+                                          imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
+                                          ImVec2(700, 310), ".prototxt,.txt,.pbtxt,.yml,.cfg,.xml",
+                                          &show_config_dialog_)) {
             config_path_ = config_dialog_.selected_path;
             show_config_dialog_ = false;
             needs_reinit_ = true;
@@ -408,28 +422,36 @@ void ObjectDetection::UpdateGui(void *context, int interface)
         if (show_classes_dialog_)
             ImGui::OpenPopup(CreateControlString("Set Classes", GetInstanceName()).c_str());
 
-        if (classes_dialog_.showFileDialog(CreateControlString("Set Classes", GetInstanceName()), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
-                ImVec2(700, 310), ".txt", &show_classes_dialog_)) {
+        if (classes_dialog_.showFileDialog(CreateControlString("Set Classes", GetInstanceName()),
+                                           imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
+                                           ImVec2(700, 310), ".txt", &show_classes_dialog_)) {
             classes_path_ = classes_dialog_.selected_path;
             show_classes_dialog_ = false;
             needs_reinit_ = true;
         }
         ImGui::Separator();
         ImGui::SetNextItemWidth(180);
-        ImGui::DragFloat3(CreateControlString("Mean", GetInstanceName()).c_str(), mean_, 0.1f, 0.0f, 500.0f, "%0.2f");
+        ImGui::DragFloat3(CreateControlString("Mean", GetInstanceName()).c_str(), mean_, 0.1f, 0.0f,
+                          500.0f, "%0.2f");
         ImGui::SetNextItemWidth(100);
-        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &scale_, 0.0001f, 0.0f, 10.0f, "%0.7f");
+        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &scale_, 0.0001f,
+                         0.0f, 10.0f, "%0.7f");
         ImGui::SetNextItemWidth(70);
-        ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &model_res_[0], 0.5f, 224, 1000);
+        ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &model_res_[0],
+                       0.5f, 224, 1000);
         ImGui::SameLine();
         ImGui::SetNextItemWidth(70);
-        ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &model_res_[1], 0.5f, 224, 1000);
+        ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &model_res_[1],
+                       0.5f, 224, 1000);
         ImGui::SetNextItemWidth(80);
-        ImGui::DragFloat(CreateControlString("Conf. Threshold", GetInstanceName()).c_str(), &conf_thresh_, 0.01f, 0.0f, 1.0f, "%0.2f");
+        ImGui::DragFloat(CreateControlString("Conf. Threshold", GetInstanceName()).c_str(),
+                         &conf_thresh_, 0.01f, 0.0f, 1.0f, "%0.2f");
         ImGui::SetNextItemWidth(80);
-        ImGui::DragFloat(CreateControlString("NMS Threshold", GetInstanceName()).c_str(), &nms_thresh_, 0.01f, 0.0f, 1.0f, "%0.2f");
+        ImGui::DragFloat(CreateControlString("NMS Threshold", GetInstanceName()).c_str(),
+                         &nms_thresh_, 0.01f, 0.0f, 1.0f, "%0.2f");
         ImGui::Checkbox(CreateControlString("RGB", GetInstanceName()).c_str(), &swap_rb_);
-        if (ImGui::Checkbox(CreateControlString("Preprocess Resize", GetInstanceName()).c_str(), &pre_proc_resize_)) {
+        if (ImGui::Checkbox(CreateControlString("Preprocess Resize", GetInstanceName()).c_str(),
+                            &pre_proc_resize_)) {
             if (!pre_proc_resize_)
                 crop_ = false;
         }
@@ -446,12 +468,15 @@ void ObjectDetection::UpdateGui(void *context, int interface)
             ImGui::DragInt(CreateControlString("Y", GetInstanceName()).c_str(), &text_pos_.y, 0.5f);
             ImGui::Separator();
             ImGui::SetNextItemWidth(80);
-            ImGui::DragFloat(CreateControlString("Text Scale", GetInstanceName()).c_str(), &text_scale_, 0.01f, 0.0f, 100.0f);
+            ImGui::DragFloat(CreateControlString("Text Scale", GetInstanceName()).c_str(),
+                             &text_scale_, 0.01f, 0.0f, 100.0f);
             ImGui::Separator();
             ImGui::SetNextItemWidth(80);
-            ImGui::DragInt(CreateControlString("Text Thickness", GetInstanceName()).c_str(), &text_thickness_, 0.1f, 1, 10);
+            ImGui::DragInt(CreateControlString("Text Thickness", GetInstanceName()).c_str(),
+                           &text_thickness_, 0.1f, 1, 10);
             ImGui::Separator();
-            ImGui::ColorEdit3(CreateControlString("Text Color", GetInstanceName()).c_str(), (float *)&text_color_);
+            ImGui::ColorEdit3(CreateControlString("Text Color", GetInstanceName()).c_str(),
+                              (float *)&text_color_);
         }
     }
 }

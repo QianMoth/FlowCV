@@ -18,7 +18,6 @@
 
 void Camera_Enumerator::RefreshCameraList()
 {
-
 #ifdef _WIN32
     msmf::DeviceEnumerator de;
     std::map<int, msmf::Device> devices;
@@ -47,21 +46,23 @@ void Camera_Enumerator::RefreshCameraList()
 
 int Camera_Enumerator::GetCameraCount()
 {
-    return (int)camera_list_.size();
+    return static_cast<int>(camera_list_.size());
 }
 
 std::string Camera_Enumerator::GetCameraName(uint32_t index)
 {
-    if (index < camera_list_.size())
+    if (index < camera_list_.size()) {
         return camera_list_.at(index).second;
+    }
 
     return "";
 }
 
 int Camera_Enumerator::GetCameraIndex(uint32_t index)
 {
-    if (index < camera_list_.size())
+    if (index < camera_list_.size()) {
         return camera_list_.at(index).first;
+    }
 
     return -1;
 }

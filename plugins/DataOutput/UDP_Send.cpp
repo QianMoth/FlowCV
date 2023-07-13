@@ -9,11 +9,9 @@ using namespace DSPatchables;
 
 int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables::internal
-{
+namespace DSPatch::DSPatchables::internal {
 class UdpSend
-{
-};
+{};
 }  // namespace DSPatch::DSPatchables::internal
 
 UdpSend::UdpSend() : Component(ProcessOrder::OutOfOrder), p(new internal::UdpSend())
@@ -28,7 +26,8 @@ UdpSend::UdpSend() : Component(ProcessOrder::OutOfOrder), p(new internal::UdpSen
 
     // 1 inputs
     SetInputCount_(5, {"bool", "int", "float", "str", "json"},
-        {IoType::Io_Type_Bool, IoType::Io_Type_Int, IoType::Io_Type_Float, IoType::Io_Type_String, IoType::Io_Type_JSON});
+                   {IoType::Io_Type_Bool, IoType::Io_Type_Int, IoType::Io_Type_Float,
+                    IoType::Io_Type_String, IoType::Io_Type_JSON});
 
     // 0 outputs
     SetOutputCount_(0);
@@ -81,7 +80,8 @@ void UdpSend::SetEOLSeq_()
     }
 }
 
-template<typename T> std::vector<uint8_t> UdpSend::GenerateOutBuffer_(T data)
+template <typename T>
+std::vector<uint8_t> UdpSend::GenerateOutBuffer_(T data)
 {
     std::vector<uint8_t> outBuffer;
     if (send_as_binary_) {
@@ -89,8 +89,7 @@ template<typename T> std::vector<uint8_t> UdpSend::GenerateOutBuffer_(T data)
         for (int i = 0; i < sizeof(T); i++) {
             outBuffer.emplace_back(d[i]);
         }
-    }
-    else {
+    } else {
         std::string buf;
         if (typeid(T).name() == typeid(char).name())
             buf = data;
@@ -120,41 +119,42 @@ void UdpSend::Process_(SignalBus const &inputs, SignalBus &outputs)
         if (socket_ != nullptr) {
             if (socket_->is_open()) {
                 current_time_ = std::chrono::steady_clock::now();
-                auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ - last_time_).count();
+                auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ -
+                                                                                   last_time_)
+                                 .count();
                 bool readyToSend = false;
                 if (transmit_rate_ > 0) {
                     if (delta >= (long long)rate_val_) {
                         readyToSend = true;
                     }
-                }
-                else
+                } else
                     readyToSend = true;
 
                 if (in1) {
                     if (readyToSend) {
                         std::vector<uint8_t> buf = GenerateOutBuffer_<bool>(*in1);
-                        socket_->async_send_to(asio::buffer(buf.data(), buf.size()), *remote_endpoint_, HandleNetworkWrite);
+                        socket_->async_send_to(asio::buffer(buf.data(), buf.size()),
+                                               *remote_endpoint_, HandleNetworkWrite);
                     }
-                }
-                else if (in2) {
+                } else if (in2) {
                     if (readyToSend) {
                         std::vector<uint8_t> buf = GenerateOutBuffer_<int>(*in2);
-                        socket_->async_send_to(asio::buffer(buf.data(), buf.size()), *remote_endpoint_, HandleNetworkWrite);
+                        socket_->async_send_to(asio::buffer(buf.data(), buf.size()),
+                                               *remote_endpoint_, HandleNetworkWrite);
                     }
-                }
-                else if (in3) {
+                } else if (in3) {
                     if (readyToSend) {
                         std::vector<uint8_t> buf = GenerateOutBuffer_<float>(*in3);
-                        socket_->async_send_to(asio::buffer(buf.data(), buf.size()), *remote_endpoint_, HandleNetworkWrite);
+                        socket_->async_send_to(asio::buffer(buf.data(), buf.size()),
+                                               *remote_endpoint_, HandleNetworkWrite);
                     }
-                }
-                else if (in4) {
+                } else if (in4) {
                     if (readyToSend) {
                         std::vector<uint8_t> buf = GenerateOutBuffer_<char>(*in4->c_str());
-                        socket_->async_send_to(asio::buffer(buf.data(), buf.size()), *remote_endpoint_, HandleNetworkWrite);
+                        socket_->async_send_to(asio::buffer(buf.data(), buf.size()),
+                                               *remote_endpoint_, HandleNetworkWrite);
                     }
-                }
-                else if (in5) {
+                } else if (in5) {
                     if (!in5->empty()) {
                         nlohmann::json json_in_ = *in5;
                         if (readyToSend) {
@@ -162,25 +162,29 @@ void UdpSend::Process_(SignalBus const &inputs, SignalBus &outputs)
                                 case 1:  // BSON
                                 {
                                     std::vector<uint8_t> msg = nlohmann::json::to_bson(json_in_);
-                                    socket_->async_send_to(asio::buffer(msg.data(), msg.size()), *remote_endpoint_, HandleNetworkWrite);
+                                    socket_->async_send_to(asio::buffer(msg.data(), msg.size()),
+                                                           *remote_endpoint_, HandleNetworkWrite);
                                     break;
                                 }
                                 case 2:  // CBOR
                                 {
                                     std::vector<uint8_t> msg = nlohmann::json::to_cbor(json_in_);
-                                    socket_->async_send_to(asio::buffer(msg.data(), msg.size()), *remote_endpoint_, HandleNetworkWrite);
+                                    socket_->async_send_to(asio::buffer(msg.data(), msg.size()),
+                                                           *remote_endpoint_, HandleNetworkWrite);
                                     break;
                                 }
                                 case 3:  // MessagePack
                                 {
                                     std::vector<uint8_t> msg = nlohmann::json::to_msgpack(json_in_);
-                                    socket_->async_send_to(asio::buffer(msg.data(), msg.size()), *remote_endpoint_, HandleNetworkWrite);
+                                    socket_->async_send_to(asio::buffer(msg.data(), msg.size()),
+                                                           *remote_endpoint_, HandleNetworkWrite);
                                     break;
                                 }
                                 case 4:  // UBJSON
                                 {
                                     std::vector<uint8_t> msg = nlohmann::json::to_ubjson(json_in_);
-                                    socket_->async_send_to(asio::buffer(msg.data(), msg.size()), *remote_endpoint_, HandleNetworkWrite);
+                                    socket_->async_send_to(asio::buffer(msg.data(), msg.size()),
+                                                           *remote_endpoint_, HandleNetworkWrite);
                                     break;
                                 }
                                 default:  // None (0)
@@ -195,7 +199,7 @@ void UdpSend::Process_(SignalBus const &inputs, SignalBus &outputs)
                     }
                 }
                 if (readyToSend) {
-                    float curRate = 1.0f / ((float)delta * 0.001f);
+                    float curRate = 1.0F / ((float)delta * 0.001F);
                     // std::cout << curRate << std::endl;
                     last_time_ = current_time_;
                 }
@@ -206,8 +210,9 @@ void UdpSend::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool UdpSend::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -222,13 +227,15 @@ void UdpSend::UpdateGui(void *context, int interface)
 
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         bool multicastIndicator = is_multicast_;
-        ImGui::Checkbox(CreateControlString("Is Multicast", GetInstanceName()).c_str(), &multicastIndicator);
+        ImGui::Checkbox(CreateControlString("Is Multicast", GetInstanceName()).c_str(),
+                        &multicastIndicator);
         if (!is_valid_ip)
             ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(128, 0, 0, 255));
         else
             ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(29, 47, 73, 255));
         ImGui::SetNextItemWidth(140);
-        if (ImGui::InputText(CreateControlString("IP Address", GetInstanceName()).c_str(), tmp_ip_buf, 64)) {
+        if (ImGui::InputText(CreateControlString("IP Address", GetInstanceName()).c_str(),
+                             tmp_ip_buf, 64)) {
             ip_addr_ = tmp_ip_buf;
             if (IsValidIP_() && port_ != 0) {
                 OpenSocket_();
@@ -243,23 +250,27 @@ void UdpSend::UpdateGui(void *context, int interface)
         }
         ImGui::Separator();
         ImGui::SetNextItemWidth(120);
-        ImGui::Combo(CreateControlString("JSON Data Mode", GetInstanceName()).c_str(), &data_pack_mode_, "Text\0BSON\0CBOR\0MessagePack\0UBJSON\0\0");
+        ImGui::Combo(CreateControlString("JSON Data Mode", GetInstanceName()).c_str(),
+                     &data_pack_mode_, "Text\0BSON\0CBOR\0MessagePack\0UBJSON\0\0");
         ImGui::Separator();
         ImGui::SetNextItemWidth(120);
-        if (ImGui::Combo(CreateControlString("Rate (Hz)", GetInstanceName()).c_str(), &transmit_rate_, "Fastest\0 60\0 30\0 20\0 15\0 10\0 5\0 2\0 1\0\0")) {
+        if (ImGui::Combo(CreateControlString("Rate (Hz)", GetInstanceName()).c_str(),
+                         &transmit_rate_, "Fastest\0 60\0 30\0 20\0 15\0 10\0 5\0 2\0 1\0\0")) {
             if (transmit_rate_ > 0)
-                rate_val_ = (1.0f / (float)rate_selection_[transmit_rate_]) * 1000.0f;
+                rate_val_ = (1.0F / (float)rate_selection_[transmit_rate_]) * 1000.0F;
             else
                 rate_val_ = 0;
         }
         ImGui::Separator();
-        if (ImGui::Combo(
-                CreateControlString("EOL Sequence", GetInstanceName()).c_str(), &eol_seq_index_, "None\0<CR>\0<LF>\0<CR><LF>\0<SPACE>\0<TAB>\0<COMMA>\0\0")) {
+        if (ImGui::Combo(CreateControlString("EOL Sequence", GetInstanceName()).c_str(),
+                         &eol_seq_index_,
+                         "None\0<CR>\0<LF>\0<CR><LF>\0<SPACE>\0<TAB>\0<COMMA>\0\0")) {
             SetEOLSeq_();
         }
         ImGui::Separator();
         ImGui::TextUnformatted("Non-JSON Data Type Sending Options");
-        ImGui::Checkbox(CreateControlString("Send As Binary", GetInstanceName()).c_str(), &send_as_binary_);
+        ImGui::Checkbox(CreateControlString("Send As Binary", GetInstanceName()).c_str(),
+                        &send_as_binary_);
     }
 }
 
@@ -298,7 +309,7 @@ void UdpSend::SetState(std::string &&json_serialized)
     if (state.contains("data_rate")) {
         transmit_rate_ = state["data_rate"].get<int>();
         if (transmit_rate_ > 0)
-            rate_val_ = (1.0f / (float)rate_selection_[transmit_rate_]) * 1000.0f;
+            rate_val_ = (1.0F / (float)rate_selection_[transmit_rate_]) * 1000.0F;
         else
             rate_val_ = 0;
     }
@@ -329,8 +340,7 @@ void UdpSend::OpenSocket_()
             socket_->open(asio::ip::udp::v4());
             if (address.is_multicast())
                 is_multicast_ = true;
-        }
-        else if (address.is_v6()) {
+        } else if (address.is_v6()) {
             socket_->open(asio::ip::udp::v6());
             if (address.is_multicast())
                 is_multicast_ = true;
@@ -352,8 +362,7 @@ bool UdpSend::IsValidIP_()
         if (ec) {
             is_valid_ip = false;
             std::cerr << ec.message() << std::endl;
-        }
-        else {
+        } else {
             if (address.is_v4()) {
                 int dotCount = 0;
                 for (auto &c : ip_addr_) {
@@ -364,8 +373,7 @@ bool UdpSend::IsValidIP_()
                     is_valid_ip = true;
                     return true;
                 }
-            }
-            else if (address.is_v6()) {
+            } else if (address.is_v6()) {
                 int dotCount = 0;
                 for (auto c : ip_addr_) {
                     if (c == ':')

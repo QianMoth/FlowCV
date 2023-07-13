@@ -10,8 +10,7 @@ std::string ToNarrow(const wchar_t *s, char dfault = '?', const std::locale &loc
     return stm.str();
 }
 
-namespace msmf
-{
+namespace msmf {
 
 std::map<int, Device> DeviceEnumerator::getVideoDevicesMap()
 {
@@ -30,11 +29,11 @@ std::map<int, Device> DeviceEnumerator::getDevicesMap(REFGUID category)
 
     HRESULT res = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     if (SUCCEEDED(res)) {
-
         HRESULT hr;
         IEnumMoniker *pEnum;
         ICreateDevEnum *pDevEnum = nullptr;
-        hr = CoCreateInstance(CLSID_SystemDeviceEnum, nullptr, CLSCTX_INPROC_SERVER, IID_ICreateDevEnum, (void **)&pDevEnum);
+        hr = CoCreateInstance(CLSID_SystemDeviceEnum, nullptr, CLSCTX_INPROC_SERVER,
+                              IID_ICreateDevEnum, (void **)&pDevEnum);
 
         if (SUCCEEDED(hr)) {
             // Create an enumerator for the category.
@@ -50,7 +49,8 @@ std::map<int, Device> DeviceEnumerator::getDevicesMap(REFGUID category)
             if (pEnum) {
                 while (pEnum->Next(1, &pMoniker, nullptr) == S_OK) {
                     IPropertyBag *pPropBag;
-                    HRESULT hr2 = pMoniker->BindToStorage(nullptr, nullptr, IID_PPV_ARGS(&pPropBag));
+                    HRESULT hr2 =
+                        pMoniker->BindToStorage(nullptr, nullptr, IID_PPV_ARGS(&pPropBag));
                     if (FAILED(hr2)) {
                         pMoniker->Release();
                         continue;
@@ -105,8 +105,9 @@ std::string DeviceEnumerator::ConvertWCSToMBS(const wchar_t *pstr, long wslen)
     int len = ::WideCharToMultiByte(CP_ACP, 0, pstr, wslen, nullptr, 0, nullptr, nullptr);
 
     std::string dblstr(len, '\0');
-    len = ::WideCharToMultiByte(
-        CP_ACP, 0 /* no flags */, pstr, wslen /* not necessary NULL-terminated */, &dblstr[0], len, nullptr, nullptr /* no default char */);
+    len = ::WideCharToMultiByte(CP_ACP, 0 /* no flags */, pstr,
+                                wslen /* not necessary NULL-terminated */, &dblstr[0], len, nullptr,
+                                nullptr /* no default char */);
 
     return dblstr;
 }

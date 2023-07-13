@@ -14,8 +14,8 @@
 #include "imgui_opencv.hpp"
 #include "imgui_wrapper.hpp"
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
+
 class HumanPose final : public Component
 {
   public:

@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Multiply::Multiply() : Component(ProcessOrder::OutOfOrder)
 {
@@ -44,14 +43,14 @@ void Multiply::Process_(SignalBus const &inputs, SignalBus &outputs)
     if (!in1->empty() && !in2->empty()) {
         if (IsEnabled()) {
             // Process Image
-            if (in1->type() == in2->type() && in1->channels() == in2->channels() && in1->size == in2->size) {
+            if (in1->type() == in2->type() && in1->channels() == in2->channels() &&
+                in1->size == in2->size) {
                 cv::Mat frame;
                 cv::multiply(*in1, *in2, frame, scale_);
                 if (!frame.empty())
                     outputs.SetValue(0, frame);
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -59,7 +58,8 @@ void Multiply::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Multiply::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -72,8 +72,9 @@ void Multiply::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         ImGui::SetNextItemWidth(100);
         ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &scale_, 0.001f);

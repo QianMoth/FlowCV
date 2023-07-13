@@ -17,8 +17,7 @@
 #include <devguid.h>
 // clang-format on
 
-namespace SerialDeviceEnum
-{
+namespace SerialDeviceEnum {
 
 struct SerialPortInfo
 {

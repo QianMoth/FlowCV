@@ -2,17 +2,26 @@
 // FlowCV Plugin Manager Class
 //
 
-#include "Plugin_Manager.hpp"
-#include <filesystem>
-#include <algorithm>
+#include "PluginManager.hpp"
 
-namespace FlowCV
-{
+#include <spdlog/spdlog.h>
+
+#include <algorithm>
+#include <filesystem>
+
+namespace FlowCV {
+
 PluginManager::~PluginManager()
 {
     UnLoadPlugins();
 }
 
+///@brief 插件名字比较
+///
+///@param a
+///@param b
+///@return true
+///@return false
 static bool compareName(const PluginInfo &a, const PluginInfo &b)
 {
     return a.plugin_desc.name < b.plugin_desc.name;
@@ -25,25 +34,38 @@ void PluginManager::ScanDirForPlugins(const char *dir_path, bool recursive)
 
     for (const auto &entry : fs::directory_iterator(dir_path)) {
         if (entry.is_directory()) {
-            if (recursive)
+            // 如果是文件夹就递归到里面
+            if (recursive) {
                 ScanDirForPlugins(entry.path().string().c_str());
-        }
-        else if (entry.is_regular_file()) {
+            }
+        } else if (entry.is_regular_file()) {
             std::string filename = entry.path().string();
             int extLen = ext.size();
             std::string ending = filename.substr(filename.size() - extLen, extLen);
+
+            // 判断是否是目标后缀
             if (ending == ext) {
-                std::cout << entry.path() << std::endl;
+                spdlog::info("{}", filename);
+
                 PluginInfo pi;
                 pi.plugin_handle = new DSPatch::Plugin(filename);
                 if (pi.plugin_handle->IsLoaded()) {
-                    std::shared_ptr<DSPatch::Component> plugin_instance = pi.plugin_handle->Create();
-                    pi.plugin_desc.name = plugin_instance->GetComponentName();
-                    pi.plugin_desc.category = plugin_instance->GetComponentCategory();
-                    pi.plugin_desc.author = plugin_instance->GetComponentAuthor();
-                    pi.plugin_desc.version = plugin_instance->GetComponentVersion();
+                    std::shared_ptr<DSPatch::Component> plugin_instance =
+                        pi.plugin_handle->Create();
+
+                    // // 组件名称
+                    // pi.plugin_desc.name = plugin_instance->GetComponentName();
+                    // // 组件所在目录
+                    // pi.plugin_desc.category = plugin_instance->GetComponentCategory();
+                    // // 组件作者
+                    // pi.plugin_desc.author = plugin_instance->GetComponentAuthor();
+                    // // 组件版本
+                    // pi.plugin_desc.version = plugin_instance->GetComponentVersion();
+                    // 输入端口数
                     pi.plugin_desc.input_count = plugin_instance->GetInputCount();
+                    // 输出端口数
                     pi.plugin_desc.output_count = plugin_instance->GetOutputCount();
+
                     plugins_.emplace_back(pi);
                     plugin_instance.reset();
                 }
@@ -51,14 +73,14 @@ void PluginManager::ScanDirForPlugins(const char *dir_path, bool recursive)
         }
     }
 
-    // Sort Nodes
+    // 根据名字排序插件
     std::sort(plugins_.begin(), plugins_.end(), compareName);
 }
 
 void PluginManager::LoadPlugins(const char *plugin_path, bool recursive)
 {
     plugin_path_ = plugin_path;
-    std::cout << "Looking for Plugins in: " << plugin_path << std::endl;
+    spdlog::info("Looking for Plugins in: {}", plugin_path);
     ScanDirForPlugins(plugin_path_.c_str());
 }
 
@@ -78,7 +100,6 @@ uint32_t PluginManager::PluginCount()
 
 bool PluginManager::GetPluginDescription(uint32_t index, NodeDescription &nodeDesc)
 {
-
     if (index >= 0 && index < plugins_.size()) {
         nodeDesc.name = plugins_.at(index).plugin_desc.name;
         nodeDesc.category = plugins_.at(index).plugin_desc.category;
@@ -94,7 +115,6 @@ bool PluginManager::GetPluginDescription(uint32_t index, NodeDescription &nodeDe
 
 bool PluginManager::GetPluginDescription(const char *name, NodeDescription &nodeDesc)
 {
-
     for (auto const &p : plugins_) {
         if (p.plugin_desc.name == name) {
             nodeDesc.name = p.plugin_desc.name;

@@ -27,8 +27,7 @@ struct colorVertNorm
     GLfloat nz;
 };
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 class DepthViewer3D final : public Component
 {

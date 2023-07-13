@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 LaplacianFilter::LaplacianFilter() : Component(ProcessOrder::OutOfOrder)
 {
@@ -50,8 +49,7 @@ void LaplacianFilter::Process_(SignalBus const &inputs, SignalBus &outputs)
             cv::Mat lapFrame, frame;
             if (in1->channels() > 1) {
                 cv::cvtColor(*in1, lapFrame, cv::COLOR_BGR2GRAY);
-            }
-            else {
+            } else {
                 lapFrame = *in1;
             }
 
@@ -70,8 +68,7 @@ void LaplacianFilter::Process_(SignalBus const &inputs, SignalBus &outputs)
             cv::Laplacian(lapFrame, frame, depth_mode, ksize_, scale_, delta_, cv::BORDER_DEFAULT);
             if (!frame.empty())
                 outputs.SetValue(0, frame);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -79,7 +76,8 @@ void LaplacianFilter::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool LaplacianFilter::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -92,13 +90,16 @@ void LaplacianFilter::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
-        ImGui::Combo(CreateControlString("Depth Out", GetInstanceName()).c_str(), &out_depth_, "Auto\0CV_16S\0CV_32F\0CV_64F\0\0");
+        ImGui::Combo(CreateControlString("Depth Out", GetInstanceName()).c_str(), &out_depth_,
+                     "Auto\0CV_16S\0CV_32F\0CV_64F\0\0");
         ImGui::Separator();
         ImGui::SetNextItemWidth(100);
-        if (ImGui::InputInt(CreateControlString("Kernel Size", GetInstanceName()).c_str(), &ksize_, 2, 2)) {
+        if (ImGui::InputInt(CreateControlString("Kernel Size", GetInstanceName()).c_str(), &ksize_,
+                            2, 2)) {
             if ((ksize_ % 2) == 0) {
                 ksize_ += 1;
             }

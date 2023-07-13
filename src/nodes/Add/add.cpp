@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Add::Add() : Component(ProcessOrder::OutOfOrder)
 {
@@ -23,7 +22,8 @@ Add::Add() : Component(ProcessOrder::OutOfOrder)
     global_inst_counter++;
 
     // 3 inputs
-    SetInputCount_(3, {"in1", "in2", "mask"}, {IoType::Io_Type_CvMat, IoType::Io_Type_CvMat, IoType::Io_Type_CvMat});
+    SetInputCount_(3, {"in1", "in2", "mask"},
+                   {IoType::Io_Type_CvMat, IoType::Io_Type_CvMat, IoType::Io_Type_CvMat});
 
     // 1 outputs
     SetOutputCount_(1, {"out"}, {IoType::Io_Type_CvMat});
@@ -51,14 +51,14 @@ void Add::Process_(SignalBus const &inputs, SignalBus &outputs)
     if (!in1->empty() && !in2->empty()) {
         if (IsEnabled()) {
             // Process Image
-            if (in1->type() == in2->type() && in1->channels() == in2->channels() && in1->size == in2->size) {
+            if (in1->type() == in2->type() && in1->channels() == in2->channels() &&
+                in1->size == in2->size) {
                 cv::Mat frame;
                 if (has_mask) {
                     if (mask_mode_ == 0) {  // Default - Fill with black
                         if (!frame.empty())
                             frame.setTo(cv::Scalar(0, 0, 0));
-                    }
-                    else if (mask_mode_ == 1)
+                    } else if (mask_mode_ == 1)
                         in1->copyTo(frame);
                     else if (mask_mode_ == 2)
                         in2->copyTo(frame);
@@ -66,15 +66,13 @@ void Add::Process_(SignalBus const &inputs, SignalBus &outputs)
 
                 if (has_mask) {
                     cv::add(*in1, *in2, frame, *mask);
-                }
-                else
+                } else
                     cv::add(*in1, *in2, frame);
 
                 if (!frame.empty())
                     outputs.SetValue(0, frame);
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -82,7 +80,8 @@ void Add::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Add::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -95,10 +94,12 @@ void Add::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
-        ImGui::Combo(CreateControlString("Mask Mode", GetInstanceName()).c_str(), &mask_mode_, "Default\0In1\0In2\0\0");
+        ImGui::Combo(CreateControlString("Mask Mode", GetInstanceName()).c_str(), &mask_mode_,
+                     "Default\0In1\0In2\0\0");
     }
 }
 

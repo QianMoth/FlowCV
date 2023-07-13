@@ -21,7 +21,6 @@
 
 class Serial_Enumerator
 {
-
   public:
     void RefreshSerialList();
     int GetSerialCount();

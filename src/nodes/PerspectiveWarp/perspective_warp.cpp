@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 PerspectiveWarp::PerspectiveWarp() : Component(ProcessOrder::OutOfOrder)
 {
@@ -95,7 +94,8 @@ void PerspectiveWarp::Process_(SignalBus const &inputs, SignalBus &outputs)
             }
             if (corner_count_ == 4) {
                 std::vector<cv::Point2f> approx;
-                cv::approxPolyDP(cv::Mat(corners), approx, cv::arcLength(cv::Mat(corners), true) * 0.02, true);
+                cv::approxPolyDP(cv::Mat(corners), approx,
+                                 cv::arcLength(cv::Mat(corners), true) * 0.02, true);
                 if (approx.size() == 4) {
                     cv::Point2f center(0, 0);
                     for (auto &corner : corners)
@@ -136,8 +136,7 @@ void PerspectiveWarp::Process_(SignalBus const &inputs, SignalBus &outputs)
                     }
                 }
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in_img);
         }
     }
@@ -146,7 +145,8 @@ void PerspectiveWarp::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool PerspectiveWarp::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -161,21 +161,27 @@ void PerspectiveWarp::UpdateGui(void *context, int interface)
 
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         if (!is_poly_)
-            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "No Quadrilateral Polygon Detected\nNeed Exactly 4 Points");
+            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+                               "No Quadrilateral Polygon Detected\nNeed Exactly 4 Points");
         else {
-            ImGui::Combo(CreateControlString("Interpolation", GetInstanceName()).c_str(), &interp_mode_, "Nearest\0Bilinear\0BiCubic\0Area\0Lanczos\0\0");
+            ImGui::Combo(CreateControlString("Interpolation", GetInstanceName()).c_str(),
+                         &interp_mode_, "Nearest\0Bilinear\0BiCubic\0Area\0Lanczos\0\0");
             ImGui::Separator();
             ImGui::SetNextItemWidth(120);
-            ImGui::Checkbox(CreateControlString("Use Fixed Resolution", GetInstanceName()).c_str(), &use_fixed_res_);
+            ImGui::Checkbox(CreateControlString("Use Fixed Resolution", GetInstanceName()).c_str(),
+                            &use_fixed_res_);
             if (use_fixed_res_) {
                 ImGui::SetNextItemWidth(100);
-                ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &fixed_width_, 0.5f, 2, 5000);
+                ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(),
+                               &fixed_width_, 0.5f, 2, 5000);
                 ImGui::SetNextItemWidth(100);
-                ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &fixed_height_, 0.5f, 2, 5000);
-            }
-            else {
+                ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(),
+                               &fixed_height_, 0.5f, 2, 5000);
+            } else {
                 ImGui::SetNextItemWidth(100);
-                ImGui::DragFloat(CreateControlString("Aspect Ratio Adjust", GetInstanceName()).c_str(), &ratio_adjustment_, 0.01f, -10.0f, 10.0f);
+                ImGui::DragFloat(
+                    CreateControlString("Aspect Ratio Adjust", GetInstanceName()).c_str(),
+                    &ratio_adjustment_, 0.01f, -10.0f, 10.0f);
             }
         }
     }

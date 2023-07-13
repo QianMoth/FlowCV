@@ -5,8 +5,7 @@
 
 #include "List_Serial_Ports_Linux.hpp"
 
-namespace SerialDeviceEnum
-{
+namespace SerialDeviceEnum {
 
 std::vector<std::string> DeviceEnumerator::glob(const std::vector<std::string> &patterns)
 {
@@ -59,8 +58,7 @@ std::string DeviceEnumerator::dirname(const std::string &path)
 bool DeviceEnumerator::path_exists(const std::string &path)
 {
     struct stat sb
-    {
-    };
+    {};
 
     if (stat(path.c_str(), &sb) == 0)
         return true;
@@ -119,8 +117,7 @@ std::vector<std::string> DeviceEnumerator::get_sysfs_info(const std::string &dev
 
             hardware_id = usb_sysfs_hw_string(sys_device_path);
         }
-    }
-    else if (device_name.compare(0, 6, "ttyACM") == 0) {
+    } else if (device_name.compare(0, 6, "ttyACM") == 0) {
         sys_device_path = dirname(realpath(sys_device_path));
 
         if (path_exists(sys_device_path)) {
@@ -128,8 +125,7 @@ std::vector<std::string> DeviceEnumerator::get_sysfs_info(const std::string &dev
 
             hardware_id = usb_sysfs_hw_string(sys_device_path);
         }
-    }
-    else {
+    } else {
         // Try to read ID string of PCI device
 
         std::string sys_id_path = sys_device_path + "/id";
@@ -188,8 +184,7 @@ std::string DeviceEnumerator::format(const char *format, ...)
 
         if (return_value < 0) {
             done = true;
-        }
-        else if (return_value >= buffer_size_bytes) {
+        } else if (return_value >= buffer_size_bytes) {
             // Realloc and try again.
             buffer_size_bytes = return_value + 1;
 
@@ -197,12 +192,10 @@ std::string DeviceEnumerator::format(const char *format, ...)
 
             if (new_buffer_ptr == nullptr) {
                 done = true;
-            }
-            else {
+            } else {
                 buffer = new_buffer_ptr;
             }
-        }
-        else {
+        } else {
             result = buffer;
             done = true;
         }

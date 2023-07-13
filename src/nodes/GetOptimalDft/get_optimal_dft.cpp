@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 GetOptimalDft::GetOptimalDft() : Component(ProcessOrder::OutOfOrder)
 {
@@ -43,8 +42,7 @@ void GetOptimalDft::Process_(SignalBus const &inputs, SignalBus &outputs)
 
     if (!in1) {
         has_frame_input_ = false;
-    }
-    else {
+    } else {
         if (!in1->empty())
             has_frame_input_ = true;
         else
@@ -52,8 +50,7 @@ void GetOptimalDft::Process_(SignalBus const &inputs, SignalBus &outputs)
     }
     if (!in2) {
         has_size_input_ = false;
-    }
-    else {
+    } else {
         if (in2->size() == 2)
             has_size_input_ = true;
         else
@@ -67,8 +64,7 @@ void GetOptimalDft::Process_(SignalBus const &inputs, SignalBus &outputs)
             if (has_frame_input_) {
                 width_ = cv::getOptimalDFTSize(in1->cols);
                 height_ = cv::getOptimalDFTSize(in1->rows);
-            }
-            else {
+            } else {
                 width_ = cv::getOptimalDFTSize(in2->at(0));
                 height_ = cv::getOptimalDFTSize(in2->at(1));
             }
@@ -76,8 +72,7 @@ void GetOptimalDft::Process_(SignalBus const &inputs, SignalBus &outputs)
             if (dft_size.empty()) {
                 dft_size.emplace_back(width_);
                 dft_size.emplace_back(height_);
-            }
-            else {
+            } else {
                 dft_size.at(0) = width_;
                 dft_size.at(1) = height_;
             }
@@ -89,7 +84,6 @@ void GetOptimalDft::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool GetOptimalDft::HasGui(int interface)
 {
-
     return false;
 }
 

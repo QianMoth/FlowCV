@@ -3,6 +3,7 @@
 //
 
 #include "convert_color.hpp"
+
 #include "color_types.hpp"
 
 using namespace DSPatch;
@@ -10,8 +11,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 ConvertColor::ConvertColor() : Component(ProcessOrder::OutOfOrder)
 {
@@ -52,14 +52,12 @@ void ConvertColor::Process_(SignalBus const &inputs, SignalBus &outputs)
                 channel_error_ = false;
                 if (!frame.empty())
                     outputs.SetValue(0, frame);
-            }
-            catch (const std::exception &e) {
+            } catch (const std::exception &e) {
                 std::cout << e.what();
                 outputs.SetValue(0, *in1);
                 channel_error_ = true;
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
             channel_error_ = false;
         }
@@ -68,8 +66,9 @@ void ConvertColor::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool ConvertColor::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }

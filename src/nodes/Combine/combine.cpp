@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Combine::Combine() : Component(ProcessOrder::OutOfOrder)
 {
@@ -23,7 +22,9 @@ Combine::Combine() : Component(ProcessOrder::OutOfOrder)
     global_inst_counter++;
 
     // 4 inputs
-    SetInputCount_(4, {"r", "g", "b", "a"}, {IoType::Io_Type_CvMat, IoType::Io_Type_CvMat, IoType::Io_Type_CvMat, IoType::Io_Type_CvMat});
+    SetInputCount_(4, {"r", "g", "b", "a"},
+                   {IoType::Io_Type_CvMat, IoType::Io_Type_CvMat, IoType::Io_Type_CvMat,
+                    IoType::Io_Type_CvMat});
 
     // 1 outputs
     SetOutputCount_(1, {"out"}, {IoType::Io_Type_CvMat});
@@ -78,7 +79,8 @@ void Combine::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Combine::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return false;
     }

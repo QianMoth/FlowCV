@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 BlobDetector::BlobDetector() : Component(ProcessOrder::OutOfOrder)
 {
@@ -26,7 +25,8 @@ BlobDetector::BlobDetector() : Component(ProcessOrder::OutOfOrder)
     SetInputCount_(1, {"in"}, {DSPatch::IoType::Io_Type_CvMat});
 
     // 2 outputs
-    SetOutputCount_(2, {"viz", "blobs"}, {DSPatch::IoType::Io_Type_CvMat, DSPatch::IoType::Io_Type_JSON});
+    SetOutputCount_(2, {"viz", "blobs"},
+                    {DSPatch::IoType::Io_Type_CvMat, DSPatch::IoType::Io_Type_JSON});
 
     blob_param_color_ = 255;
     blob_params_.blobColor = blob_param_color_;
@@ -70,8 +70,10 @@ void BlobDetector::Process_(SignalBus const &inputs, SignalBus &outputs)
             std::vector<cv::KeyPoint> keypoints;
             detector->detect(frame, keypoints);
 
-            cv::drawKeypoints(frame, keypoints, frame, cv::Scalar(blob_viz_color_.z * 255, blob_viz_color_.y * 255, blob_viz_color_.x * 255),
-                cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+            cv::drawKeypoints(frame, keypoints, frame,
+                              cv::Scalar(blob_viz_color_.z * 255, blob_viz_color_.y * 255,
+                                         blob_viz_color_.x * 255),
+                              cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
             nlohmann::json json_out;
             nlohmann::json jBlobs;
@@ -96,8 +98,7 @@ void BlobDetector::Process_(SignalBus const &inputs, SignalBus &outputs)
                 outputs.SetValue(0, frame);
 
             detector.release();
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -105,8 +106,9 @@ void BlobDetector::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool BlobDetector::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -122,73 +124,93 @@ void BlobDetector::UpdateGui(void *context, int interface)
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         ImGui::Text("Threshold:");
         ImGui::SetNextItemWidth(50);
-        ImGui::DragFloat(CreateControlString("Min##Thresh", GetInstanceName()).c_str(), &blob_params_.minThreshold, 0.25f, 0.0f, 255.0f, "%.0f");
+        ImGui::DragFloat(CreateControlString("Min##Thresh", GetInstanceName()).c_str(),
+                         &blob_params_.minThreshold, 0.25f, 0.0f, 255.0f, "%.0f");
         ImGui::SameLine();
         ImGui::SetNextItemWidth(50);
-        ImGui::DragFloat(CreateControlString("Max##Thresh", GetInstanceName()).c_str(), &blob_params_.maxThreshold, 0.25f, 0.0f, 255.0f, "%.0f");
+        ImGui::DragFloat(CreateControlString("Max##Thresh", GetInstanceName()).c_str(),
+                         &blob_params_.maxThreshold, 0.25f, 0.0f, 255.0f, "%.0f");
         ImGui::SameLine();
         ImGui::SetNextItemWidth(50);
-        ImGui::DragFloat(CreateControlString("Step##Thresh", GetInstanceName()).c_str(), &blob_params_.thresholdStep, 0.01f, 0.0f, 255.0f, "%.2f");
+        ImGui::DragFloat(CreateControlString("Step##Thresh", GetInstanceName()).c_str(),
+                         &blob_params_.thresholdStep, 0.01f, 0.0f, 255.0f, "%.2f");
         if (blob_params_.thresholdStep < 1)
             blob_params_.thresholdStep = 1;
         ImGui::Separator();
         ImGui::SetNextItemWidth(80);
         ImGui::DragFloat(
-            CreateControlString("Min Distance Between Blobs", GetInstanceName()).c_str(), &blob_params_.minDistBetweenBlobs, 0.1f, 0.0f, 5000.0f, "%.1f");
+            CreateControlString("Min Distance Between Blobs", GetInstanceName()).c_str(),
+            &blob_params_.minDistBetweenBlobs, 0.1f, 0.0f, 5000.0f, "%.1f");
         ImGui::Separator();
         ImGui::SetNextItemWidth(80);
-        ImGui::DragInt(CreateControlString("Min Repeatability", GetInstanceName()).c_str(), &blob_param_repeat_, 0.25f, 0, 255);
+        ImGui::DragInt(CreateControlString("Min Repeatability", GetInstanceName()).c_str(),
+                       &blob_param_repeat_, 0.25f, 0, 255);
         if (blob_param_repeat_ < 1)
             blob_param_repeat_ = 1;
         blob_params_.minRepeatability = blob_param_repeat_;
 
         ImGui::Separator();
-        ImGui::Checkbox(CreateControlString("Filter By Color", GetInstanceName()).c_str(), &blob_params_.filterByColor);
+        ImGui::Checkbox(CreateControlString("Filter By Color", GetInstanceName()).c_str(),
+                        &blob_params_.filterByColor);
         if (blob_params_.filterByColor) {
             ImGui::SetNextItemWidth(80);
-            ImGui::DragInt(CreateControlString("Color", GetInstanceName()).c_str(), &blob_param_color_, 0.25f, 0, 255);
+            ImGui::DragInt(CreateControlString("Color", GetInstanceName()).c_str(),
+                           &blob_param_color_, 0.25f, 0, 255);
             blob_params_.blobColor = blob_param_color_;
         }
         ImGui::Separator();
-        ImGui::Checkbox(CreateControlString("Filter By Area", GetInstanceName()).c_str(), &blob_params_.filterByArea);
+        ImGui::Checkbox(CreateControlString("Filter By Area", GetInstanceName()).c_str(),
+                        &blob_params_.filterByArea);
         if (blob_params_.filterByArea) {
             ImGui::SetNextItemWidth(80);
-            ImGui::DragFloat(CreateControlString("Min##Area", GetInstanceName()).c_str(), &blob_params_.minArea, 0.1f, 0.0f, 5000.0f, "%.1f");
+            ImGui::DragFloat(CreateControlString("Min##Area", GetInstanceName()).c_str(),
+                             &blob_params_.minArea, 0.1f, 0.0f, 5000.0f, "%.1f");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(80);
-            ImGui::DragFloat(CreateControlString("Max##Area", GetInstanceName()).c_str(), &blob_params_.maxArea, 0.1f, 0.0f, 5000.0f, "%.1f");
+            ImGui::DragFloat(CreateControlString("Max##Area", GetInstanceName()).c_str(),
+                             &blob_params_.maxArea, 0.1f, 0.0f, 5000.0f, "%.1f");
         }
         ImGui::Separator();
-        ImGui::Checkbox(CreateControlString("Filter By Circularity", GetInstanceName()).c_str(), &blob_params_.filterByCircularity);
+        ImGui::Checkbox(CreateControlString("Filter By Circularity", GetInstanceName()).c_str(),
+                        &blob_params_.filterByCircularity);
         if (blob_params_.filterByCircularity) {
             ImGui::SetNextItemWidth(80);
-            ImGui::DragFloat(CreateControlString("Min##Circularity", GetInstanceName()).c_str(), &blob_params_.minCircularity, 0.001f, 0.0f, 1.0f);
+            ImGui::DragFloat(CreateControlString("Min##Circularity", GetInstanceName()).c_str(),
+                             &blob_params_.minCircularity, 0.001f, 0.0f, 1.0f);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(80);
-            ImGui::DragFloat(CreateControlString("Max##Circularity", GetInstanceName()).c_str(), &blob_params_.maxCircularity, 0.001f, 0.0f, 1.0f);
+            ImGui::DragFloat(CreateControlString("Max##Circularity", GetInstanceName()).c_str(),
+                             &blob_params_.maxCircularity, 0.001f, 0.0f, 1.0f);
         }
         ImGui::Separator();
-        ImGui::Checkbox(CreateControlString("Filter By Convexity", GetInstanceName()).c_str(), &blob_params_.filterByConvexity);
+        ImGui::Checkbox(CreateControlString("Filter By Convexity", GetInstanceName()).c_str(),
+                        &blob_params_.filterByConvexity);
         if (blob_params_.filterByConvexity) {
             ImGui::SetNextItemWidth(80);
-            ImGui::DragFloat(CreateControlString("Min##Convexity", GetInstanceName()).c_str(), &blob_params_.minConvexity, 0.001f, 0.0f, 1.0f);
+            ImGui::DragFloat(CreateControlString("Min##Convexity", GetInstanceName()).c_str(),
+                             &blob_params_.minConvexity, 0.001f, 0.0f, 1.0f);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(80);
-            ImGui::DragFloat(CreateControlString("Max##Convexity", GetInstanceName()).c_str(), &blob_params_.maxConvexity, 0.001f, 0.0f, 1.0f);
+            ImGui::DragFloat(CreateControlString("Max##Convexity", GetInstanceName()).c_str(),
+                             &blob_params_.maxConvexity, 0.001f, 0.0f, 1.0f);
         }
         ImGui::Separator();
-        ImGui::Checkbox(CreateControlString("Filter By Inertia", GetInstanceName()).c_str(), &blob_params_.filterByInertia);
+        ImGui::Checkbox(CreateControlString("Filter By Inertia", GetInstanceName()).c_str(),
+                        &blob_params_.filterByInertia);
         if (blob_params_.filterByInertia) {
             ImGui::SetNextItemWidth(80);
-            ImGui::DragFloat(CreateControlString("Min##Inertia", GetInstanceName()).c_str(), &blob_params_.minInertiaRatio, 0.001f, 0.0f, 1.0f);
+            ImGui::DragFloat(CreateControlString("Min##Inertia", GetInstanceName()).c_str(),
+                             &blob_params_.minInertiaRatio, 0.001f, 0.0f, 1.0f);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(80);
-            ImGui::DragFloat(CreateControlString("Max##Inertia", GetInstanceName()).c_str(), &blob_params_.maxInertiaRatio, 0.001f, 0.0f, 1.0f);
+            ImGui::DragFloat(CreateControlString("Max##Inertia", GetInstanceName()).c_str(),
+                             &blob_params_.maxInertiaRatio, 0.001f, 0.0f, 1.0f);
         }
         ImGui::Separator();
         ImGui::Text("Visualization Settings");
         ImGui::Separator();
-        ImGui::ColorEdit3(CreateControlString("Blob Color", GetInstanceName()).c_str(), (float *)&blob_viz_color_);
+        ImGui::ColorEdit3(CreateControlString("Blob Color", GetInstanceName()).c_str(),
+                          (float *)&blob_viz_color_);
     }
 }
 

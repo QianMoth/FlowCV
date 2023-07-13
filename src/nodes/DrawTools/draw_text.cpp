@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 DrawText::DrawText() : Component(ProcessOrder::OutOfOrder)
 {
@@ -59,18 +58,20 @@ void DrawText::Process_(SignalBus const &inputs, SignalBus &outputs)
             in1->copyTo(frame);
 
             if (has_str_input_) {
-                cv::putText(frame, *in2, text_pos_, text_font_, text_scale_, cv::Scalar(text_color_.z * 255, text_color_.y * 255, text_color_.x * 255),
+                cv::putText(
+                    frame, *in2, text_pos_, text_font_, text_scale_,
+                    cv::Scalar(text_color_.z * 255, text_color_.y * 255, text_color_.x * 255),
                     text_thickness_);
-            }
-            else {
-                cv::putText(frame, text_, text_pos_, text_font_, text_scale_, cv::Scalar(text_color_.z * 255, text_color_.y * 255, text_color_.x * 255),
+            } else {
+                cv::putText(
+                    frame, text_, text_pos_, text_font_, text_scale_,
+                    cv::Scalar(text_color_.z * 255, text_color_.y * 255, text_color_.x * 255),
                     text_thickness_);
             }
 
             if (!frame.empty())
                 outputs.SetValue(0, frame);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -78,7 +79,8 @@ void DrawText::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool DrawText::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -91,16 +93,19 @@ void DrawText::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceName()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceName()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         if (!has_str_input_) {
             ImGui::Text("Input:");
-            ImGui::InputText(CreateControlString("String", GetInstanceName()).c_str(), text_, 128, ImGuiInputTextFlags_EnterReturnsTrue);
+            ImGui::InputText(CreateControlString("String", GetInstanceName()).c_str(), text_, 128,
+                             ImGuiInputTextFlags_EnterReturnsTrue);
         }
         ImGui::Separator();
         ImGui::Combo(CreateControlString("Font", GetInstanceName()).c_str(), &text_font_,
-            "Simplex\0Plain\0Duplex\0Complex\0Triplex\0Complex Small\0Script Simplex\0Script Complex\0\0");
+                     "Simplex\0Plain\0Duplex\0Complex\0Triplex\0Complex Small\0Script "
+                     "Simplex\0Script Complex\0\0");
         ImGui::Separator();
         ImGui::Text("Position:");
         ImGui::SetNextItemWidth(80);
@@ -110,12 +115,15 @@ void DrawText::UpdateGui(void *context, int interface)
         ImGui::DragInt(CreateControlString("Y", GetInstanceName()).c_str(), &text_pos_.y, 0.5f);
         ImGui::Separator();
         ImGui::SetNextItemWidth(80);
-        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &text_scale_, 0.1f);
+        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &text_scale_,
+                         0.1f);
         ImGui::Separator();
         ImGui::SetNextItemWidth(80);
-        ImGui::DragInt(CreateControlString("Thickness", GetInstanceName()).c_str(), &text_thickness_, 0.1f);
+        ImGui::DragInt(CreateControlString("Thickness", GetInstanceName()).c_str(),
+                       &text_thickness_, 0.1f);
         ImGui::Separator();
-        ImGui::ColorEdit3(CreateControlString("Color", GetInstanceName()).c_str(), (float *)&text_color_);
+        ImGui::ColorEdit3(CreateControlString("Color", GetInstanceName()).c_str(),
+                          (float *)&text_color_);
     }
 }
 

@@ -4,36 +4,74 @@
 
 #include "dnn_human_pose_helper.hpp"
 
-namespace dnn_human_pose_helper
-{
+namespace dnn_human_pose_helper {
 const std::vector<std::vector<std::pair<int, int>>> POSE_PAIRS = {
     {// COCO body
-        {1, 2}, {1, 5}, {2, 3}, {3, 4}, {5, 6}, {6, 7}, {1, 8}, {8, 9}, {9, 10}, {1, 11}, {11, 12}, {12, 13}, {1, 0}, {0, 14}, {14, 16}, {0, 15}, {15, 17}},
+     {1, 2},
+     {1, 5},
+     {2, 3},
+     {3, 4},
+     {5, 6},
+     {6, 7},
+     {1, 8},
+     {8, 9},
+     {9, 10},
+     {1, 11},
+     {11, 12},
+     {12, 13},
+     {1, 0},
+     {0, 14},
+     {14, 16},
+     {0, 15},
+     {15, 17}},
     {// MPII body
-        {0, 1}, {1, 2}, {2, 3}, {3, 4}, {1, 5}, {5, 6}, {6, 7}, {1, 14}, {14, 8}, {8, 9}, {9, 10}, {14, 11}, {11, 12}, {12, 13}},
+     {0, 1},
+     {1, 2},
+     {2, 3},
+     {3, 4},
+     {1, 5},
+     {5, 6},
+     {6, 7},
+     {1, 14},
+     {14, 8},
+     {8, 9},
+     {9, 10},
+     {14, 11},
+     {11, 12},
+     {12, 13}},
     {
         // hand
-        {0, 1}, {1, 2}, {2, 3}, {3, 4},         // thumb
-        {0, 5}, {5, 6}, {6, 7}, {7, 8},         // pinky
-        {0, 9}, {9, 10}, {10, 11}, {11, 12},    // middle
+        {0, 1},  {1, 2},   {2, 3},   {3, 4},    // thumb
+        {0, 5},  {5, 6},   {6, 7},   {7, 8},    // pinky
+        {0, 9},  {9, 10},  {10, 11}, {11, 12},  // middle
         {0, 13}, {13, 14}, {14, 15}, {15, 16},  // ring
         {0, 17}, {17, 18}, {18, 19}, {19, 20}   // index
     }};
 
-const std::vector<std::vector<std::string>> KEYPOINT_NAMES = {{"Nose", "Neck", "R_Shoulder", "R_Elbow", "R_Wrist", "L_Shoulder", "L_Elbow", "L_Wrist", "R_Hip",
-                                                                  "R_Knee", "R_Ankle", "L_Hip", "L_Knee", "L_Ankle", "R_Eye", "L_Eye", "R_Ear", "L_Ear"},
-    {"Head", "Neck", "R_Shoulder", "R_Elbow", "R_Wrist", "L_Shoulder", "L_Elbow", "L_Wrist", "R_Hip", "R_Knee", "R_Ankle", "L_Hip", "L_Knee", "L_Ankle",
-        "Chest", "BKG"},
-    {"Wrist", "Thumb_1", "Thumb_2", "Thumb_3", "Thumb_4", "Pinky_1", "Pinky_2", "Pinky_3", "Pinky_4", "Middle_1", "Middle_2", "Middle_3", "Middle_4", "Ring_1",
-        "Ring_2", "Ring_3", "Ring_4", "Index_1", "Index_2", "Index_3", "Index_4"}};
+const std::vector<std::vector<std::string>> KEYPOINT_NAMES = {
+    {"Nose", "Neck", "R_Shoulder", "R_Elbow", "R_Wrist", "L_Shoulder", "L_Elbow", "L_Wrist",
+     "R_Hip", "R_Knee", "R_Ankle", "L_Hip", "L_Knee", "L_Ankle", "R_Eye", "L_Eye", "R_Ear",
+     "L_Ear"},
+    {"Head", "Neck", "R_Shoulder", "R_Elbow", "R_Wrist", "L_Shoulder", "L_Elbow", "L_Wrist",
+     "R_Hip", "R_Knee", "R_Ankle", "L_Hip", "L_Knee", "L_Ankle", "Chest", "BKG"},
+    {"Wrist",   "Thumb_1", "Thumb_2",  "Thumb_3",  "Thumb_4",  "Pinky_1",  "Pinky_2",
+     "Pinky_3", "Pinky_4", "Middle_1", "Middle_2", "Middle_3", "Middle_4", "Ring_1",
+     "Ring_2",  "Ring_3",  "Ring_4",   "Index_1",  "Index_2",  "Index_3",  "Index_4"}};
 
-const std::vector<cv::Scalar> JOINT_COLORS = {cv::Scalar(255, 0, 0), cv::Scalar(255, 85, 0), cv::Scalar(255, 170, 0), cv::Scalar(255, 255, 0),
-    cv::Scalar(170, 255, 0), cv::Scalar(85, 255, 0), cv::Scalar(0, 255, 0), cv::Scalar(0, 255, 85), cv::Scalar(0, 255, 170), cv::Scalar(0, 255, 255),
-    cv::Scalar(0, 170, 255), cv::Scalar(0, 85, 255), cv::Scalar(0, 0, 255), cv::Scalar(85, 0, 255), cv::Scalar(170, 0, 255), cv::Scalar(255, 0, 255),
-    cv::Scalar(255, 0, 170), cv::Scalar(255, 0, 85), cv::Scalar(128, 32, 64), cv::Scalar(64, 128, 32), cv::Scalar(32, 64, 128), cv::Scalar(10, 75, 111)};
+const std::vector<cv::Scalar> JOINT_COLORS = {
+    cv::Scalar(255, 0, 0),   cv::Scalar(255, 85, 0),  cv::Scalar(255, 170, 0),
+    cv::Scalar(255, 255, 0), cv::Scalar(170, 255, 0), cv::Scalar(85, 255, 0),
+    cv::Scalar(0, 255, 0),   cv::Scalar(0, 255, 85),  cv::Scalar(0, 255, 170),
+    cv::Scalar(0, 255, 255), cv::Scalar(0, 170, 255), cv::Scalar(0, 85, 255),
+    cv::Scalar(0, 0, 255),   cv::Scalar(85, 0, 255),  cv::Scalar(170, 0, 255),
+    cv::Scalar(255, 0, 255), cv::Scalar(255, 0, 170), cv::Scalar(255, 0, 85),
+    cv::Scalar(128, 32, 64), cv::Scalar(64, 128, 32), cv::Scalar(32, 64, 128),
+    cv::Scalar(10, 75, 111)};
 
-const std::vector<std::pair<int, int>> MAPPING_IDX = {{31, 32}, {39, 40}, {33, 34}, {35, 36}, {41, 42}, {43, 44}, {19, 20}, {21, 22}, {23, 24}, {25, 26},
-    {27, 28}, {29, 30}, {47, 48}, {49, 50}, {53, 54}, {51, 52}, {55, 56}, {37, 38}, {45, 46}};
+const std::vector<std::pair<int, int>> MAPPING_IDX = {
+    {31, 32}, {39, 40}, {33, 34}, {35, 36}, {41, 42}, {43, 44}, {19, 20},
+    {21, 22}, {23, 24}, {25, 26}, {27, 28}, {29, 30}, {47, 48}, {49, 50},
+    {53, 54}, {51, 52}, {55, 56}, {37, 38}, {45, 46}};
 
 PoseSizeInfo getPoseInfo(int index)
 {
@@ -63,7 +101,8 @@ void getKeyPoints(cv::Mat &probMap, double threshold, std::vector<KeyJoint> &key
     cv::findContours(maskedProbMap, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
 
     for (const auto &contour : contours) {
-        cv::Mat blobMask = cv::Mat::zeros(smoothProbMap.rows, smoothProbMap.cols, smoothProbMap.type());
+        cv::Mat blobMask =
+            cv::Mat::zeros(smoothProbMap.rows, smoothProbMap.cols, smoothProbMap.type());
         cv::fillConvexPoly(blobMask, contour, cv::Scalar(1));
 
         double maxVal;
@@ -74,7 +113,8 @@ void getKeyPoints(cv::Mat &probMap, double threshold, std::vector<KeyJoint> &key
     }
 }
 
-void splitNetOutputBlobToParts(cv::Mat &netOutputBlob, const cv::Size &targetSize, std::vector<cv::Mat> &netOutputParts)
+void splitNetOutputBlobToParts(cv::Mat &netOutputBlob, const cv::Size &targetSize,
+                               std::vector<cv::Mat> &netOutputParts)
 {
     int nParts = netOutputBlob.size[1];
     int h = netOutputBlob.size[2];
@@ -88,7 +128,8 @@ void splitNetOutputBlobToParts(cv::Mat &netOutputBlob, const cv::Size &targetSiz
     }
 }
 
-void populateInterpPoints(const cv::Point &a, const cv::Point &b, int numPoints, std::vector<cv::Point> &interpCoords)
+void populateInterpPoints(const cv::Point &a, const cv::Point &b, int numPoints,
+                          std::vector<cv::Point> &interpCoords)
 {
     float xStep = ((float)(b.x - a.x)) / (float)(numPoints - 1);
     float yStep = ((float)(b.y - a.y)) / (float)(numPoints - 1);
@@ -100,10 +141,11 @@ void populateInterpPoints(const cv::Point &a, const cv::Point &b, int numPoints,
     interpCoords.emplace_back(b);
 }
 
-void getValidPairs(const std::vector<cv::Mat> &netOutputParts, const std::vector<std::vector<KeyJoint>> &detectedKeypoints,
-    std::vector<std::vector<ValidPair>> &validPairs, std::set<int> &invalidPairs, float thresh, int midx)
+void getValidPairs(const std::vector<cv::Mat> &netOutputParts,
+                   const std::vector<std::vector<KeyJoint>> &detectedKeypoints,
+                   std::vector<std::vector<ValidPair>> &validPairs, std::set<int> &invalidPairs,
+                   float thresh, int midx)
 {
-
     int nInterpSamples = 10;
     float pafScoreTh = 0.1;
     float confTh = thresh;
@@ -120,8 +162,10 @@ void getValidPairs(const std::vector<cv::Mat> &netOutputParts, const std::vector
             // Find the keypoints for the first and second limb
             if (k >= POSE_PAIRS.at(midx).size())
                 continue;
-            const std::vector<KeyJoint> &candA = detectedKeypoints.at(POSE_PAIRS.at(midx).at(k).first);
-            const std::vector<KeyJoint> &candB = detectedKeypoints.at(POSE_PAIRS.at(midx).at(k).second);
+            const std::vector<KeyJoint> &candA =
+                detectedKeypoints.at(POSE_PAIRS.at(midx).at(k).first);
+            const std::vector<KeyJoint> &candB =
+                detectedKeypoints.at(POSE_PAIRS.at(midx).at(k).second);
 
             int nA = (int)candA.size();
             int nB = (int)candB.size();
@@ -143,8 +187,10 @@ void getValidPairs(const std::vector<cv::Mat> &netOutputParts, const std::vector
                     bool found = false;
 
                     for (int j = 0; j < nB; ++j) {
-                        std::pair<float, float> distance(candB.at(j).point.x - candA.at(i).point.x, candB.at(j).point.y - candA.at(i).point.y);
-                        float norm = std::sqrt(distance.first * distance.first + distance.second * distance.second);
+                        std::pair<float, float> distance(candB.at(j).point.x - candA.at(i).point.x,
+                                                         candB.at(j).point.y - candA.at(i).point.y);
+                        float norm = std::sqrt(distance.first * distance.first +
+                                               distance.second * distance.second);
 
                         if (!norm) {
                             continue;
@@ -155,11 +201,13 @@ void getValidPairs(const std::vector<cv::Mat> &netOutputParts, const std::vector
 
                         // Find p(u)
                         std::vector<cv::Point> interpCoords;
-                        populateInterpPoints(candA.at(i).point, candB.at(j).point, nInterpSamples, interpCoords);
+                        populateInterpPoints(candA.at(i).point, candB.at(j).point, nInterpSamples,
+                                             interpCoords);
                         // Find L(p(u))
                         std::vector<std::pair<float, float>> pafInterp;
                         for (auto &interpCoord : interpCoords) {
-                            pafInterp.emplace_back(pafA.at<float>(interpCoord.y, interpCoord.x), pafB.at<float>(interpCoord.y, interpCoord.x));
+                            pafInterp.emplace_back(pafA.at<float>(interpCoord.y, interpCoord.x),
+                                                   pafB.at<float>(interpCoord.y, interpCoord.x));
                         }
 
                         std::vector<float> pafScores;
@@ -192,8 +240,7 @@ void getValidPairs(const std::vector<cv::Mat> &netOutputParts, const std::vector
                 } /* i */
                 if (!localValidPairs.empty())
                     validPairs.emplace_back(localValidPairs);
-            }
-            else {
+            } else {
                 invalidPairs.insert(k);
                 validPairs.emplace_back();
             }
@@ -201,8 +248,9 @@ void getValidPairs(const std::vector<cv::Mat> &netOutputParts, const std::vector
     } /* k */
 }
 
-void getPersonwiseKeypoints(
-    const std::vector<std::vector<ValidPair>> &validPairs, const std::set<int> &invalidPairs, std::vector<std::vector<int>> &personwiseKeypoints, int midx)
+void getPersonwiseKeypoints(const std::vector<std::vector<ValidPair>> &validPairs,
+                            const std::set<int> &invalidPairs,
+                            std::vector<std::vector<int>> &personwiseKeypoints, int midx)
 {
     for (int k = 0; k < MAPPING_IDX.size(); ++k) {
         if (invalidPairs.find(k) != invalidPairs.end()) {
@@ -219,7 +267,8 @@ void getPersonwiseKeypoints(
                 int personIdx = -1;
 
                 for (int j = 0; !found && j < personwiseKeypoints.size(); ++j) {
-                    if (indexA < personwiseKeypoints.at(j).size() && personwiseKeypoints.at(j).at(indexA) == localValidPairs.at(i).aId) {
+                    if (indexA < personwiseKeypoints.at(j).size() &&
+                        personwiseKeypoints.at(j).at(indexA) == localValidPairs.at(i).aId) {
                         personIdx = j;
                         found = true;
                     }
@@ -227,8 +276,7 @@ void getPersonwiseKeypoints(
 
                 if (found) {
                     personwiseKeypoints.at(personIdx).at(indexB) = localValidPairs.at(i).bId;
-                }
-                else if (k < 17) {
+                } else if (k < 17) {
                     std::vector<int> lpkp(std::vector<int>(18, -1));
 
                     if (!localValidPairs.empty()) {

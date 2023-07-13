@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 static void HelpMarker(const char *desc)
 {
@@ -51,7 +50,8 @@ DrawJson::DrawJson() : Component(ProcessOrder::OutOfOrder)
     SetEnabled(true);
 }
 
-std::string DrawJson::JsonTreeToStringList_(const nlohmann::json::iterator &it, std::string &curDepth)
+std::string DrawJson::JsonTreeToStringList_(const nlohmann::json::iterator &it,
+                                            std::string &curDepth)
 {
     std::string outStr;
     if (it->is_object()) {
@@ -62,8 +62,7 @@ std::string DrawJson::JsonTreeToStringList_(const nlohmann::json::iterator &it, 
         for (nlohmann::json::iterator it2 = it->begin(); it2 != it->end(); ++it2) {
             JsonTreeToStringList_(it2, outStr);
         }
-    }
-    else {
+    } else {
         // Last Level Add to List
         outStr += it.key();
         std::string newPath = curDepth;
@@ -118,31 +117,34 @@ void DrawJson::Process_(SignalBus const &inputs, SignalBus &outputs)
                                                 if (j.at(item.out_item_index).is_number_float()) {
                                                     std::ostringstream out;
                                                     out.precision(float_draw_precision_);
-                                                    out << std::fixed << j.at(item.out_item_index).get<float>();
+                                                    out << std::fixed
+                                                        << j.at(item.out_item_index).get<float>();
                                                     outStr += out.str();
-                                                }
-                                                else {
+                                                } else {
                                                     outStr += to_string(j.at(item.out_item_index));
                                                 }
                                             }
-                                        }
-                                        else {
+                                        } else {
                                             outStr += ": ";
                                             if (j.is_number_float()) {
                                                 std::ostringstream out;
                                                 out.precision(float_draw_precision_);
                                                 out << std::fixed << j.get<float>();
                                                 outStr += out.str();
-                                            }
-                                            else {
+                                            } else {
                                                 outStr += to_string(j);
                                             }
                                         }
 
-                                        cv::putText(frame, outStr, start_pos, text_font_, text_scale_,
-                                            cv::Scalar(text_color_.z * 255, text_color_.y * 255, text_color_.x * 255), text_thickness_);
+                                        cv::putText(
+                                            frame, outStr, start_pos, text_font_, text_scale_,
+                                            cv::Scalar(text_color_.z * 255, text_color_.y * 255,
+                                                       text_color_.x * 255),
+                                            text_thickness_);
                                         int baseline = 0;
-                                        cv::Size txtSize = cv::getTextSize(outStr, text_font_, text_scale_, text_thickness_, &baseline);
+                                        cv::Size txtSize =
+                                            cv::getTextSize(outStr, text_font_, text_scale_,
+                                                            text_thickness_, &baseline);
                                         start_pos.y += txtSize.height + txt_offset;
                                     }
                                 }
@@ -153,8 +155,7 @@ void DrawJson::Process_(SignalBus const &inputs, SignalBus &outputs)
                         outputs.SetValue(0, frame);
                 }
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -162,7 +163,8 @@ void DrawJson::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool DrawJson::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -175,12 +177,14 @@ void DrawJson::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceName()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceName()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         std::lock_guard<std::mutex> lck(io_mutex_);
         ImGui::Combo(CreateControlString("Font", GetInstanceName()).c_str(), &text_font_,
-            "Simplex\0Plain\0Duplex\0Complex\0Triplex\0Complex Small\0Script Simplex\0Script Complex\0\0");
+                     "Simplex\0Plain\0Duplex\0Complex\0Triplex\0Complex Small\0Script "
+                     "Simplex\0Script Complex\0\0");
         ImGui::Separator();
         ImGui::Text("Position:");
         ImGui::SetNextItemWidth(80);
@@ -190,22 +194,28 @@ void DrawJson::UpdateGui(void *context, int interface)
         ImGui::DragInt(CreateControlString("Y", GetInstanceName()).c_str(), &text_pos_.y, 0.5f);
         ImGui::Separator();
         ImGui::SetNextItemWidth(80);
-        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &text_scale_, 0.1f);
+        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &text_scale_,
+                         0.1f);
         ImGui::Separator();
         ImGui::SetNextItemWidth(80);
-        ImGui::DragInt(CreateControlString("Thickness", GetInstanceName()).c_str(), &text_thickness_, 0.1f, 1, 100);
+        ImGui::DragInt(CreateControlString("Thickness", GetInstanceName()).c_str(),
+                       &text_thickness_, 0.1f, 1, 100);
         ImGui::Separator();
-        ImGui::ColorEdit3(CreateControlString("Color", GetInstanceName()).c_str(), (float *)&text_color_);
+        ImGui::ColorEdit3(CreateControlString("Color", GetInstanceName()).c_str(),
+                          (float *)&text_color_);
         ImGui::Separator();
         ImGui::SetNextItemWidth(80);
-        ImGui::DragInt(CreateControlString("Decimal Places", GetInstanceName()).c_str(), &float_draw_precision_, 0.5f, 1, 10);
+        ImGui::DragInt(CreateControlString("Decimal Places", GetInstanceName()).c_str(),
+                       &float_draw_precision_, 0.5f, 1, 10);
         ImGui::Separator();
         if (!json_data_.empty()) {
             if (json_data_.contains("data")) {
                 if (!json_data_["data"].empty()) {
                     uint32_t dataSize = json_data_["data"].size();
                     ImGui::SetNextItemWidth(100);
-                    if (ImGui::InputInt(CreateControlString("Data Index", GetInstanceName()).c_str(), &json_data_index_, 1, 10)) {
+                    if (ImGui::InputInt(
+                            CreateControlString("Data Index", GetInstanceName()).c_str(),
+                            &json_data_index_, 1, 10)) {
                         if (json_data_index_ < 0)
                             json_data_index_ = 0;
                         if (json_data_index_ > dataSize - 1)
@@ -218,8 +228,9 @@ void DrawJson::UpdateGui(void *context, int interface)
                     ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(50, 57, 77, 100));
                     // Create Tree List
                     json_tree_list_.clear();
-                    for (nlohmann::json::iterator it = json_data_["data"].at(json_data_index_).begin(); it != json_data_["data"].at(json_data_index_).end();
-                         ++it) {
+                    for (nlohmann::json::iterator it =
+                             json_data_["data"].at(json_data_index_).begin();
+                         it != json_data_["data"].at(json_data_index_).end(); ++it) {
                         std::string curDepth = "/";
                         std::string strPath = JsonTreeToStringList_(it, curDepth);
                     }
@@ -228,14 +239,16 @@ void DrawJson::UpdateGui(void *context, int interface)
                         dataHeight = 66;
                     if (dataHeight > 200)
                         dataHeight = 200;
-                    ImGui::BeginChild(CreateControlString("Data", GetInstanceName()).c_str(), ImVec2(0, dataHeight), true, ImGuiWindowFlags_None);
+                    ImGui::BeginChild(CreateControlString("Data", GetInstanceName()).c_str(),
+                                      ImVec2(0, dataHeight), true, ImGuiWindowFlags_None);
                     // Create Available List
                     for (const auto &s : json_tree_list_) {
                         nlohmann::json::json_pointer jPtr(s);
                         auto j = json_data_["data"].at(json_data_index_).at(jPtr);
                         if (j.is_array()) {
                             const std::string &label = s;
-                            if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
+                            if (ImGui::Selectable(label.c_str(), false,
+                                                  ImGuiSelectableFlags_AllowDoubleClick)) {
                                 if (ImGui::IsMouseDoubleClicked(0)) {
                                     JsonOutItem tmp;
                                     tmp.out_key_path = s;
@@ -243,10 +256,10 @@ void DrawJson::UpdateGui(void *context, int interface)
                                     json_out_list_.emplace_back(tmp);
                                 }
                             }
-                        }
-                        else if (!j.is_array() && !j.is_object()) {
+                        } else if (!j.is_array() && !j.is_object()) {
                             const std::string &label = s;
-                            if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
+                            if (ImGui::Selectable(label.c_str(), false,
+                                                  ImGuiSelectableFlags_AllowDoubleClick)) {
                                 if (ImGui::IsMouseDoubleClicked(0)) {
                                     if (!IsInList_(s)) {
                                         JsonOutItem tmp;
@@ -271,12 +284,15 @@ void DrawJson::UpdateGui(void *context, int interface)
                         outHeight = 66;
                     if (outHeight > 200)
                         outHeight = 200;
-                    ImGui::BeginChild(CreateControlString("List", GetInstanceName()).c_str(), ImVec2(0, outHeight), true, ImGuiWindowFlags_None);
+                    ImGui::BeginChild(CreateControlString("List", GetInstanceName()).c_str(),
+                                      ImVec2(0, outHeight), true, ImGuiWindowFlags_None);
                     // Create Out List
                     for (int i = 0; i < json_out_list_.size(); i++) {
                         std::string label = json_out_list_.at(i).out_key_path;
                         if (json_out_list_.at(i).is_array) {
-                            if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(180.0f, 0.0f))) {
+                            if (ImGui::Selectable(label.c_str(), false,
+                                                  ImGuiSelectableFlags_AllowDoubleClick,
+                                                  ImVec2(180.0f, 0.0f))) {
                                 if (ImGui::IsMouseDoubleClicked(0)) {
                                     json_out_list_.erase(json_out_list_.begin() + i);
                                     continue;
@@ -287,13 +303,14 @@ void DrawJson::UpdateGui(void *context, int interface)
                             ctlName += std::to_string(i);
                             ctlName += GetInstanceName();
                             ImGui::SetNextItemWidth(80);
-                            if (ImGui::InputInt(ctlName.c_str(), &json_out_list_.at(i).out_item_index, 1, 10)) {
+                            if (ImGui::InputInt(ctlName.c_str(),
+                                                &json_out_list_.at(i).out_item_index, 1, 10)) {
                                 if (json_out_list_.at(i).out_item_index < 0)
                                     json_out_list_.at(i).out_item_index = 0;
                             }
-                        }
-                        else {
-                            if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick)) {
+                        } else {
+                            if (ImGui::Selectable(label.c_str(), false,
+                                                  ImGuiSelectableFlags_AllowDoubleClick)) {
                                 if (ImGui::IsMouseDoubleClicked(0)) {
                                     json_out_list_.erase(json_out_list_.begin() + i);
                                     continue;
@@ -304,8 +321,7 @@ void DrawJson::UpdateGui(void *context, int interface)
                     ImGui::EndChild();
                     ImGui::PopStyleColor();
                 }
-            }
-            else {
+            } else {
                 ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "JSON Contains No Data");
             }
         }
@@ -382,8 +398,7 @@ void DrawJson::SetState(std::string &&json_serialized)
             if (tmp.is_array) {
                 if (item.contains("item_index"))
                     tmp.out_item_index = item["item_index"].get<int>();
-            }
-            else
+            } else
                 tmp.out_item_index = 0;
             if (item.contains("item_path"))
                 tmp.out_key_path = item["item_path"].get<std::string>();

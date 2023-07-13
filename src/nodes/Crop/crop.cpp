@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Crop::Crop() : Component(ProcessOrder::OutOfOrder)
 {
@@ -84,17 +83,26 @@ void Crop::Process_(SignalBus const &inputs, SignalBus &outputs)
                             if (totalRect.x < totalRect.width && totalRect.y < totalRect.height) {
                                 crop_area_.x = totalRect.x - (adjust_size_x_ / 2);
                                 crop_area_.y = totalRect.y - (adjust_size_y_ / 2);
-                                crop_area_.width = (totalRect.width - crop_area_.x) + adjust_size_x_;
-                                crop_area_.height = (totalRect.height - crop_area_.y) + adjust_size_y_;
+                                crop_area_.width =
+                                    (totalRect.width - crop_area_.x) + adjust_size_x_;
+                                crop_area_.height =
+                                    (totalRect.height - crop_area_.y) + adjust_size_y_;
                             }
-                        }
-                        else {
+                        } else {
                             if (json_bbox_index_ < json_data["data"].size()) {
                                 if (json_data["data"].at(json_bbox_index_).contains("bbox")) {
-                                    crop_area_.x = json_data["data"].at(json_bbox_index_)["bbox"]["x"].get<int>();
-                                    crop_area_.y = json_data["data"].at(json_bbox_index_)["bbox"]["y"].get<int>();
-                                    crop_area_.width = json_data["data"].at(json_bbox_index_)["bbox"]["w"].get<int>();
-                                    crop_area_.height = json_data["data"].at(json_bbox_index_)["bbox"]["h"].get<int>();
+                                    crop_area_.x = json_data["data"]
+                                                       .at(json_bbox_index_)["bbox"]["x"]
+                                                       .get<int>();
+                                    crop_area_.y = json_data["data"]
+                                                       .at(json_bbox_index_)["bbox"]["y"]
+                                                       .get<int>();
+                                    crop_area_.width = json_data["data"]
+                                                           .at(json_bbox_index_)["bbox"]["w"]
+                                                           .get<int>();
+                                    crop_area_.height = json_data["data"]
+                                                            .at(json_bbox_index_)["bbox"]["h"]
+                                                            .get<int>();
                                     crop_area_.x -= (adjust_size_x_ / 2);
                                     crop_area_.y -= (adjust_size_y_ / 2);
                                     crop_area_.width += adjust_size_x_;
@@ -102,14 +110,11 @@ void Crop::Process_(SignalBus const &inputs, SignalBus &outputs)
                                 }
                             }
                         }
-                    }
-                    else
+                    } else
                         has_json_data_ = false;
-                }
-                else
+                } else
                     has_json_data_ = false;
-            }
-            else
+            } else
                 has_json_data_ = false;
 
             // Process Image
@@ -136,8 +141,7 @@ void Crop::Process_(SignalBus const &inputs, SignalBus &outputs)
             cv::Mat crop_frame = frame(crop_area_);
             if (!crop_frame.empty())
                 outputs.SetValue(0, crop_frame);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -145,8 +149,9 @@ void Crop::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Crop::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -162,27 +167,35 @@ void Crop::UpdateGui(void *context, int interface)
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         if (!has_json_data_) {
             ImGui::SetNextItemWidth(100);
-            ImGui::DragInt(CreateControlString("Start X", GetInstanceName()).c_str(), &crop_area_.x, 0.5f, 0, 1000);
+            ImGui::DragInt(CreateControlString("Start X", GetInstanceName()).c_str(), &crop_area_.x,
+                           0.5f, 0, 1000);
             ImGui::SetNextItemWidth(100);
-            ImGui::DragInt(CreateControlString("Start Y", GetInstanceName()).c_str(), &crop_area_.y, 0.5f, 0, 1000);
+            ImGui::DragInt(CreateControlString("Start Y", GetInstanceName()).c_str(), &crop_area_.y,
+                           0.5f, 0, 1000);
             ImGui::SetNextItemWidth(100);
-            ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &crop_area_.width, 0.5f, 0, 8000);
+            ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(),
+                           &crop_area_.width, 0.5f, 0, 8000);
             ImGui::SetNextItemWidth(100);
-            ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &crop_area_.height, 0.5f, 0, 8000);
-        }
-        else {
-            ImGui::Checkbox(CreateControlString("Calculate Total BBOX from All", GetInstanceName()).c_str(), &calc_total_bbox_);
+            ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(),
+                           &crop_area_.height, 0.5f, 0, 8000);
+        } else {
+            ImGui::Checkbox(
+                CreateControlString("Calculate Total BBOX from All", GetInstanceName()).c_str(),
+                &calc_total_bbox_);
             if (!calc_total_bbox_) {
                 ImGui::SetNextItemWidth(100);
-                ImGui::DragInt(CreateControlString("BBOX Index", GetInstanceName()).c_str(), &json_bbox_index_, 0.25f, 0, 2000);
+                ImGui::DragInt(CreateControlString("BBOX Index", GetInstanceName()).c_str(),
+                               &json_bbox_index_, 0.25f, 0, 2000);
                 if (json_bbox_index_ < 0)
                     json_bbox_index_ = 0;
             }
             ImGui::Separator();
             ImGui::SetNextItemWidth(100);
-            ImGui::DragInt(CreateControlString("Padding X", GetInstanceName()).c_str(), &adjust_size_x_, 0.25f);
+            ImGui::DragInt(CreateControlString("Padding X", GetInstanceName()).c_str(),
+                           &adjust_size_x_, 0.25f);
             ImGui::SetNextItemWidth(100);
-            ImGui::DragInt(CreateControlString("Padding Y", GetInstanceName()).c_str(), &adjust_size_y_, 0.25f);
+            ImGui::DragInt(CreateControlString("Padding Y", GetInstanceName()).c_str(),
+                           &adjust_size_y_, 0.25f);
         }
     }
 }

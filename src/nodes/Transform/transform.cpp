@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Transform::Transform() : Component(ProcessOrder::OutOfOrder)
 {
@@ -40,7 +39,8 @@ Transform::Transform() : Component(ProcessOrder::OutOfOrder)
     props_.AddOption("scale_mode", "Scale Mode", 0, {"Percentage", "Pixels"});
     props_.AddFloat("scale_x", "Width", 100.0f, 2.0f, 1000.0f, 0.1f);
     props_.AddFloat("scale_y", "Height", 100.0f, 2.0f, 1000.0f, 0.1f);
-    props_.AddOption("interp", "Interpolation", 0, {"Nearest", "Bilinear", "BiCubic", "Area", "Lanczos", "Bilinear Exact"});
+    props_.AddOption("interp", "Interpolation", 0,
+                     {"Nearest", "Bilinear", "BiCubic", "Area", "Lanczos", "Bilinear Exact"});
     props_.AddOption("aspect_mode", "Aspect Mode", 0, {"Free", "Lock Width", "Lock Height"}, false);
 
     // Enable Node
@@ -94,7 +94,8 @@ void Transform::Process_(SignalBus const &inputs, SignalBus &outputs)
                 case 4:
                     auto ang = props_.Get<float>("angle");
                     if (ang > 0 || ang < 0) {
-                        cv::Point2f center((float)(frame_.cols - 1) / 2.0f, (float)(frame_.rows - 1) / 2.0f);
+                        cv::Point2f center((float)(frame_.cols - 1) / 2.0f,
+                                           (float)(frame_.rows - 1) / 2.0f);
                         cv::Mat rotation_matix = getRotationMatrix2D(center, ang, 1.0);
                         warpAffine(frame_, frame_, rotation_matix, frame_.size());
                     }
@@ -120,8 +121,7 @@ void Transform::Process_(SignalBus const &inputs, SignalBus &outputs)
 
                 if (scale.y > 100.0f || scale.y < 100.0f)
                     applyScale = true;
-            }
-            else {
+            } else {
                 scaleVal.x = scale.x;
                 scaleVal.y = scale.y;
 
@@ -135,29 +135,34 @@ void Transform::Process_(SignalBus const &inputs, SignalBus &outputs)
             if (applyScale) {
                 switch (props_.Get<int>("interp")) {
                     case 0:
-                        cv::resize(frame_, frame_, cv::Size((int)scaleVal.x, (int)scaleVal.y), 0, 0, cv::INTER_NEAREST);
+                        cv::resize(frame_, frame_, cv::Size((int)scaleVal.x, (int)scaleVal.y), 0, 0,
+                                   cv::INTER_NEAREST);
                         break;
                     case 1:
-                        cv::resize(frame_, frame_, cv::Size((int)scaleVal.x, (int)scaleVal.y), 0, 0, cv::INTER_LINEAR);
+                        cv::resize(frame_, frame_, cv::Size((int)scaleVal.x, (int)scaleVal.y), 0, 0,
+                                   cv::INTER_LINEAR);
                         break;
                     case 2:
-                        cv::resize(frame_, frame_, cv::Size((int)scaleVal.x, (int)scaleVal.y), 0, 0, cv::INTER_CUBIC);
+                        cv::resize(frame_, frame_, cv::Size((int)scaleVal.x, (int)scaleVal.y), 0, 0,
+                                   cv::INTER_CUBIC);
                         break;
                     case 3:
-                        cv::resize(frame_, frame_, cv::Size((int)scaleVal.x, (int)scaleVal.y), 0, 0, cv::INTER_AREA);
+                        cv::resize(frame_, frame_, cv::Size((int)scaleVal.x, (int)scaleVal.y), 0, 0,
+                                   cv::INTER_AREA);
                         break;
                     case 4:
-                        cv::resize(frame_, frame_, cv::Size((int)scaleVal.x, (int)scaleVal.y), 0, 0, cv::INTER_LANCZOS4);
+                        cv::resize(frame_, frame_, cv::Size((int)scaleVal.x, (int)scaleVal.y), 0, 0,
+                                   cv::INTER_LANCZOS4);
                         break;
                     case 5:
-                        cv::resize(frame_, frame_, cv::Size((int)scaleVal.x, (int)scaleVal.y), 0, 0, cv::INTER_LINEAR_EXACT);
+                        cv::resize(frame_, frame_, cv::Size((int)scaleVal.x, (int)scaleVal.y), 0, 0,
+                                   cv::INTER_LINEAR_EXACT);
                         break;
                 }
             }
             if (!frame_.empty())
                 outputs.SetValue(0, frame_);
-        }
-        else {
+        } else {
             // Copy Original to Output (pass thru)
             outputs.SetValue(0, *in1);
         }
@@ -166,8 +171,9 @@ void Transform::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Transform::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -200,8 +206,7 @@ void Transform::UpdateGui(void *context, int interface)
                 props_.SetStep("scale_y", 0.1f);
                 props_.Set("aspect_mode", 0);
                 props_.SetVisibility("aspect_mode", false);
-            }
-            else {
+            } else {
                 props_.Set("scale_x", (float)props_.GetW<int>("res_x"));
                 props_.Set("scale_y", (float)props_.GetW<int>("res_y"));
                 props_.SetMax("scale_x", 8000.0f);
@@ -212,11 +217,12 @@ void Transform::UpdateGui(void *context, int interface)
             }
         }
         if (props_.GetW<int>("aspect_mode") == 1) {
-            props_.Set("scale_y", props_.GetW<float>("scale_x") * props_.GetW<float>("aspect_ratio"));
-        }
-        else if (props_.GetW<int>("aspect_mode") == 2) {
+            props_.Set("scale_y",
+                       props_.GetW<float>("scale_x") * props_.GetW<float>("aspect_ratio"));
+        } else if (props_.GetW<int>("aspect_mode") == 2) {
             if (props_.GetW<float>("aspect_ratio") > 0.0f) {
-                props_.Set("scale_x", props_.GetW<float>("scale_y") / props_.GetW<float>("aspect_ratio"));
+                props_.Set("scale_x",
+                           props_.GetW<float>("scale_y") / props_.GetW<float>("aspect_ratio"));
             }
         }
     }
@@ -249,8 +255,7 @@ void Transform::SetState(std::string &&json_serialized)
         props_.SetMax("scale_y", 1000.0f);
         props_.SetStep("scale_y", 0.1f);
         props_.SetVisibility("aspect_mode", false);
-    }
-    else {
+    } else {
         props_.SetMax("scale_x", 8000.0f);
         props_.SetStep("scale_x", 1.0f);
         props_.SetMax("scale_y", 8000.0f);

@@ -138,7 +138,11 @@ elseif(APPLE)
 endif()
 
 if(BUILD_PLUGINS)
-    # add_subdirectory(plugins)
+    add_subdirectory(plugins)
 endif()
 
+add_subdirectory(examples/test)
+
+# interface
 add_subdirectory(examples/cli)
+add_subdirectory(examples/ui)

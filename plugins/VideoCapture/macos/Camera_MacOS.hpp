@@ -4,15 +4,15 @@
 
 #ifndef FLOWCV_CAMERA_MACOS_HPP_
 #define FLOWCV_CAMERA_MACOS_HPP_
-#include <iostream>
-#include <map>
-#include <fstream>
-#include <filesystem>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/usb/IOUSBLib.h>
 
-namespace cam_macos
-{
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <map>
+
+namespace cam_macos {
 
 struct Device
 {

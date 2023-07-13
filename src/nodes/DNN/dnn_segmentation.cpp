@@ -3,6 +3,7 @@
 //
 
 #include "dnn_segmentation.hpp"
+
 #include <fstream>
 #include <sstream>
 
@@ -11,8 +12,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Segmentation::Segmentation() : Component(ProcessOrder::OutOfOrder)
 {
@@ -93,8 +93,7 @@ void Segmentation::InitDnn_()
         net_->setPreferableBackend(current_backend_);
         net_->setPreferableTarget(current_target_);
         out_names_ = net_->getUnconnectedOutLayersNames();
-    }
-    catch (...) {
+    } catch (...) {
         std::cerr << "DNN Initialization Error" << std::endl;
         net_load_error = true;
         is_initialized_ = false;
@@ -121,9 +120,11 @@ void Segmentation::ColorizeSegmentation_(const cv::Mat &score, cv::Mat &segm)
                 color[j] = (colors_list_[i - 1][j] + rand() % 256) / 2;
             colors_list_.emplace_back(color);
         }
-    }
-    else if (chns != (int)colors_list_.size()) {
-        std::cerr << cv::format("Number of output classes doesn't match number of colors (%d != %zu)", chns, colors_list_.size()) << std::endl;
+    } else if (chns != (int)colors_list_.size()) {
+        std::cerr << cv::format(
+                         "Number of output classes doesn't match number of colors (%d != %zu)",
+                         chns, colors_list_.size())
+                  << std::endl;
         return;
     }
 
@@ -171,11 +172,9 @@ void Segmentation::Process_(SignalBus const &inputs, SignalBus &outputs)
             if (pre_proc_resize_) {
                 if (model_res_[0] > 0 && model_res_[1] > 0) {
                     cv::resize(*in1, frame, modelSize);
-                }
-                else
+                } else
                     frame = orig;
-            }
-            else
+            } else
                 frame = orig;
 
             nlohmann::json json_out;
@@ -187,14 +186,14 @@ void Segmentation::Process_(SignalBus const &inputs, SignalBus &outputs)
             json_out["ref_frame"] = ref;
 
             try {
-                cv::dnn::blobFromImage(frame, blob, scale_, modelSize, cv::Scalar(mean_[0], mean_[1], mean_[2]), swap_rb_, false);
+                cv::dnn::blobFromImage(frame, blob, scale_, modelSize,
+                                       cv::Scalar(mean_[0], mean_[1], mean_[2]), swap_rb_, false);
                 net_->setInput(blob);
                 cv::Mat score = net_->forward();
                 cv::Mat segm;
                 ColorizeSegmentation_(score, segm);
                 resize(segm, frame, orig.size(), 0, 0, cv::INTER_NEAREST);
-            }
-            catch (std::exception &e) {
+            } catch (std::exception &e) {
                 std::cerr << GetInstanceName() << ", Error Computing DNN" << std::endl;
                 std::cerr << e.what() << std::endl;
                 return;
@@ -216,8 +215,7 @@ void Segmentation::Process_(SignalBus const &inputs, SignalBus &outputs)
                 json_out["data"] = detected;
             outputs.SetValue(1, json_out);
             outputs.SetValue(0, frame);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -225,7 +223,8 @@ void Segmentation::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Segmentation::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -238,21 +237,24 @@ void Segmentation::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         if (!model_path_.empty() && !classes_path_.empty()) {
             std::string button_str;
             if (net_load_error)
                 ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Error Initializing Network");
             if (needs_reinit_ && is_initialized_)
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Network Needs To Be Reinitialized!");
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+                                   "Network Needs To Be Reinitialized!");
 
             if (is_initialized_)
                 button_str = "Reinitialize Network";
             else {
                 button_str = "Initialize Network";
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Network Needs To Be Initialized!");
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+                                   "Network Needs To Be Initialized!");
             }
             if (ImGui::Button(CreateControlString(button_str.c_str(), GetInstanceName()).c_str())) {
                 std::lock_guard<std::mutex> lk(io_mutex_);
@@ -262,7 +264,10 @@ void Segmentation::UpdateGui(void *context, int interface)
             if (ImGui::Combo(
                     CreateControlString("Backend", GetInstanceName()).c_str(), &dnn_backend_idx_,
                     [](void *data, int idx, const char **out_text) {
-                        *out_text = ((const std::vector<std::pair<std::string, cv::dnn::Backend>> *)data)->at(idx).first.c_str();
+                        *out_text =
+                            ((const std::vector<std::pair<std::string, cv::dnn::Backend>> *)data)
+                                ->at(idx)
+                                .first.c_str();
                         return true;
                     },
                     (void *)&backend_list_, (int)backend_list_.size())) {
@@ -278,7 +283,10 @@ void Segmentation::UpdateGui(void *context, int interface)
             if (ImGui::Combo(
                     CreateControlString("Target", GetInstanceName()).c_str(), &dnn_target_idx_,
                     [](void *data, int idx, const char **out_text) {
-                        *out_text = ((const std::vector<std::pair<std::string, cv::dnn::Target>> *)data)->at(idx).first.c_str();
+                        *out_text =
+                            ((const std::vector<std::pair<std::string, cv::dnn::Target>> *)data)
+                                ->at(idx)
+                                .first.c_str();
                         return true;
                     },
                     (void *)&target_list_, (int)target_list_.size())) {
@@ -314,8 +322,10 @@ void Segmentation::UpdateGui(void *context, int interface)
         if (show_model_dialog_)
             ImGui::OpenPopup(CreateControlString("Set Model", GetInstanceName()).c_str());
 
-        if (model_dialog_.showFileDialog(CreateControlString("Set Model", GetInstanceName()), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
-                ImVec2(700, 310), ".caffemodel,.bin,.onnx,.pb,.pth,.weights,.t7,.net", &show_model_dialog_)) {
+        if (model_dialog_.showFileDialog(
+                CreateControlString("Set Model", GetInstanceName()),
+                imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310),
+                ".caffemodel,.bin,.onnx,.pb,.pth,.weights,.t7,.net", &show_model_dialog_)) {
             model_path_ = model_dialog_.selected_path;
             show_model_dialog_ = false;
             needs_reinit_ = true;
@@ -338,8 +348,10 @@ void Segmentation::UpdateGui(void *context, int interface)
         if (show_config_dialog_)
             ImGui::OpenPopup(CreateControlString("Set Config", GetInstanceName()).c_str());
 
-        if (config_dialog_.showFileDialog(CreateControlString("Set Config", GetInstanceName()), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
-                ImVec2(700, 310), ".prototxt,.txt,.pbtxt,.yml,.cfg,.xml", &show_config_dialog_)) {
+        if (config_dialog_.showFileDialog(CreateControlString("Set Config", GetInstanceName()),
+                                          imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
+                                          ImVec2(700, 310), ".prototxt,.txt,.pbtxt,.yml,.cfg,.xml",
+                                          &show_config_dialog_)) {
             config_path_ = config_dialog_.selected_path;
             show_config_dialog_ = false;
             needs_reinit_ = true;
@@ -362,8 +374,9 @@ void Segmentation::UpdateGui(void *context, int interface)
         if (show_classes_dialog_)
             ImGui::OpenPopup(CreateControlString("Set Classes", GetInstanceName()).c_str());
 
-        if (classes_dialog_.showFileDialog(CreateControlString("Set Classes", GetInstanceName()), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
-                ImVec2(700, 310), ".txt", &show_classes_dialog_)) {
+        if (classes_dialog_.showFileDialog(CreateControlString("Set Classes", GetInstanceName()),
+                                           imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
+                                           ImVec2(700, 310), ".txt", &show_classes_dialog_)) {
             classes_path_ = classes_dialog_.selected_path;
             show_classes_dialog_ = false;
             needs_reinit_ = true;
@@ -386,24 +399,30 @@ void Segmentation::UpdateGui(void *context, int interface)
         if (show_colors_dialog_)
             ImGui::OpenPopup(CreateControlString("Set Colors", GetInstanceName()).c_str());
 
-        if (colors_dialog_.showFileDialog(CreateControlString("Set Colors", GetInstanceName()), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
-                ImVec2(700, 310), ".txt", &show_colors_dialog_)) {
+        if (colors_dialog_.showFileDialog(CreateControlString("Set Colors", GetInstanceName()),
+                                          imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
+                                          ImVec2(700, 310), ".txt", &show_colors_dialog_)) {
             colors_path_ = colors_dialog_.selected_path;
             show_colors_dialog_ = false;
             needs_reinit_ = true;
         }
         ImGui::Separator();
         ImGui::SetNextItemWidth(180);
-        ImGui::DragFloat3(CreateControlString("Mean", GetInstanceName()).c_str(), mean_, 0.1f, 0.0f, 500.0f, "%0.2f");
+        ImGui::DragFloat3(CreateControlString("Mean", GetInstanceName()).c_str(), mean_, 0.1f, 0.0f,
+                          500.0f, "%0.2f");
         ImGui::SetNextItemWidth(100);
-        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &scale_, 0.0001f, 0.0f, 10.0f, "%0.7f");
+        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &scale_, 0.0001f,
+                         0.0f, 10.0f, "%0.7f");
         ImGui::SetNextItemWidth(70);
-        ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &model_res_[0], 0.5f, 224, 1000);
+        ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &model_res_[0],
+                       0.5f, 224, 1000);
         ImGui::SameLine();
         ImGui::SetNextItemWidth(70);
-        ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &model_res_[1], 0.5f, 224, 1000);
+        ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &model_res_[1],
+                       0.5f, 224, 1000);
         ImGui::Checkbox(CreateControlString("RGB", GetInstanceName()).c_str(), &swap_rb_);
-        ImGui::Checkbox(CreateControlString("Preprocess Resize", GetInstanceName()).c_str(), &pre_proc_resize_);
+        ImGui::Checkbox(CreateControlString("Preprocess Resize", GetInstanceName()).c_str(),
+                        &pre_proc_resize_);
     }
 }
 

@@ -3,6 +3,7 @@
 //
 
 #include "draw_datetime.hpp"
+
 #include <ctime>
 
 using namespace DSPatch;
@@ -10,8 +11,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 static void HelpMarker(const char *desc)
 {
@@ -80,8 +80,7 @@ void DrawDateTime::Process_(SignalBus const &inputs, SignalBus &outputs)
             std::string outStr;
             time_t now = time(nullptr);
             struct tm tstruct
-            {
-            };
+            {};
             char buf[128];
 #ifdef _WIN32
             localtime_s(&tstruct, &now);
@@ -100,13 +99,13 @@ void DrawDateTime::Process_(SignalBus const &inputs, SignalBus &outputs)
                 outStr += buf;
             }
 
-            cv::putText(
-                frame, outStr, text_pos_, text_font_, text_scale_, cv::Scalar(text_color_.z * 255, text_color_.y * 255, text_color_.x * 255), text_thickness_);
+            cv::putText(frame, outStr, text_pos_, text_font_, text_scale_,
+                        cv::Scalar(text_color_.z * 255, text_color_.y * 255, text_color_.x * 255),
+                        text_thickness_);
 
             if (!frame.empty())
                 outputs.SetValue(0, frame);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -114,7 +113,8 @@ void DrawDateTime::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool DrawDateTime::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -127,14 +127,16 @@ void DrawDateTime::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceName()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceName()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         ImGui::Checkbox(CreateControlString("Draw Date", GetInstanceName()).c_str(), &draw_date_);
         std::lock_guard<std::mutex> lck(io_mutex_);
         if (draw_date_) {
             ImGui::SetNextItemWidth(100);
-            if (ImGui::InputText(CreateControlString("Date Format", GetInstanceName()).c_str(), date_format_, 32, ImGuiInputTextFlags_EnterReturnsTrue)) {
+            if (ImGui::InputText(CreateControlString("Date Format", GetInstanceName()).c_str(),
+                                 date_format_, 32, ImGuiInputTextFlags_EnterReturnsTrue)) {
                 is_valid_date_format_ = IsFormatValid(0);
                 if (is_valid_date_format_)
                     date_format_str_ = date_format_;
@@ -165,7 +167,8 @@ void DrawDateTime::UpdateGui(void *context, int interface)
         ImGui::Checkbox(CreateControlString("Draw Time", GetInstanceName()).c_str(), &draw_time_);
         if (draw_time_) {
             ImGui::SetNextItemWidth(100);
-            if (ImGui::InputText(CreateControlString("Time Format", GetInstanceName()).c_str(), time_format_, 32, ImGuiInputTextFlags_EnterReturnsTrue)) {
+            if (ImGui::InputText(CreateControlString("Time Format", GetInstanceName()).c_str(),
+                                 time_format_, 32, ImGuiInputTextFlags_EnterReturnsTrue)) {
                 is_valid_time_format_ = IsFormatValid(1);
                 if (is_valid_time_format_)
                     time_format_str_ = time_format_;
@@ -189,7 +192,8 @@ void DrawDateTime::UpdateGui(void *context, int interface)
             }
         }
         ImGui::Combo(CreateControlString("Font", GetInstanceName()).c_str(), &text_font_,
-            "Simplex\0Plain\0Duplex\0Complex\0Triplex\0Complex Small\0Script Simplex\0Script Complex\0\0");
+                     "Simplex\0Plain\0Duplex\0Complex\0Triplex\0Complex Small\0Script "
+                     "Simplex\0Script Complex\0\0");
         ImGui::Separator();
         ImGui::Text("Position:");
         ImGui::SetNextItemWidth(80);
@@ -199,12 +203,15 @@ void DrawDateTime::UpdateGui(void *context, int interface)
         ImGui::DragInt(CreateControlString("Y", GetInstanceName()).c_str(), &text_pos_.y, 0.5f);
         ImGui::Separator();
         ImGui::SetNextItemWidth(80);
-        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &text_scale_, 0.1f);
+        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &text_scale_,
+                         0.1f);
         ImGui::Separator();
         ImGui::SetNextItemWidth(80);
-        ImGui::DragInt(CreateControlString("Thickness", GetInstanceName()).c_str(), &text_thickness_, 0.1f);
+        ImGui::DragInt(CreateControlString("Thickness", GetInstanceName()).c_str(),
+                       &text_thickness_, 0.1f);
         ImGui::Separator();
-        ImGui::ColorEdit3(CreateControlString("Color", GetInstanceName()).c_str(), (float *)&text_color_);
+        ImGui::ColorEdit3(CreateControlString("Color", GetInstanceName()).c_str(),
+                          (float *)&text_color_);
     }
 }
 
@@ -275,8 +282,11 @@ void DrawDateTime::SetState(std::string &&json_serialized)
 
 bool DrawDateTime::IsFormatValid(int mode)
 {
-    static const std::vector<char> date_allow = {'Y', 'y', 'C', 'G', 'g', 'b', 'h', 'B', 'm', 'U', 'W', 'V', 'j', 'd', 'e', 'a', 'A', 'w', 'u', 'x', 'D', 'F'};
-    static const std::vector<char> time_allow = {'H', 'I', 'M', 'S', 'c', 'X', 'r', 'R', 'T', 'p', 'z', 'Z'};
+    static const std::vector<char> date_allow = {'Y', 'y', 'C', 'G', 'g', 'b', 'h', 'B',
+                                                 'm', 'U', 'W', 'V', 'j', 'd', 'e', 'a',
+                                                 'A', 'w', 'u', 'x', 'D', 'F'};
+    static const std::vector<char> time_allow = {'H', 'I', 'M', 'S', 'c', 'X',
+                                                 'r', 'R', 'T', 'p', 'z', 'Z'};
 
     int foundPercent = 0;
     int foundPercentMatch = -1;
@@ -308,8 +318,7 @@ bool DrawDateTime::IsFormatValid(int mode)
         }
         if (foundPercent == foundPercentMatch)
             return true;
-    }
-    else if (mode == 1) {  // Time Mode
+    } else if (mode == 1) {  // Time Mode
 #ifdef _WIN32
         size_t fmtSize = strnlen_s(time_format_, 32);
 #else

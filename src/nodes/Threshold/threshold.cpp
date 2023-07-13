@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Threshold::Threshold() : Component(ProcessOrder::OutOfOrder)
 {
@@ -54,11 +53,12 @@ void Threshold::Process_(SignalBus const &inputs, SignalBus &outputs)
             // Process Image
             if (thresh_method_ == 0) {  // Simple
                 cv::threshold(*in1, frame, thresh_amt_, 255, thresh_type_);
-            }
-            else if (thresh_method_ == 1) {  // Color Range
+            } else if (thresh_method_ == 1) {  // Color Range
                 ImVec4 hsv1, hsv2;
-                ImGui::ColorConvertRGBtoHSV(hsv_low_.x, hsv_low_.y, hsv_low_.z, hsv1.x, hsv1.y, hsv1.z);
-                ImGui::ColorConvertRGBtoHSV(hsv_high_.x, hsv_high_.y, hsv_high_.z, hsv2.x, hsv2.y, hsv2.z);
+                ImGui::ColorConvertRGBtoHSV(hsv_low_.x, hsv_low_.y, hsv_low_.z, hsv1.x, hsv1.y,
+                                            hsv1.z);
+                ImGui::ColorConvertRGBtoHSV(hsv_high_.x, hsv_high_.y, hsv_high_.z, hsv2.x, hsv2.y,
+                                            hsv2.z);
                 if (in1->channels() > 1)
                     cv::cvtColor(*in1, frame, cv::COLOR_BGR2HSV);
                 else {
@@ -66,9 +66,9 @@ void Threshold::Process_(SignalBus const &inputs, SignalBus &outputs)
                     cv::cvtColor(frame, frame, cv::COLOR_BGR2HSV);
                 }
                 // OpenCV Hue is scaled to half 360 range (0 - 179)
-                cv::inRange(frame, cv::Scalar(hsv1.x * 179, hsv1.y * 255, hsv1.z * 255), cv::Scalar(hsv2.x * 179, hsv2.y * 255, hsv2.z * 255), frame);
-            }
-            else if (thresh_method_ == 2) {  // Adaptive
+                cv::inRange(frame, cv::Scalar(hsv1.x * 179, hsv1.y * 255, hsv1.z * 255),
+                            cv::Scalar(hsv2.x * 179, hsv2.y * 255, hsv2.z * 255), frame);
+            } else if (thresh_method_ == 2) {  // Adaptive
                 if (in1->channels() > 1)
                     cv::cvtColor(*in1, frame, cv::COLOR_BGR2GRAY);
                 else
@@ -77,9 +77,9 @@ void Threshold::Process_(SignalBus const &inputs, SignalBus &outputs)
                 int aThreshType = thresh_type_;
                 if (aThreshType > 1)
                     aThreshType = 1;
-                cv::adaptiveThreshold(frame, frame, 255, adapt_type_, aThreshType, adapt_block_, adapt_thresh_);
-            }
-            else if (thresh_method_ == 3) {  // Otsu
+                cv::adaptiveThreshold(frame, frame, 255, adapt_type_, aThreshType, adapt_block_,
+                                      adapt_thresh_);
+            } else if (thresh_method_ == 3) {  // Otsu
                 if (in1->channels() > 1)
                     cv::cvtColor(*in1, frame, cv::COLOR_BGR2GRAY);
                 else
@@ -89,8 +89,7 @@ void Threshold::Process_(SignalBus const &inputs, SignalBus &outputs)
 
             if (!frame.empty())
                 outputs.SetValue(0, frame);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -98,8 +97,9 @@ void Threshold::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Threshold::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -114,27 +114,33 @@ void Threshold::UpdateGui(void *context, int interface)
 
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         ImGui::SetNextItemWidth(120);
-        ImGui::Combo(CreateControlString("Method", GetInstanceName()).c_str(), &thresh_method_, "Simple\0Color Range\0Adaptive\0Otsu\0\0");
+        ImGui::Combo(CreateControlString("Method", GetInstanceName()).c_str(), &thresh_method_,
+                     "Simple\0Color Range\0Adaptive\0Otsu\0\0");
         ImGui::SetNextItemWidth(120);
-        ImGui::Combo(CreateControlString("Type", GetInstanceName()).c_str(), &thresh_type_, "Binary\0Binary Inv\0Trunc\0ToZero\0ToZero Inv\0\0");
+        ImGui::Combo(CreateControlString("Type", GetInstanceName()).c_str(), &thresh_type_,
+                     "Binary\0Binary Inv\0Trunc\0ToZero\0ToZero Inv\0\0");
         if (thresh_method_ == 0) {
             ImGui::Separator();
             ImGui::SetNextItemWidth(80);
-            ImGui::DragInt(CreateControlString("Thresh", GetInstanceName()).c_str(), &thresh_amt_, 0.5f, 1, 255);
-        }
-        else if (thresh_method_ == 1) {
+            ImGui::DragInt(CreateControlString("Thresh", GetInstanceName()).c_str(), &thresh_amt_,
+                           0.5f, 1, 255);
+        } else if (thresh_method_ == 1) {
             ImGui::Separator();
-            ImGui::ColorEdit3(CreateControlString("Low", GetInstanceName()).c_str(), (float *)&hsv_low_);
-            ImGui::ColorEdit3(CreateControlString("High", GetInstanceName()).c_str(), (float *)&hsv_high_);
-        }
-        else if (thresh_method_ == 2) {
+            ImGui::ColorEdit3(CreateControlString("Low", GetInstanceName()).c_str(),
+                              (float *)&hsv_low_);
+            ImGui::ColorEdit3(CreateControlString("High", GetInstanceName()).c_str(),
+                              (float *)&hsv_high_);
+        } else if (thresh_method_ == 2) {
             ImGui::Separator();
             ImGui::SetNextItemWidth(120);
-            ImGui::Combo(CreateControlString("Adapt Type", GetInstanceName()).c_str(), &adapt_type_, "Mean\0Gaussian\0\0");
+            ImGui::Combo(CreateControlString("Adapt Type", GetInstanceName()).c_str(), &adapt_type_,
+                         "Mean\0Gaussian\0\0");
             ImGui::SetNextItemWidth(80);
-            ImGui::DragInt(CreateControlString("Adapt Thresh", GetInstanceName()).c_str(), &adapt_thresh_, 0.5f, 0, 255);
+            ImGui::DragInt(CreateControlString("Adapt Thresh", GetInstanceName()).c_str(),
+                           &adapt_thresh_, 0.5f, 0, 255);
             ImGui::SetNextItemWidth(80);
-            if (ImGui::InputInt(CreateControlString("Block Size", GetInstanceName()).c_str(), &adapt_block_, 2, 2)) {
+            if (ImGui::InputInt(CreateControlString("Block Size", GetInstanceName()).c_str(),
+                                &adapt_block_, 2, 2)) {
                 if ((adapt_block_ % 2) == 0)
                     adapt_block_++;
                 if (adapt_block_ <= 1)

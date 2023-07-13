@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Solid::Solid() : Component(ProcessOrder::InOrder)
 {
@@ -44,23 +43,26 @@ Solid::Solid() : Component(ProcessOrder::InOrder)
 
 void Solid::Process_(SignalBus const &inputs, SignalBus &outputs)
 {
-
     if (io_mutex_.try_lock()) {  // Try lock so other threads will skip if locked instead of waiting
         bool should_wait = true;
         while (should_wait) {
             std::chrono::steady_clock::time_point current_time_ = std::chrono::steady_clock::now();
-            auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ - last_time_).count();
+            auto delta =
+                std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ - last_time_)
+                    .count();
             if (delta >= (uint32_t)fps_time_)
                 should_wait = false;
         }
         cv::Mat frame;
         if (is_color_) {
             if (has_alpha_)
-                frame = cv::Mat(height_, width_, CV_8UC4, cv::Scalar(color_.z * 255, color_.y * 255, color_.x * 255, color_.w * 255));
+                frame = cv::Mat(
+                    height_, width_, CV_8UC4,
+                    cv::Scalar(color_.z * 255, color_.y * 255, color_.x * 255, color_.w * 255));
             else
-                frame = cv::Mat(height_, width_, CV_8UC3, cv::Scalar(color_.z * 255, color_.y * 255, color_.x * 255));
-        }
-        else {
+                frame = cv::Mat(height_, width_, CV_8UC3,
+                                cv::Scalar(color_.z * 255, color_.y * 255, color_.x * 255));
+        } else {
             frame = cv::Mat(height_, width_, CV_8UC1, cv::Scalar(grey_value_));
         }
         outputs.SetValue(0, frame);
@@ -72,7 +74,8 @@ void Solid::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Solid::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -90,30 +93,36 @@ void Solid::UpdateGui(void *context, int interface)
         ImGui::Checkbox(CreateControlString("Color", GetInstanceName()).c_str(), &is_color_);
         if (is_color_) {
             ImGui::SetNextItemWidth(100);
-            ImGui::Checkbox(CreateControlString("Has Alpha", GetInstanceName()).c_str(), &has_alpha_);
+            ImGui::Checkbox(CreateControlString("Has Alpha", GetInstanceName()).c_str(),
+                            &has_alpha_);
             // ImGui::SetNextItemWidth(300);
             if (has_alpha_)
-                ImGui::ColorEdit4(CreateControlString("Solid Color", GetInstanceName()).c_str(), (float *)&color_);
+                ImGui::ColorEdit4(CreateControlString("Solid Color", GetInstanceName()).c_str(),
+                                  (float *)&color_);
             else
-                ImGui::ColorEdit3(CreateControlString("Solid Color", GetInstanceName()).c_str(), (float *)&color_);
-        }
-        else {
+                ImGui::ColorEdit3(CreateControlString("Solid Color", GetInstanceName()).c_str(),
+                                  (float *)&color_);
+        } else {
             // ImGui::SetNextItemWidth(100);
-            ImGui::SliderInt(CreateControlString("Solid Value", GetInstanceName()).c_str(), &grey_value_, 0, 255);
+            ImGui::SliderInt(CreateControlString("Solid Value", GetInstanceName()).c_str(),
+                             &grey_value_, 0, 255);
         }
         ImGui::SetNextItemWidth(100);
-        if (ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &width_, 0.5, 1, 10000)) {
+        if (ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &width_, 0.5, 1,
+                           10000)) {
             if (width_ < 2)
                 width_ = 2;
         }
         ImGui::SetNextItemWidth(100);
-        if (ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &height_, 0.5, 1, 10000)) {
+        if (ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &height_, 0.5,
+                           1, 10000)) {
             if (height_ < 2)
                 height_ = 2;
         }
         ImGui::SetNextItemWidth(80);
         const int fpsValues[] = {1, 3, 5, 10, 15, 20, 25, 30, 60, 120};
-        if (ImGui::Combo(CreateControlString("Output FPS", GetInstanceName()).c_str(), &fps_index_, " 1\0 3\0 5\0 10\0 15\0 20\0 25\0 30\0 60\0 120\0\0")) {
+        if (ImGui::Combo(CreateControlString("Output FPS", GetInstanceName()).c_str(), &fps_index_,
+                         " 1\0 3\0 5\0 10\0 15\0 20\0 25\0 30\0 60\0 120\0\0")) {
             fps_ = fpsValues[fps_index_];
             fps_time_ = (1.0f / (float)fps_) * 1000.0f;
         }

@@ -9,18 +9,17 @@ using namespace DSPatchables;
 
 int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables::internal
-{
+namespace DSPatch::DSPatchables::internal {
 class VideoCapture
-{
-};
+{};
 }  // namespace DSPatch::DSPatchables::internal
 
 const std::map<int, const char *> &GetPropertyList()
 {
-    static const auto *property_list =
-        new std::map<int, const char *>{{10, "Brightness"}, {11, "Contrast"}, {12, "Saturation"}, {13, "Hue"}, {14, "Gain"}, {15, "Exposure"},
-            {20, "Sharpness"}, {21, "Auto Exposure"}, {22, "Gamma"}, {27, "Zoom"}, {28, "Focus"}, {30, "ISO Speed"}, {31, "Backlight"}, {35, "Iris"}};
+    static const auto *property_list = new std::map<int, const char *>{
+        {10, "Brightness"}, {11, "Contrast"},  {12, "Saturation"},    {13, "Hue"},   {14, "Gain"},
+        {15, "Exposure"},   {20, "Sharpness"}, {21, "Auto Exposure"}, {22, "Gamma"}, {27, "Zoom"},
+        {28, "Focus"},      {30, "ISO Speed"}, {31, "Backlight"},     {35, "Iris"}};
 
     return *property_list;
 }
@@ -71,18 +70,21 @@ VideoCapture::VideoCapture() : Component(ProcessOrder::InOrder), p(new internal:
 
 VideoCapture::~VideoCapture()
 {
-    if (!frame_.empty())
+    if (!frame_.empty()) {
         frame_.release();
-    if (cap_.isOpened())
+    }
+    if (cap_.isOpened()) {
         cap_.release();
+    }
 }
 
 void VideoCapture::OpenSource()
 {
     if (src_index_ > 0) {
         std::lock_guard<std::mutex> lck(io_mutex_);
-        if (cap_.isOpened())
+        if (cap_.isOpened()) {
             cap_.release();
+        }
 
         int back_end = cv::CAP_ANY;
 
@@ -103,14 +105,13 @@ void VideoCapture::OpenSource()
                 cap_.set(cv::CAP_PROP_FRAME_WIDTH, video_modes_.at(src_mode_).width);
                 cap_.set(cv::CAP_PROP_FRAME_HEIGHT, video_modes_.at(src_mode_).height);
                 cap_.set(cv::CAP_PROP_FPS, fps_);
-                fps_ = (int)cap_.get(cv::CAP_PROP_FPS);
+                fps_ = static_cast<int>(cap_.get(cv::CAP_PROP_FPS));
                 last_index_ = src_index_;
                 last_mode_ = src_mode_;
                 last_fps_ = fps_;
                 GetCameraProperties();
             }
-        }
-        catch (const std::exception &e) {
+        } catch (const std::exception &e) {
             std::cout << e.what() << std::endl;
         }
     }
@@ -118,19 +119,22 @@ void VideoCapture::OpenSource()
 
 void VideoCapture::Process_(SignalBus const &inputs, SignalBus &outputs)
 {
-    if (!IsEnabled())
+    if (!IsEnabled()) {
         SetEnabled(true);
+    }
 
     if (src_index_ != last_index_ || src_mode_ != last_mode_ || fps_ != last_fps_) {
         OpenSource();
     }
 
-    if (!cap_.isOpened())
+    if (!cap_.isOpened()) {
         OpenSource();
+    }
 
     if (cap_.isOpened()) {
-        if (first_load_set_)
+        if (first_load_set_) {
             SetCameraProperties();
+        }
         if (cap_.read(frame_)) {
             if (!frame_.empty()) {
                 outputs.SetValue(0, frame_);
@@ -142,19 +146,15 @@ void VideoCapture::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool VideoCapture::HasGui(int interface)
 {
-    if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
-        return true;
-    }
-
-    return false;
+    return interface == static_cast<int>(FlowCV::GuiInterfaceType_Controls);
 }
 
 void VideoCapture::UpdateGui(void *context, int interface)
 {
-    auto *imCurContext = (ImGuiContext *)context;
+    auto *imCurContext = static_cast<ImGuiContext *>(context);
     ImGui::SetCurrentContext(imCurContext);
 
-    if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
+    if (interface == static_cast<int>(FlowCV::GuiInterfaceType_Controls)) {
         if (ImGui::Button(CreateControlString("Refresh Cap List", GetInstanceName()).c_str())) {
             std::string curName = cam_enum_.GetCameraName(list_index_);
             cam_enum_.RefreshCameraList();
@@ -180,15 +180,17 @@ void VideoCapture::UpdateGui(void *context, int interface)
             cams.emplace_back(cam_enum_.GetCameraName(i));
         }
         ImGui::Separator();
-        ImGui::Checkbox(CreateControlString("Force Use Index", GetInstanceName()).c_str(), &force_index_);
+        ImGui::Checkbox(CreateControlString("Force Use Index", GetInstanceName()).c_str(),
+                        &force_index_);
         ImGui::SetNextItemWidth(200);
         if (ImGui::Combo(
                 CreateControlString("Camera", GetInstanceName()).c_str(), &list_index_,
                 [](void *data, int idx, const char **out_text) {
-                    *out_text = ((const std::vector<std::string> *)data)->at(idx).c_str();
+                    *out_text =
+                        (static_cast<const std::vector<std::string> *>(data))->at(idx).c_str();
                     return true;
                 },
-                (void *)&cams, (int)cams.size())) {
+                (void *)&cams, static_cast<int>(cams.size()))) {
             src_index_ = cam_enum_.GetCameraIndex(list_index_);
         }
 
@@ -204,30 +206,35 @@ void VideoCapture::UpdateGui(void *context, int interface)
         ImGui::Combo(
             CreateControlString("Video Resolution", GetInstanceName()).c_str(), &src_mode_,
             [](void *data, int idx, const char **out_text) {
-                *out_text = ((const std::vector<std::string> *)data)->at(idx).c_str();
+                *out_text = (static_cast<const std::vector<std::string> *>(data))->at(idx).c_str();
                 return true;
             },
-            (void *)&modes, (int)modes.size());
+            (void *)&modes, static_cast<int>(modes.size()));
         ImGui::SetNextItemWidth(80);
         const int fpsValues[] = {1, 3, 5, 10, 15, 20, 25, 30, 60, 120};
-        if (ImGui::Combo(CreateControlString("Video FPS", GetInstanceName()).c_str(), &fps_index_, " 1\0 3\0 5\0 10\0 15\0 20\0 25\0 30\0 60\0 120\0\0")) {
+        if (ImGui::Combo(CreateControlString("Video FPS", GetInstanceName()).c_str(), &fps_index_,
+                         " 1\0 3\0 5\0 10\0 15\0 20\0 25\0 30\0 60\0 120\0\0")) {
             fps_ = fpsValues[fps_index_];
         }
         ImGui::Separator();
-        if (ImGui::Button(CreateControlString("Open External Settings", GetInstanceName()).c_str())) {
+        if (ImGui::Button(
+                CreateControlString("Open External Settings", GetInstanceName()).c_str())) {
             cap_.set(cv::CAP_PROP_SETTINGS, src_index_);
         }
         ImGui::Separator();
-        ImGui::Checkbox(CreateControlString("Restore Settings on Load", GetInstanceName()).c_str(), &restore_man_set_);
+        ImGui::Checkbox(CreateControlString("Restore Settings on Load", GetInstanceName()).c_str(),
+                        &restore_man_set_);
         if (ImGui::TreeNode("Manual Settings")) {
             for (auto &prop : cam_props_) {
                 ImGui::SetNextItemWidth(100);
-                if (ImGui::DragFloat(CreateControlString(prop.second.name.c_str(), GetInstanceName()).c_str(), &prop.second.value, 1.0f)) {
+                if (ImGui::DragFloat(
+                        CreateControlString(prop.second.name.c_str(), GetInstanceName()).c_str(),
+                        &prop.second.value, 1.0F)) {
                     try {
-                        if (cap_.isOpened())
-                            cap_.set(prop.first, (double)prop.second.value);
-                    }
-                    catch (const std::exception &e) {
+                        if (cap_.isOpened()) {
+                            cap_.set(prop.first, static_cast<double>(prop.second.value));
+                        }
+                    } catch (const std::exception &e) {
                         std::cout << "Error: " << e.what() << std::endl;
                     }
                 }

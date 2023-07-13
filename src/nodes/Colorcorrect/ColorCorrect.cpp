@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Colorcorrect::Colorcorrect() : Component(ProcessOrder::OutOfOrder)
 {
@@ -66,12 +65,10 @@ void Colorcorrect::Process_(SignalBus const &inputs, SignalBus &outputs)
                 cv::Mat matMask;
                 if (!inMask) {
                     matMask = cv::Mat(in1->rows, in1->cols, CV_8UC1, 255);
-                }
-                else {
+                } else {
                     if (in1->size() != inMask->size()) {
                         cv::resize(*inMask, matMask, cv::Size(in1->cols, in1->rows));
-                    }
-                    else {
+                    } else {
                         inMask->copyTo(matMask);
                     }
                 }
@@ -88,8 +85,7 @@ void Colorcorrect::Process_(SignalBus const &inputs, SignalBus &outputs)
                         if (matFrame.type() == CV_8UC3) {
                             rgb = in1->at<cv::Vec3b>(y, x);
                             lum = ((float)(rgb[0] + rgb[1] + rgb[2]) / 3.0f) / 255.0f;
-                        }
-                        else if (matFrame.type() == CV_8UC4) {
+                        } else if (matFrame.type() == CV_8UC4) {
                             rgba = in1->at<cv::Vec4b>(y, x);
                             lum = ((float)(rgba[0] + rgba[1] + rgba[2]) / 3.0f) / 255.0f;
                         }
@@ -127,11 +123,12 @@ void Colorcorrect::Process_(SignalBus const &inputs, SignalBus &outputs)
                                     }
                                 }
                                 if (matFrame.type() == CV_8UC3)
-                                    matFrame.at<cv::Vec3b>(y, x)[c] = cv::saturate_cast<uchar>(val * 255.0f);
+                                    matFrame.at<cv::Vec3b>(y, x)[c] =
+                                        cv::saturate_cast<uchar>(val * 255.0f);
                                 else if (matFrame.type() == CV_8UC4)
-                                    matFrame.at<cv::Vec4b>(y, x)[c] = cv::saturate_cast<uchar>(val * 255.0f);
-                            }
-                            else {
+                                    matFrame.at<cv::Vec4b>(y, x)[c] =
+                                        cv::saturate_cast<uchar>(val * 255.0f);
+                            } else {
                                 matFrame.at<cv::Vec4b>(y, x)[c] = in1->at<cv::Vec4b>(y, x)[c];
                             }
                         }
@@ -139,12 +136,10 @@ void Colorcorrect::Process_(SignalBus const &inputs, SignalBus &outputs)
                 }
                 if (!matFrame.empty())
                     outputs.SetValue(0, matFrame);
-            }
-            else {
+            } else {
                 outputs.SetValue(0, *in1);
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -152,8 +147,9 @@ void Colorcorrect::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Colorcorrect::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -182,21 +178,28 @@ void Colorcorrect::UpdateGui(void *context, int interface)
             UpdateLUT();
         }
         ImGui::Separator();
-        ImGui::ColorEdit3(CreateControlString("Low Range", GetInstanceName()).c_str(), (float *)&color_range_low_);
-        ImGui::ColorEdit3(CreateControlString("High Range", GetInstanceName()).c_str(), (float *)&color_range_high_);
+        ImGui::ColorEdit3(CreateControlString("Low Range", GetInstanceName()).c_str(),
+                          (float *)&color_range_low_);
+        ImGui::ColorEdit3(CreateControlString("High Range", GetInstanceName()).c_str(),
+                          (float *)&color_range_high_);
         ImGui::Separator();
         ImGui::SetNextItemWidth(100);
-        ImGui::DragFloat(CreateControlString("Saturation", GetInstanceName()).c_str(), &saturation_, 0.01f, 0.0f, 4.0f);
+        ImGui::DragFloat(CreateControlString("Saturation", GetInstanceName()).c_str(), &saturation_,
+                         0.01f, 0.0f, 4.0f);
         ImGui::SetNextItemWidth(100);
-        ImGui::DragFloat(CreateControlString("Brightness", GetInstanceName()).c_str(), &brightness_, 0.01f, -3.0f, 3.0f);
+        ImGui::DragFloat(CreateControlString("Brightness", GetInstanceName()).c_str(), &brightness_,
+                         0.01f, -3.0f, 3.0f);
         ImGui::SetNextItemWidth(100);
-        ImGui::DragFloat(CreateControlString("Contrast", GetInstanceName()).c_str(), &contrast_, 0.01f, 0.0f, 5.0f);
+        ImGui::DragFloat(CreateControlString("Contrast", GetInstanceName()).c_str(), &contrast_,
+                         0.01f, 0.0f, 5.0f);
         ImGui::SetNextItemWidth(100);
-        if (ImGui::DragFloat(CreateControlString("Gamma", GetInstanceName()).c_str(), &gamma_, 0.01f, 0.0f, 5.0f)) {
+        if (ImGui::DragFloat(CreateControlString("Gamma", GetInstanceName()).c_str(), &gamma_,
+                             0.01f, 0.0f, 5.0f)) {
             UpdateLUT();
         }
         ImGui::SetNextItemWidth(100);
-        ImGui::DragFloat(CreateControlString("Gain", GetInstanceName()).c_str(), &gain_, 0.01f, 0.0f, 5.0f);
+        ImGui::DragFloat(CreateControlString("Gain", GetInstanceName()).c_str(), &gain_, 0.01f,
+                         0.0f, 5.0f);
     }
 }
 

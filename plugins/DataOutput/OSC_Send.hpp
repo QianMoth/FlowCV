@@ -2,22 +2,20 @@
 // Plugin OscSend
 //
 
-#ifndef FLOWCV_PLUGIN_OSC_SEND_HPP_
-#define FLOWCV_PLUGIN_OSC_SEND_HPP_
+#pragma once
+
 #include <DSPatch.h>
 
+#include <FlowCV/Types.hpp>
 #include <asio2/asio2.hpp>
 #include <nlohmann/json.hpp>
 
 #include "OscOutboundPacketStream.h"
-#include "Types.hpp"
 #include "imgui_opencv.hpp"
 #include "imgui_wrapper.hpp"
 
-namespace DSPatch::DSPatchables
-{
-namespace internal
-{
+namespace DSPatch::DSPatchables {
+namespace internal {
 class OscSend;
 }
 
@@ -57,4 +55,3 @@ class DLLEXPORT OscSend final : public Component
 EXPORT_PLUGIN(OscSend)
 
 }  // namespace DSPatch::DSPatchables
-#endif  // FLOWCV_PLUGIN_OSC_SEND_HPP_

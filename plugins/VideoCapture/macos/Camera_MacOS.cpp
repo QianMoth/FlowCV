@@ -4,8 +4,7 @@
 
 #include "Camera_MacOS.hpp"
 
-namespace cam_macos
-{
+namespace cam_macos {
 
 std::map<int, Device> Camera_MacOS_Enumerator::getVideoDevicesMap()
 {
@@ -18,7 +17,7 @@ std::map<int, Device> Camera_MacOS_Enumerator::getVideoDevicesMap()
 
     /* set up a matching dictionary for the class */
     matchingDict = IOServiceMatching(kIOUSBDeviceClassName);
-    if (matchingDict == NULL) {
+    if (matchingDict == nullptr) {
         return deviceMap;  // fail
     }
 
@@ -34,7 +33,8 @@ std::map<int, Device> Camera_MacOS_Enumerator::getVideoDevicesMap()
         char devName[255];
         IORegistryEntryGetName(device, devName);
         std::string cameraName = devName;
-        std::transform(cameraName.begin(), cameraName.end(), cameraName.begin(), [](unsigned char c) { return std::tolower(c); });
+        std::transform(cameraName.begin(), cameraName.end(), cameraName.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
         if (cameraName.find("cam") != std::string::npos) {
             camCount++;
         }
@@ -48,7 +48,8 @@ std::map<int, Device> Camera_MacOS_Enumerator::getVideoDevicesMap()
         char devName[255];
         IORegistryEntryGetName(device, devName);
         std::string cameraName = devName;
-        std::transform(cameraName.begin(), cameraName.end(), cameraName.begin(), [](unsigned char c) { return std::tolower(c); });
+        std::transform(cameraName.begin(), cameraName.end(), cameraName.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
         if (cameraName.find("cam") != std::string::npos) {
             camCount--;
             Device currentDevice;

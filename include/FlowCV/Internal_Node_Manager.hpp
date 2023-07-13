@@ -2,16 +2,15 @@
 // FlowCV Internal Component Manager
 //
 
-#ifndef FLOWCV_INTERNAL_NODE_MANAGER_HPP_
-#define FLOWCV_INTERNAL_NODE_MANAGER_HPP_
+#pragma once
+
 #include <DSPatch.h>
 
 #include <iostream>
 
 #include "Types.hpp"
 
-namespace FlowCV
-{
+namespace FlowCV {
 
 class InternalNodeManager
 {
@@ -29,4 +28,3 @@ class InternalNodeManager
     std::vector<NodeDescription> node_list_;
 };
 }  // End Namespace FlowCV
-#endif  // FLOWCV_INTERNAL_NODE_MANAGER_HPP_

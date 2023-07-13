@@ -1,21 +1,21 @@
 #pragma once
+#include <Mfidl.h>
+#include <dshow.h>
 #include <mfapi.h>
 #include <mfobjects.h>
-#include <Mfidl.h>
-#include <map>
-#include <string>
-#include <locale>
-#include <sstream>
-#include <iostream>
 #include <windows.h>
-#include <dshow.h>
+
+#include <iostream>
+#include <locale>
+#include <map>
+#include <sstream>
+#include <string>
 
 #pragma comment(lib, "Mfplat.lib")
 #pragma comment(lib, "Mf.lib")
 #pragma comment(lib, "strmiids.lib")
 
-namespace msmf
-{
+namespace msmf {
 
 struct Device
 {
@@ -26,7 +26,6 @@ struct Device
 
 class DeviceEnumerator
 {
-
   public:
     DeviceEnumerator() = default;
     std::map<int, Device> getDevicesMap(REFGUID category);

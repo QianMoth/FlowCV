@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 CannyFilter::CannyFilter() : Component(ProcessOrder::OutOfOrder)
 {
@@ -64,11 +63,11 @@ void CannyFilter::Process_(SignalBus const &inputs, SignalBus &outputs)
                 low_thresh = (float)(mean[0] - dev[0]);
                 high_thresh = (float)(mean[0] + dev[0]);
             }
-            cv::Canny(tmp, frame, low_thresh, high_thresh, props_.Get<int>("kernel_size"), (bool)props_.Get<int>("norm_type"));
+            cv::Canny(tmp, frame, low_thresh, high_thresh, props_.Get<int>("kernel_size"),
+                      (bool)props_.Get<int>("norm_type"));
             if (!frame.empty())
                 outputs.SetValue(0, frame);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -76,8 +75,9 @@ void CannyFilter::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool CannyFilter::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -97,8 +97,7 @@ void CannyFilter::UpdateGui(void *context, int interface)
         if (props_.Get<int>("thresh_mode") == 0) {
             props_.SetVisibility("low_thresh", true);
             props_.SetVisibility("high_thresh", true);
-        }
-        else {
+        } else {
             props_.SetVisibility("low_thresh", false);
             props_.SetVisibility("high_thresh", false);
         }

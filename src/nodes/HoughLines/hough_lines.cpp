@@ -3,6 +3,7 @@
 //
 
 #include "hough_lines.hpp"
+
 #include <optional>
 
 using namespace DSPatch;
@@ -67,8 +68,7 @@ static std::optional<Line> GetInsideLine(const Line &l1, int width, int height)
                 innerLine.start.x = pt->x;
                 innerLine.start.y = pt->y;
                 foundStart = true;
-            }
-            else {
+            } else {
                 innerLine.end.x = pt->x;
                 innerLine.end.y = pt->y;
                 return innerLine;
@@ -83,8 +83,7 @@ static std::optional<Line> GetInsideLine(const Line &l1, int width, int height)
                 innerLine.start.x = pt->x;
                 innerLine.start.y = pt->y;
                 foundStart = true;
-            }
-            else {
+            } else {
                 innerLine.end.x = pt->x;
                 innerLine.end.y = pt->y;
                 return innerLine;
@@ -106,8 +105,7 @@ static std::optional<Line> GetInsideLine(const Line &l1, int width, int height)
     return std::nullopt;
 }
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 HoughLines::HoughLines() : Component(ProcessOrder::OutOfOrder)
 {
@@ -169,9 +167,11 @@ void HoughLines::Process_(SignalBus const &inputs, SignalBus &outputs)
                 std::vector<cv::Vec4i> found_p_lines;
 
                 if (hough_mode_ == 0)
-                    cv::HoughLines(frame, found_lines, rho_, DEG_TO_RAD, thresh_, srn_, stn_, min_theta_ * DEG_TO_RAD, max_theta_ * DEG_TO_RAD);
+                    cv::HoughLines(frame, found_lines, rho_, DEG_TO_RAD, thresh_, srn_, stn_,
+                                   min_theta_ * DEG_TO_RAD, max_theta_ * DEG_TO_RAD);
                 else if (hough_mode_ == 1)
-                    cv::HoughLinesP(frame, found_p_lines, rho_, DEG_TO_RAD, thresh_, min_line_len_, max_line_gap_);
+                    cv::HoughLinesP(frame, found_p_lines, rho_, DEG_TO_RAD, thresh_, min_line_len_,
+                                    max_line_gap_);
 
                 nlohmann::json json_out;
                 nlohmann::json jLines;
@@ -203,12 +203,13 @@ void HoughLines::Process_(SignalBus const &inputs, SignalBus &outputs)
                             jLine["line"] = cTmp;
                             jLines.emplace_back(jLine);
                             if (draw_lines_)
-                                line(outFrame, lInt->start, lInt->end, cv::Scalar(line_color_.z * 255, line_color_.y * 255, line_color_.x * 255),
-                                    line_thickness_, cv::LINE_AA);
+                                line(outFrame, lInt->start, lInt->end,
+                                     cv::Scalar(line_color_.z * 255, line_color_.y * 255,
+                                                line_color_.x * 255),
+                                     line_thickness_, cv::LINE_AA);
                         }
                     }
-                }
-                else if (hough_mode_ == 1) {
+                } else if (hough_mode_ == 1) {
                     for (auto &found_p_line : found_p_lines) {
                         nlohmann::json cTmp;
                         nlohmann::json jLine;
@@ -219,8 +220,11 @@ void HoughLines::Process_(SignalBus const &inputs, SignalBus &outputs)
                         jLine["line"] = cTmp;
                         jLines.emplace_back(jLine);
                         if (draw_lines_) {
-                            line(outFrame, cv::Point(found_p_line[0], found_p_line[1]), cv::Point(found_p_line[2], found_p_line[3]),
-                                cv::Scalar(line_color_.z * 255, line_color_.y * 255, line_color_.x * 255), line_thickness_, cv::LINE_AA);
+                            line(outFrame, cv::Point(found_p_line[0], found_p_line[1]),
+                                 cv::Point(found_p_line[2], found_p_line[3]),
+                                 cv::Scalar(line_color_.z * 255, line_color_.y * 255,
+                                            line_color_.x * 255),
+                                 line_thickness_, cv::LINE_AA);
                         }
                     }
                 }
@@ -230,8 +234,7 @@ void HoughLines::Process_(SignalBus const &inputs, SignalBus &outputs)
                     outputs.SetValue(1, json_out);
                 }
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -239,7 +242,8 @@ void HoughLines::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool HoughLines::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -258,31 +262,38 @@ void HoughLines::UpdateGui(void *context, int interface)
             ImGui::Separator();
         }
         ImGui::SetNextItemWidth(120);
-        ImGui::Combo(CreateControlString("Hough Line Mode", GetInstanceName()).c_str(), &hough_mode_, "Standard\0Probabilistic\0\0");
+        ImGui::Combo(CreateControlString("Hough Line Mode", GetInstanceName()).c_str(),
+                     &hough_mode_, "Standard\0Probabilistic\0\0");
         ImGui::Separator();
         ImGui::SetNextItemWidth(100);
-        ImGui::DragFloat(CreateControlString("Accum Dist Res", GetInstanceName()).c_str(), &rho_, 0.01f, 0.01f, 10.0f);
+        ImGui::DragFloat(CreateControlString("Accum Dist Res", GetInstanceName()).c_str(), &rho_,
+                         0.01f, 0.01f, 10.0f);
         ImGui::SetNextItemWidth(100);
-        ImGui::DragInt(CreateControlString("Threshold", GetInstanceName()).c_str(), &thresh_, 0.1f, 1, 1000);
+        ImGui::DragInt(CreateControlString("Threshold", GetInstanceName()).c_str(), &thresh_, 0.1f,
+                       1, 1000);
         if (hough_mode_ == 0) {
             ImGui::SetNextItemWidth(150);
-            if (ImGui::DragFloatRange2("Min/Max Theta", &min_theta_, &max_theta_, 0.1f, 0.0f, 360.0f, "Min: %.1f °", "Max: %.1f °")) {
+            if (ImGui::DragFloatRange2("Min/Max Theta", &min_theta_, &max_theta_, 0.1f, 0.0f,
+                                       360.0f, "Min: %.1f °", "Max: %.1f °")) {
                 if (min_theta_ > max_theta_)
                     min_theta_ = max_theta_ - 1.0f;
             }
-        }
-        else if (hough_mode_ == 1) {
+        } else if (hough_mode_ == 1) {
             ImGui::SetNextItemWidth(100);
-            ImGui::DragFloat(CreateControlString("Min Line Length", GetInstanceName()).c_str(), &min_line_len_, 0.1f, 1.0f, 1000.0f);
+            ImGui::DragFloat(CreateControlString("Min Line Length", GetInstanceName()).c_str(),
+                             &min_line_len_, 0.1f, 1.0f, 1000.0f);
             ImGui::SetNextItemWidth(100);
-            ImGui::DragFloat(CreateControlString("Max Line Gap", GetInstanceName()).c_str(), &max_line_gap_, 0.1f, 1.0f, 1000.0f);
+            ImGui::DragFloat(CreateControlString("Max Line Gap", GetInstanceName()).c_str(),
+                             &max_line_gap_, 0.1f, 1.0f, 1000.0f);
         }
         ImGui::Separator();
         ImGui::Checkbox(CreateControlString("Draw Lines", GetInstanceName()).c_str(), &draw_lines_);
         if (draw_lines_) {
             ImGui::SetNextItemWidth(100);
-            ImGui::DragInt(CreateControlString("Line Thickness", GetInstanceName()).c_str(), &line_thickness_, 0.1f, 1, 25);
-            ImGui::ColorEdit3(CreateControlString("Line Color", GetInstanceName()).c_str(), (float *)&line_color_);
+            ImGui::DragInt(CreateControlString("Line Thickness", GetInstanceName()).c_str(),
+                           &line_thickness_, 0.1f, 1, 25);
+            ImGui::ColorEdit3(CreateControlString("Line Color", GetInstanceName()).c_str(),
+                              (float *)&line_color_);
         }
     }
 }

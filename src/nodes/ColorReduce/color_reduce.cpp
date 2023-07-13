@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 ColorReduce::ColorReduce() : Component(ProcessOrder::OutOfOrder)
 {
@@ -60,8 +59,7 @@ void ColorReduce::Process_(SignalBus const &inputs, SignalBus &outputs)
             }
             if (!frame.empty())
                 outputs.SetValue(0, frame);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -69,7 +67,8 @@ void ColorReduce::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool ColorReduce::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -82,11 +81,13 @@ void ColorReduce::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         ImGui::SetNextItemWidth(100);
-        if (ImGui::DragInt(CreateControlString("Reduce", GetInstanceName()).c_str(), &div_, 0.5f, 1, 255)) {
+        if (ImGui::DragInt(CreateControlString("Reduce", GetInstanceName()).c_str(), &div_, 0.5f, 1,
+                           255)) {
             if (div_ < 1)
                 div_ = 1;
         }

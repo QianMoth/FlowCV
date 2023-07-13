@@ -9,11 +9,9 @@ using namespace DSPatchables;
 
 int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables::internal
-{
+namespace DSPatch::DSPatchables::internal {
 class OscSend
-{
-};
+{};
 }  // namespace DSPatch::DSPatchables::internal
 
 OscSend::OscSend() : Component(ProcessOrder::OutOfOrder), p(new internal::OscSend())
@@ -28,7 +26,8 @@ OscSend::OscSend() : Component(ProcessOrder::OutOfOrder), p(new internal::OscSen
 
     // 1 inputs
     SetInputCount_(5, {"bool", "int", "float", "str", "json"},
-        {IoType::Io_Type_Bool, IoType::Io_Type_Int, IoType::Io_Type_Float, IoType::Io_Type_String, IoType::Io_Type_JSON});
+                   {IoType::Io_Type_Bool, IoType::Io_Type_Int, IoType::Io_Type_Float,
+                    IoType::Io_Type_String, IoType::Io_Type_JSON});
 
     // 0 outputs
     SetOutputCount_(0);
@@ -61,15 +60,17 @@ void OscSend::Process_(SignalBus const &inputs, SignalBus &outputs)
         if (socket_ != nullptr) {
             if (socket_->is_open()) {
                 current_time_ = std::chrono::steady_clock::now();
-                auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ - last_time_).count();
+                auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ -
+                                                                                   last_time_)
+                                 .count();
                 bool readyToSend = false;
                 if (transmit_rate_ > 0) {
-                    if (delta >= (long long)rate_val_) {
+                    if (delta >= static_cast<long long>(rate_val_)) {
                         readyToSend = true;
                     }
-                }
-                else
+                } else {
                     readyToSend = true;
+                }
 
                 if (in1) {
                     if (readyToSend) {
@@ -78,30 +79,30 @@ void OscSend::Process_(SignalBus const &inputs, SignalBus &outputs)
                         oscStream << osc::BeginMessage(osc_addr_prefix_);
                         oscStream << *in1;
                         oscStream << osc::EndMessage;
-                        socket_->async_send_to(asio::buffer(oscStream.Data(), oscStream.Size()), *remote_endpoint_, HandleNetworkWrite);
+                        socket_->async_send_to(asio::buffer(oscStream.Data(), oscStream.Size()),
+                                               *remote_endpoint_, HandleNetworkWrite);
                     }
-                }
-                else if (in2) {
+                } else if (in2) {
                     if (readyToSend) {
                         char buf[1024] = {'\0'};
                         osc::OutboundPacketStream oscStream(buf, 1024);
                         oscStream << osc::BeginMessage(osc_addr_prefix_);
                         oscStream << *in2;
                         oscStream << osc::EndMessage;
-                        socket_->async_send_to(asio::buffer(oscStream.Data(), oscStream.Size()), *remote_endpoint_, HandleNetworkWrite);
+                        socket_->async_send_to(asio::buffer(oscStream.Data(), oscStream.Size()),
+                                               *remote_endpoint_, HandleNetworkWrite);
                     }
-                }
-                else if (in3) {
+                } else if (in3) {
                     if (readyToSend) {
                         char buf[1024] = {'\0'};
                         osc::OutboundPacketStream oscStream(buf, 1024);
                         oscStream << osc::BeginMessage(osc_addr_prefix_);
                         oscStream << *in3;
                         oscStream << osc::EndMessage;
-                        socket_->async_send_to(asio::buffer(oscStream.Data(), oscStream.Size()), *remote_endpoint_, HandleNetworkWrite);
+                        socket_->async_send_to(asio::buffer(oscStream.Data(), oscStream.Size()),
+                                               *remote_endpoint_, HandleNetworkWrite);
                     }
-                }
-                else if (in4) {
+                } else if (in4) {
                     if (readyToSend) {
                         char buf[1024] = {'\0'};
                         osc::OutboundPacketStream oscStream(buf, 1024);
@@ -112,10 +113,10 @@ void OscSend::Process_(SignalBus const &inputs, SignalBus &outputs)
                         oscStream << osc::BeginMessage(oscAddr.c_str());
                         // oscStream << 0;
                         oscStream << osc::EndMessage;
-                        socket_->async_send_to(asio::buffer(oscStream.Data(), oscStream.Size()), *remote_endpoint_, HandleNetworkWrite);
+                        socket_->async_send_to(asio::buffer(oscStream.Data(), oscStream.Size()),
+                                               *remote_endpoint_, HandleNetworkWrite);
                     }
-                }
-                else if (in5) {
+                } else if (in5) {
                     if (!in5->empty()) {
                         nlohmann::json json_in_ = *in5;
                         if (readyToSend) {
@@ -131,8 +132,7 @@ void OscSend::Process_(SignalBus const &inputs, SignalBus &outputs)
                             if (!oscBaseAddr.empty()) {
                                 if (oscBaseAddr.at(oscBaseAddr.size() - 1) != '/')
                                     oscBaseAddr += '/';
-                            }
-                            else
+                            } else
                                 oscBaseAddr += '/';
                             char buf[8192] = {'\0'};
                             osc::OutboundPacketStream oscStream(buf, 8192);
@@ -154,7 +154,8 @@ void OscSend::Process_(SignalBus const &inputs, SignalBus &outputs)
                                 if (!json_in_["data"].empty()) {
                                     int idx = 0;
                                     for (auto &d : json_in_["data"]) {
-                                        for (nlohmann::json::iterator it = d.begin(); it != d.end(); ++it) {
+                                        for (nlohmann::json::iterator it = d.begin(); it != d.end();
+                                             ++it) {
                                             std::string oscAddr = oscBaseAddr;
                                             oscAddr += dataType;
                                             oscAddr += '/';
@@ -172,16 +173,15 @@ void OscSend::Process_(SignalBus const &inputs, SignalBus &outputs)
                                                 oscStream << it->get<int>();
                                             else if (it->is_boolean()) {
                                                 oscStream << it->get<bool>();
-                                            }
-                                            else if (it->is_array()) {
+                                            } else if (it->is_array()) {
                                                 for (int i = 0; i < it->size(); i++) {
                                                     if (it->at(i).is_number_float())
                                                         oscStream << it->at(i).get<float>();
                                                     else if (it->is_number_integer())
                                                         oscStream << it->at(i).get<int>();
                                                 }
-                                            }
-                                            else if (it->is_object()) {  // TODO: Handle Deeper Level JSON Objects
+                                            } else if (it->is_object()) {  // TODO: Handle Deeper
+                                                                           // Level JSON Objects
                                             }
                                             oscStream << osc::EndMessage;
                                         }
@@ -190,12 +190,13 @@ void OscSend::Process_(SignalBus const &inputs, SignalBus &outputs)
                                 }
                             }
                             oscStream << osc::EndBundle;
-                            socket_->async_send_to(asio::buffer(oscStream.Data(), oscStream.Size()), *remote_endpoint_, HandleNetworkWrite);
+                            socket_->async_send_to(asio::buffer(oscStream.Data(), oscStream.Size()),
+                                                   *remote_endpoint_, HandleNetworkWrite);
                         }
                     }
                 }
                 if (readyToSend) {
-                    float curRate = 1.0f / ((float)delta * 0.001f);
+                    float curRate = 1.0F / ((float)delta * 0.001F);
                     // std::cout << curRate << std::endl;
                     last_time_ = current_time_;
                 }
@@ -206,8 +207,9 @@ void OscSend::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool OscSend::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -222,13 +224,15 @@ void OscSend::UpdateGui(void *context, int interface)
 
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         bool multicastIndicator = is_multicast_;
-        ImGui::Checkbox(CreateControlString("Is Multicast", GetInstanceName()).c_str(), &multicastIndicator);
+        ImGui::Checkbox(CreateControlString("Is Multicast", GetInstanceName()).c_str(),
+                        &multicastIndicator);
         if (!is_valid_ip)
             ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(128, 0, 0, 255));
         else
             ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(29, 47, 73, 255));
         ImGui::SetNextItemWidth(140);
-        if (ImGui::InputText(CreateControlString("IP Address", GetInstanceName()).c_str(), tmp_ip_buf, 64)) {
+        if (ImGui::InputText(CreateControlString("IP Address", GetInstanceName()).c_str(),
+                             tmp_ip_buf, 64)) {
             ip_addr_ = tmp_ip_buf;
             if (IsValidIP_() && port_ != 0) {
                 OpenSocket_();
@@ -243,16 +247,18 @@ void OscSend::UpdateGui(void *context, int interface)
         }
         ImGui::Separator();
         ImGui::SetNextItemWidth(120);
-        if (ImGui::Combo(CreateControlString("Rate (Hz)", GetInstanceName()).c_str(), &transmit_rate_, "Fastest\0 60\0 30\0 20\0 15\0 10\0 5\0 2\0 1\0\0")) {
+        if (ImGui::Combo(CreateControlString("Rate (Hz)", GetInstanceName()).c_str(),
+                         &transmit_rate_, "Fastest\0 60\0 30\0 20\0 15\0 10\0 5\0 2\0 1\0\0")) {
             if (transmit_rate_ > 0)
-                rate_val_ = (1.0f / (float)rate_selection_[transmit_rate_]) * 1000.0f;
+                rate_val_ = (1.0F / (float)rate_selection_[transmit_rate_]) * 1000.0F;
             else
                 rate_val_ = 0;
         }
         ImGui::Separator();
         ImGui::TextUnformatted("OSC Options");
         ImGui::SetNextItemWidth(140);
-        ImGui::InputText(CreateControlString("Address Prefix", GetInstanceName()).c_str(), osc_addr_prefix_, 64);
+        ImGui::InputText(CreateControlString("Address Prefix", GetInstanceName()).c_str(),
+                         osc_addr_prefix_, 64);
     }
 }
 
@@ -289,7 +295,7 @@ void OscSend::SetState(std::string &&json_serialized)
     if (state.contains("data_rate")) {
         transmit_rate_ = state["data_rate"].get<int>();
         if (transmit_rate_ > 0)
-            rate_val_ = (1.0f / (float)rate_selection_[transmit_rate_]) * 1000.0f;
+            rate_val_ = (1.0F / (float)rate_selection_[transmit_rate_]) * 1000.0F;
         else
             rate_val_ = 0;
     }
@@ -314,8 +320,7 @@ void OscSend::OpenSocket_()
             socket_->open(asio::ip::udp::v4());
             if (address.is_multicast())
                 is_multicast_ = true;
-        }
-        else if (address.is_v6()) {
+        } else if (address.is_v6()) {
             socket_->open(asio::ip::udp::v6());
             if (address.is_multicast())
                 is_multicast_ = true;
@@ -337,8 +342,7 @@ bool OscSend::IsValidIP_()
         if (ec) {
             is_valid_ip = false;
             std::cerr << ec.message() << std::endl;
-        }
-        else {
+        } else {
             if (address.is_v4()) {
                 int dotCount = 0;
                 for (auto &c : ip_addr_) {
@@ -349,8 +353,7 @@ bool OscSend::IsValidIP_()
                     is_valid_ip = true;
                     return true;
                 }
-            }
-            else if (address.is_v6()) {
+            } else if (address.is_v6()) {
                 int dotCount = 0;
                 for (auto c : ip_addr_) {
                     if (c == ':')

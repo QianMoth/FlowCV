@@ -1,36 +1,19 @@
 ---
 BasedOnStyle: Google
+IndentWidth: 4
+---
+Language: Cpp
 AccessModifierOffset: -2
-AlignAfterOpenBracket: DontAlign
-AllowAllConstructorInitializersOnNextLine: true
-AllowShortBlocksOnASingleLine: true
+AllowShortBlocksOnASingleLine: Empty
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
-AlwaysBreakTemplateDeclarations: MultiLine
-BreakBeforeBraces: Custom
-BraceWrapping:
-  AfterEnum: true
-  AfterStruct: true
-  AfterClass: true
-  AfterCaseLabel: false
-  AfterFunction: true
-  AfterNamespace: true
-  AfterUnion: true
-  AfterObjCDeclaration: true
-  AfterExternBlock: true
-  AfterControlStatement: false
-  BeforeElse: true
-  BeforeCatch: true
+BreakBeforeBraces: Mozilla
 BreakConstructorInitializers: BeforeComma
 BreakInheritanceList: BeforeComma
-ColumnLimit: 160
-IndentWidth: 4
-KeepEmptyLinesAtTheStartOfBlocks: true
-Language: Cpp
-PointerAlignment: Right
-SortIncludes: true
+ColumnLimit: 100
 DerivePointerAlignment: false
 DisableFormat: false
-SpaceAfterTemplateKeyword: false
+PointerAlignment: Right
+SortIncludes: true
 UseTab: Never

@@ -2,15 +2,15 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <DSPatch.h>
 
+#include <FlowCV/FlowCV_Manager.hpp>
+#include <FlowCV/Settings.hpp>
+#include <FlowCV/Types.hpp>
 #include <deque>
 #include <nlohmann/json.hpp>
 
-#include "../managers/FlowCV_Manager.hpp"
-#include "Types.hpp"
 #include "imgui_internal.h"
 #include "imgui_wrapper.hpp"
 #include "node_editor.h"
-#include "utils/settings.h"
 
 struct ApplicationGlobals
 {

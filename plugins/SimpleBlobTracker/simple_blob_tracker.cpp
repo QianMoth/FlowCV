@@ -3,6 +3,7 @@
 //
 
 #include "simple_blob_tracker.hpp"
+
 #include <random>
 
 using namespace DSPatch;
@@ -10,17 +11,15 @@ using namespace DSPatchables;
 
 int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables::internal
-{
+namespace DSPatch::DSPatchables::internal {
 class SimpleBlobTracker
-{
-};
+{};
 }  // namespace DSPatch::DSPatchables::internal
 
 static cv::Vec3b GenerateRandomColor()
 {
-    static std::random_device rd;                     // only used once to initialise (seed) engine
-    std::mt19937 rng(rd());                           // random-number engine used (Mersenne-Twister in this case)
+    static std::random_device rd;  // only used once to initialise (seed) engine
+    std::mt19937 rng(rd());        // random-number engine used (Mersenne-Twister in this case)
     std::uniform_int_distribution<int> uni(10, 255);  // guaranteed unbiased
 
     cv::Vec3b color;
@@ -32,7 +31,8 @@ static cv::Vec3b GenerateRandomColor()
     return color;
 }
 
-SimpleBlobTracker::SimpleBlobTracker() : Component(ProcessOrder::OutOfOrder), p(new internal::SimpleBlobTracker())
+SimpleBlobTracker::SimpleBlobTracker()
+    : Component(ProcessOrder::OutOfOrder), p(new internal::SimpleBlobTracker())
 {
     // Name and Category
     SetComponentName_("Simple_Blob_Tracker");
@@ -43,7 +43,8 @@ SimpleBlobTracker::SimpleBlobTracker() : Component(ProcessOrder::OutOfOrder), p(
     global_inst_counter++;
 
     // 2 inputs
-    SetInputCount_(3, {"in", "start", "blobs"}, {IoType::Io_Type_CvMat, IoType::Io_Type_Bool, IoType::Io_Type_JSON});
+    SetInputCount_(3, {"in", "start", "blobs"},
+                   {IoType::Io_Type_CvMat, IoType::Io_Type_Bool, IoType::Io_Type_JSON});
 
     // 2 outputs
     SetOutputCount_(2, {"vis", "tracks"}, {IoType::Io_Type_CvMat, IoType::Io_Type_JSON});
@@ -119,17 +120,21 @@ void SimpleBlobTracker::Process_(SignalBus const &inputs, SignalBus &outputs)
                             int foundMatch = -1;
                             double foundDist = max_pos_var_;
                             for (int i = 0; i < blob_tracking_.size(); i++) {
-                                double res = cv::norm(curPos - blob_tracking_.at(i).pos.at(blob_tracking_.at(i).pos.size() - 1));
+                                double res =
+                                    cv::norm(curPos - blob_tracking_.at(i).pos.at(
+                                                          blob_tracking_.at(i).pos.size() - 1));
                                 if (res < foundDist) {
                                     foundDist = res;
                                     if (blob_tracking_.at(i).pos.size() > 1) {
-                                        if (curSize > (blob_tracking_.at(i).last_size - max_size_var_) &&
-                                            curSize < (blob_tracking_.at(i).last_size + max_size_var_)) {
-                                            if ((frame_count_ - blob_tracking_.at(i).last_frame) < lost_track_duration_)
+                                        if (curSize >
+                                                (blob_tracking_.at(i).last_size - max_size_var_) &&
+                                            curSize <
+                                                (blob_tracking_.at(i).last_size + max_size_var_)) {
+                                            if ((frame_count_ - blob_tracking_.at(i).last_frame) <
+                                                lost_track_duration_)
                                                 foundMatch = i;
                                         }
-                                    }
-                                    else {
+                                    } else {
                                         foundMatch = i;
                                     }
                                 }
@@ -144,8 +149,7 @@ void SimpleBlobTracker::Process_(SignalBus const &inputs, SignalBus &outputs)
                                 bt.last_frame = frame_count_;
                                 blob_tracking_.emplace_back(bt);
                                 id_counter_++;
-                            }
-                            else {
+                            } else {
                                 // Add to Position
                                 blob_tracking_.at(foundMatch).pos.emplace_back(curPos);
                                 blob_tracking_.at(foundMatch).last_size = curSize;
@@ -164,8 +168,7 @@ void SimpleBlobTracker::Process_(SignalBus const &inputs, SignalBus &outputs)
                 ref["w"] = refWidth;
                 ref["h"] = refHeight;
                 json_out["ref_frame"] = ref;
-            }
-            else if (!frame.empty()) {
+            } else if (!frame.empty()) {
                 ref["w"] = frame.cols;
                 ref["h"] = frame.rows;
                 json_out["ref_frame"] = ref;
@@ -202,7 +205,8 @@ void SimpleBlobTracker::Process_(SignalBus const &inputs, SignalBus &outputs)
                 // Draw IDs on Top
                 for (auto &blob : blob_tracking_) {
                     std::string id = std::to_string(blob.id);
-                    cv::putText(frame, id.c_str(), blob.pos.at(blob.pos.size() - 1), cv::FONT_HERSHEY_SIMPLEX, 0.75, blob.color, 2.0);
+                    cv::putText(frame, id.c_str(), blob.pos.at(blob.pos.size() - 1),
+                                cv::FONT_HERSHEY_SIMPLEX, 0.75, blob.color, 2.0);
                 }
             }
             if (!frame.empty()) {
@@ -211,8 +215,7 @@ void SimpleBlobTracker::Process_(SignalBus const &inputs, SignalBus &outputs)
                 outputs.SetValue(1, json_out);
                 frame_count_++;
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -220,8 +223,9 @@ void SimpleBlobTracker::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool SimpleBlobTracker::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -239,20 +243,27 @@ void SimpleBlobTracker::UpdateGui(void *context, int interface)
             reset_tracking_ = true;
         }
         ImGui::Separator();
-        ImGui::Checkbox(CreateControlString("Show Tracking", GetInstanceName()).c_str(), &show_tracking_);
+        ImGui::Checkbox(CreateControlString("Show Tracking", GetInstanceName()).c_str(),
+                        &show_tracking_);
         ImGui::Checkbox(CreateControlString("Show IDs", GetInstanceName()).c_str(), &show_ids_);
         ImGui::SetNextItemWidth(80);
-        ImGui::DragInt(CreateControlString("Tracking Duration (Frames)", GetInstanceName()).c_str(), &tracking_duration_, 0.5f, 2, 3000);
+        ImGui::DragInt(CreateControlString("Tracking Duration (Frames)", GetInstanceName()).c_str(),
+                       &tracking_duration_, 0.5F, 2, 3000);
         ImGui::SetNextItemWidth(80);
-        ImGui::DragInt(CreateControlString("Lost Track Duration (Frames)", GetInstanceName()).c_str(), &lost_track_duration_, 0.5f, 2, 300);
-        ImGui::Checkbox(CreateControlString("Drop Lost Tracks", GetInstanceName()).c_str(), &drop_lost_tracks_);
+        ImGui::DragInt(
+            CreateControlString("Lost Track Duration (Frames)", GetInstanceName()).c_str(),
+            &lost_track_duration_, 0.5F, 2, 300);
+        ImGui::Checkbox(CreateControlString("Drop Lost Tracks", GetInstanceName()).c_str(),
+                        &drop_lost_tracks_);
         ImGui::SetNextItemWidth(80);
         ImGui::Separator();
         ImGui::TextUnformatted("Track Matching Parameters:");
         ImGui::SetNextItemWidth(80);
-        ImGui::DragInt(CreateControlString("Max Position Diff", GetInstanceName()).c_str(), &max_pos_var_, 0.25f, 1, 1000);
+        ImGui::DragInt(CreateControlString("Max Position Diff", GetInstanceName()).c_str(),
+                       &max_pos_var_, 0.25F, 1, 1000);
         ImGui::SetNextItemWidth(80);
-        ImGui::DragInt(CreateControlString("Max Scale Diff", GetInstanceName()).c_str(), &max_size_var_, 0.25f, 1, 1000);
+        ImGui::DragInt(CreateControlString("Max Scale Diff", GetInstanceName()).c_str(),
+                       &max_size_var_, 0.25F, 1, 1000);
     }
 }
 

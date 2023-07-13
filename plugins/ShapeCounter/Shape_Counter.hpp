@@ -6,16 +6,14 @@
 #define FLOWCV_PLUGIN_SHAPE_COUNTER_HPP_
 #include <DSPatch.h>
 
+#include <FlowCV/Types.hpp>
 #include <nlohmann/json.hpp>
 
-#include "Types.hpp"
 #include "imgui_opencv.hpp"
 #include "imgui_wrapper.hpp"
 
-namespace DSPatch::DSPatchables
-{
-namespace internal
-{
+namespace DSPatch::DSPatchables {
+namespace internal {
 class ShapeCounter;
 }
 

@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 static int NormTypeValues[9] = {1, 2, 4, 32};
 
@@ -55,18 +54,16 @@ void Normalize::Process_(SignalBus const &inputs, SignalBus &outputs)
                     if (NormTypeValues[norm_type_] == cv::NORM_MINMAX)
                         cv::normalize(*in1, frame, alpha_, beta_, NormTypeValues[norm_type_]);
                     else
-                        cv::normalize(*in1, frame, alpha_, beta_, NormTypeValues[norm_type_], -1, *in2);
-                }
-                else
+                        cv::normalize(*in1, frame, alpha_, beta_, NormTypeValues[norm_type_], -1,
+                                      *in2);
+                } else
                     cv::normalize(*in1, frame, alpha_, beta_, NormTypeValues[norm_type_]);
-            }
-            else
+            } else
                 cv::normalize(*in1, frame, alpha_, beta_, NormTypeValues[norm_type_]);
 
             if (!frame.empty())
                 outputs.SetValue(0, frame);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -74,8 +71,9 @@ void Normalize::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Normalize::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -89,12 +87,15 @@ void Normalize::UpdateGui(void *context, int interface)
     ImGui::SetCurrentContext(imCurContext);
 
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
-        ImGui::Combo(CreateControlString("Normal Type", GetInstanceName()).c_str(), &norm_type_, "Inf\0L1\0L2\0Min Max\0\0");
+        ImGui::Combo(CreateControlString("Normal Type", GetInstanceName()).c_str(), &norm_type_,
+                     "Inf\0L1\0L2\0Min Max\0\0");
         ImGui::SetNextItemWidth(100);
-        ImGui::DragFloat(CreateControlString("Alpha (Min)", GetInstanceName()).c_str(), &alpha_, 0.01f, 0.0f, 500.0f, "%.2f");
+        ImGui::DragFloat(CreateControlString("Alpha (Min)", GetInstanceName()).c_str(), &alpha_,
+                         0.01f, 0.0f, 500.0f, "%.2f");
         if (norm_type_ == 3) {
             ImGui::SetNextItemWidth(100);
-            ImGui::DragFloat(CreateControlString("Beta (Max)", GetInstanceName()).c_str(), &beta_, 0.01f, 0.0f, 500.0f, "%.2f");
+            ImGui::DragFloat(CreateControlString("Beta (Max)", GetInstanceName()).c_str(), &beta_,
+                             0.01f, 0.0f, 500.0f, "%.2f");
         }
     }
 }

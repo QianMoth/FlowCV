@@ -4,13 +4,12 @@
 
 #ifndef FLOWCV_CAMERA_V4L_HPP_
 #define FLOWCV_CAMERA_V4L_HPP_
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <map>
-#include <fstream>
-#include <filesystem>
 
-namespace camv4l
-{
+namespace camv4l {
 
 struct Device
 {

@@ -6,18 +6,16 @@
 #define FLOWCV_PLUGIN_SERIAL_SEND_HPP_
 #include <DSPatch.h>
 
+#include <FlowCV/Types.hpp>
 #include <asio2/serial_port/serial_port.hpp>
 #include <nlohmann/json.hpp>
 
-#include "Types.hpp"
 #include "imgui_opencv.hpp"
 #include "imgui_wrapper.hpp"
 #include "serial_enumerator.hpp"
 
-namespace DSPatch::DSPatchables
-{
-namespace internal
-{
+namespace DSPatch::DSPatchables {
+namespace internal {
 class SerialSend;
 }
 
@@ -35,7 +33,8 @@ class DLLEXPORT SerialSend final : public Component
     void OpenSerialConn_();
     void CloseSerialConn_();
     void SetEOLSeq_();
-    template<typename T> std::vector<uint8_t> GenerateOutBuffer_(T data);
+    template <typename T>
+    std::vector<uint8_t> GenerateOutBuffer_(T data);
 
   private:
     std::unique_ptr<internal::SerialSend> p;

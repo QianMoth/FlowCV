@@ -5,18 +5,18 @@
 
 #ifndef FLOWCV_SERIAL_PORTS_MAC_HPP_
 #define FLOWCV_SERIAL_PORTS_MAC_HPP_
-#include <vector>
-#include <string>
+#include <serial/serial.h>
+#include <unistd.h>
+
+#include <cstdio>
+#include <fstream>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include <iostream>
-#include <fstream>
-#include <cstdio>
-#include <unistd.h>
-#include <serial/serial.h>
+#include <string>
+#include <vector>
 
-namespace SerialDeviceEnum
-{
+namespace SerialDeviceEnum {
 
 struct SerialPortInfo
 {
@@ -27,7 +27,6 @@ struct SerialPortInfo
 
 class DeviceEnumerator
 {
-
   public:
     std::vector<SerialPortInfo> GetSerialPortList();
 };

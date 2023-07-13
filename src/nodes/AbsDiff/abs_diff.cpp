@@ -5,12 +5,10 @@
 #include "abs_diff.hpp"
 
 using namespace DSPatch;
-using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 AbsDiff::AbsDiff() : Component(ProcessOrder::OutOfOrder)
 {
@@ -42,14 +40,15 @@ void AbsDiff::Process_(SignalBus const &inputs, SignalBus &outputs)
     if (!in1->empty() && !in2->empty()) {
         if (IsEnabled()) {
             // Process Image
-            if (in1->type() == in2->type() && in1->channels() == in2->channels() && in1->size == in2->size) {
+            if (in1->type() == in2->type() && in1->channels() == in2->channels() &&
+                in1->size == in2->size) {
                 cv::Mat frame;
                 cv::absdiff(*in1, *in2, frame);
-                if (!frame.empty())
+                if (!frame.empty()) {
                     outputs.SetValue(0, frame);
+                }
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -57,21 +56,18 @@ void AbsDiff::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool AbsDiff::HasGui(int interface)
 {
-
     return false;
 }
 
 void AbsDiff::UpdateGui(void *context, int interface)
 {
-    auto *imCurContext = (ImGuiContext *)context;
+    auto *imCurContext = static_cast<ImGuiContext *>(context);
     ImGui::SetCurrentContext(imCurContext);
 }
 
 std::string AbsDiff::GetState()
 {
-    using namespace nlohmann;
-
-    json state;
+    nlohmann::json state;
 
     std::string stateSerialized = state.dump(4);
 
@@ -80,9 +76,7 @@ std::string AbsDiff::GetState()
 
 void AbsDiff::SetState(std::string &&json_serialized)
 {
-    using namespace nlohmann;
-
-    json state = json::parse(json_serialized);
+    nlohmann::json state = nlohmann::json::parse(json_serialized);
 }
 
 }  // End Namespace DSPatch::DSPatchables

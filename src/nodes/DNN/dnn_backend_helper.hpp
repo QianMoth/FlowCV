@@ -5,8 +5,8 @@
 #ifndef DNN_BACKEND_HELPER_HPP_
 #define DNN_BACKEND_HELPER_HPP_
 #include <iostream>
-#include <vector>
 #include <opencv2/dnn.hpp>
+#include <vector>
 
 class DnnBackendListHelper
 {

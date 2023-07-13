@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Magnitude::Magnitude() : Component(ProcessOrder::OutOfOrder)
 {
@@ -44,15 +43,15 @@ void Magnitude::Process_(SignalBus const &inputs, SignalBus &outputs)
         if (IsEnabled()) {
             // Process Image
             if (in1->type() == CV_32F || in1->type() == CV_64F) {
-                if (in1->type() == in2->type() && in1->channels() == in2->channels() && in1->size == in2->size) {
+                if (in1->type() == in2->type() && in1->channels() == in2->channels() &&
+                    in1->size == in2->size) {
                     cv::Mat frame;
                     cv::magnitude(*in1, *in2, frame);
                     if (!frame.empty())
                         outputs.SetValue(0, frame);
                 }
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -60,7 +59,6 @@ void Magnitude::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Magnitude::HasGui(int interface)
 {
-
     return false;
 }
 

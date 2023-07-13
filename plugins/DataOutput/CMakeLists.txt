@@ -49,6 +49,7 @@ target_link_libraries(
         UdpSend
         ${IMGUI_LIBS}
         ${OpenCV_LIBS}
+        FlowCVEngine
 )
 
 if(WIN32)
@@ -89,6 +90,7 @@ target_link_libraries(
         TcpSend
         ${IMGUI_LIBS}
         ${OpenCV_LIBS}
+        FlowCVEngine
 )
 
 if(WIN32)
@@ -136,6 +138,7 @@ if(APPLE)
                 ${SER_ENUM_LIB}
                 ${FOUNDATION_LIBRARY}
                 ${IOKIT_LIBRARY}
+                FlowCVEngine
         )
 else()
         target_link_libraries(
@@ -143,6 +146,7 @@ else()
                 ${IMGUI_LIBS}
                 ${OpenCV_LIBS}
                 ${SER_ENUM_LIB}
+                FlowCVEngine
         )
 endif()
 
@@ -185,6 +189,7 @@ target_link_libraries(
         OscSend
         ${IMGUI_LIBS}
         ${OpenCV_LIBS}
+        FlowCVEngine
 )
 
 if(WIN32)
@@ -225,6 +230,7 @@ target_link_libraries(
         CsvFile
         ${IMGUI_LIBS}
         ${OpenCV_LIBS}
+        FlowCVEngine
 )
 
 if(WIN32)

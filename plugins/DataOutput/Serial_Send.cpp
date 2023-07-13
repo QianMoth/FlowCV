@@ -9,11 +9,9 @@ using namespace DSPatchables;
 
 int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables::internal
-{
+namespace DSPatch::DSPatchables::internal {
 class SerialSend
-{
-};
+{};
 }  // namespace DSPatch::DSPatchables::internal
 
 SerialSend::SerialSend() : Component(ProcessOrder::OutOfOrder), p(new internal::SerialSend())
@@ -28,7 +26,8 @@ SerialSend::SerialSend() : Component(ProcessOrder::OutOfOrder), p(new internal::
 
     // 1 inputs
     SetInputCount_(5, {"bool", "int", "float", "str", "json"},
-        {IoType::Io_Type_Bool, IoType::Io_Type_Int, IoType::Io_Type_Float, IoType::Io_Type_String, IoType::Io_Type_JSON});
+                   {IoType::Io_Type_Bool, IoType::Io_Type_Int, IoType::Io_Type_Float,
+                    IoType::Io_Type_String, IoType::Io_Type_JSON});
 
     // 0 outputs
     SetOutputCount_(0);
@@ -70,9 +69,12 @@ SerialSend::SerialSend() : Component(ProcessOrder::OutOfOrder), p(new internal::
     last_time_ = current_time_;
 
     sp_->bind_init([&]() {
-        sp_->socket().set_option(asio::serial_port::flow_control((asio::serial_port::flow_control::type)flow_control_index_));
-        sp_->socket().set_option(asio::serial_port::parity((asio::serial_port::parity::type)parity_index_));
-        sp_->socket().set_option(asio::serial_port::stop_bits((asio::serial_port::stop_bits::type)stop_bits_index_));
+        sp_->socket().set_option(asio::serial_port::flow_control(
+            (asio::serial_port::flow_control::type)flow_control_index_));
+        sp_->socket().set_option(
+            asio::serial_port::parity((asio::serial_port::parity::type)parity_index_));
+        sp_->socket().set_option(
+            asio::serial_port::stop_bits((asio::serial_port::stop_bits::type)stop_bits_index_));
         sp_->socket().set_option(asio::serial_port::character_size(char_size_index_ + 5));
     });
 
@@ -109,7 +111,8 @@ void SerialSend::SetEOLSeq_()
     }
 }
 
-template<typename T> std::vector<uint8_t> SerialSend::GenerateOutBuffer_(T data)
+template <typename T>
+std::vector<uint8_t> SerialSend::GenerateOutBuffer_(T data)
 {
     std::vector<uint8_t> outBuffer;
     if (send_as_binary_) {
@@ -117,8 +120,7 @@ template<typename T> std::vector<uint8_t> SerialSend::GenerateOutBuffer_(T data)
         for (int i = 0; i < sizeof(T); i++) {
             outBuffer.emplace_back(d[i]);
         }
-    }
-    else {
+    } else {
         std::string buf;
         if (typeid(T).name() == typeid(char).name())
             buf = data;
@@ -148,14 +150,15 @@ void SerialSend::Process_(SignalBus const &inputs, SignalBus &outputs)
         if (sp_ != nullptr) {
             if (sp_->is_started()) {
                 current_time_ = std::chrono::steady_clock::now();
-                auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ - last_time_).count();
+                auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ -
+                                                                                   last_time_)
+                                 .count();
                 bool readyToSend = false;
                 if (transmit_rate_ > 0) {
                     if (delta >= (long long)rate_val_) {
                         readyToSend = true;
                     }
-                }
-                else
+                } else
                     readyToSend = true;
 
                 if (in1) {
@@ -163,26 +166,22 @@ void SerialSend::Process_(SignalBus const &inputs, SignalBus &outputs)
                         std::vector<uint8_t> buf = GenerateOutBuffer_<bool>(*in1);
                         sp_->send(asio::buffer(buf.data(), buf.size()));
                     }
-                }
-                else if (in2) {
+                } else if (in2) {
                     if (readyToSend) {
                         std::vector<uint8_t> buf = GenerateOutBuffer_<int>(*in2);
                         sp_->send(asio::buffer(buf.data(), buf.size()));
                     }
-                }
-                else if (in3) {
+                } else if (in3) {
                     if (readyToSend) {
                         std::vector<uint8_t> buf = GenerateOutBuffer_<float>(*in3);
                         sp_->send(asio::buffer(buf.data(), buf.size()));
                     }
-                }
-                else if (in4) {
+                } else if (in4) {
                     if (readyToSend) {
                         std::vector<uint8_t> buf = GenerateOutBuffer_<char>(*in4->c_str());
                         sp_->send(asio::buffer(buf.data(), buf.size()));
                     }
-                }
-                else if (in5) {
+                } else if (in5) {
                     if (!in5->empty()) {
                         nlohmann::json json_in_ = *in5;
                         if (readyToSend) {
@@ -223,7 +222,7 @@ void SerialSend::Process_(SignalBus const &inputs, SignalBus &outputs)
                     }
                 }
                 if (readyToSend) {
-                    float curRate = 1.0f / ((float)delta * 0.001f);
+                    float curRate = 1.0F / ((float)delta * 0.001F);
                     // std::cout << curRate << std::endl;
                     last_time_ = current_time_;
                 }
@@ -288,40 +287,48 @@ void SerialSend::UpdateGui(void *context, int interface)
             },
             (void *)&baud_rate_, (int)baud_rate_.size());
         ImGui::SetNextItemWidth(120);
-        if (ImGui::Combo(CreateControlString("Data Bits", GetInstanceName()).c_str(), &char_size_index_, " 5\0 6\0 7\0 8\0\0")) {
+        if (ImGui::Combo(CreateControlString("Data Bits", GetInstanceName()).c_str(),
+                         &char_size_index_, " 5\0 6\0 7\0 8\0\0")) {
             OpenSerialConn_();
         }
         ImGui::SetNextItemWidth(120);
-        if (ImGui::Combo(CreateControlString("Parity", GetInstanceName()).c_str(), &parity_index_, "None\0Odd\0Even\0\0")) {
+        if (ImGui::Combo(CreateControlString("Parity", GetInstanceName()).c_str(), &parity_index_,
+                         "None\0Odd\0Even\0\0")) {
             OpenSerialConn_();
         }
         ImGui::SetNextItemWidth(120);
-        if (ImGui::Combo(CreateControlString("Stop Bits", GetInstanceName()).c_str(), &stop_bits_index_, " 1\0 1.5\0 2\0\0")) {
+        if (ImGui::Combo(CreateControlString("Stop Bits", GetInstanceName()).c_str(),
+                         &stop_bits_index_, " 1\0 1.5\0 2\0\0")) {
             OpenSerialConn_();
         }
         ImGui::SetNextItemWidth(120);
-        if (ImGui::Combo(CreateControlString("Flow Control", GetInstanceName()).c_str(), &flow_control_index_, "None\0Software\0Hardware\0\0")) {
+        if (ImGui::Combo(CreateControlString("Flow Control", GetInstanceName()).c_str(),
+                         &flow_control_index_, "None\0Software\0Hardware\0\0")) {
             OpenSerialConn_();
         }
         ImGui::Separator();
         ImGui::SetNextItemWidth(120);
-        ImGui::Combo(CreateControlString("JSON Data Mode", GetInstanceName()).c_str(), &data_pack_mode_, "Text\0BSON\0CBOR\0MessagePack\0UBJSON\0\0");
+        ImGui::Combo(CreateControlString("JSON Data Mode", GetInstanceName()).c_str(),
+                     &data_pack_mode_, "Text\0BSON\0CBOR\0MessagePack\0UBJSON\0\0");
         ImGui::Separator();
         ImGui::SetNextItemWidth(120);
-        if (ImGui::Combo(CreateControlString("Rate (Hz)", GetInstanceName()).c_str(), &transmit_rate_, "Fastest\0 60\0 30\0 20\0 15\0 10\0 5\0 2\0 1\0\0")) {
+        if (ImGui::Combo(CreateControlString("Rate (Hz)", GetInstanceName()).c_str(),
+                         &transmit_rate_, "Fastest\0 60\0 30\0 20\0 15\0 10\0 5\0 2\0 1\0\0")) {
             if (transmit_rate_ > 0)
-                rate_val_ = (1.0f / (float)rate_selection_[transmit_rate_]) * 1000.0f;
+                rate_val_ = (1.0F / (float)rate_selection_[transmit_rate_]) * 1000.0F;
             else
                 rate_val_ = 0;
         }
         ImGui::Separator();
-        if (ImGui::Combo(
-                CreateControlString("EOL Sequence", GetInstanceName()).c_str(), &eol_seq_index_, "None\0<CR>\0<LF>\0<CR><LF>\0<SPACE>\0<TAB>\0<COMMA>\0\0")) {
+        if (ImGui::Combo(CreateControlString("EOL Sequence", GetInstanceName()).c_str(),
+                         &eol_seq_index_,
+                         "None\0<CR>\0<LF>\0<CR><LF>\0<SPACE>\0<TAB>\0<COMMA>\0\0")) {
             SetEOLSeq_();
         }
         ImGui::Separator();
         ImGui::TextUnformatted("Non-JSON Data Type Sending Options");
-        ImGui::Checkbox(CreateControlString("Send As Binary", GetInstanceName()).c_str(), &send_as_binary_);
+        ImGui::Checkbox(CreateControlString("Send As Binary", GetInstanceName()).c_str(),
+                        &send_as_binary_);
     }
 }
 
@@ -390,7 +397,7 @@ void SerialSend::SetState(std::string &&json_serialized)
     if (state.contains("data_rate")) {
         transmit_rate_ = state["data_rate"].get<int>();
         if (transmit_rate_ > 0)
-            rate_val_ = (1.0f / (float)rate_selection_[transmit_rate_]) * 1000.0f;
+            rate_val_ = (1.0F / (float)rate_selection_[transmit_rate_]) * 1000.0F;
         else
             rate_val_ = 0;
     }

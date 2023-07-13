@@ -5,14 +5,12 @@
 #include "hough_circles.hpp"
 
 using namespace DSPatch;
-using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
-HCircles::HCircles() : Component(ProcessOrder::OutOfOrder)
+DSPatchables::HCircles::HCircles() : Component(ProcessOrder::OutOfOrder)
 {
     // Name and Category
     SetComponentName_("Hough_Circles");
@@ -23,10 +21,12 @@ HCircles::HCircles() : Component(ProcessOrder::OutOfOrder)
     global_inst_counter++;
 
     // 1 inputs
-    SetInputCount_(2, {"orig", "canny"}, {DSPatch::IoType::Io_Type_CvMat, DSPatch::IoType::Io_Type_CvMat});
+    SetInputCount_(2, {"orig", "canny"},
+                   {DSPatch::IoType::Io_Type_CvMat, DSPatch::IoType::Io_Type_CvMat});
 
     // 2 outputs
-    SetOutputCount_(2, {"vis", "circles"}, {DSPatch::IoType::Io_Type_CvMat, DSPatch::IoType::Io_Type_JSON});
+    SetOutputCount_(2, {"vis", "circles"},
+                    {DSPatch::IoType::Io_Type_CvMat, DSPatch::IoType::Io_Type_JSON});
 
     dp_ = 2;
     min_dist_ = 150;
@@ -35,23 +35,23 @@ HCircles::HCircles() : Component(ProcessOrder::OutOfOrder)
     min_radius_ = 0;
     max_radius_ = 0;
 
-    circle_color_ = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
-    center_color_ = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+    circle_color_ = ImVec4(1.0F, 0.0F, 0.0F, 1.0F);
+    center_color_ = ImVec4(0.0F, 1.0F, 0.0F, 1.0F);
     ;
-    text_color_ = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    text_color_ = ImVec4(1.0F, 1.0F, 1.0F, 1.0F);
     ;
     fill_circle_ = false;
     show_radius_ = true;
     circle_thickness_ = 2;
     show_center_ = true;
-    text_scale_ = 1.0f;
+    text_scale_ = 1.0F;
     text_thickness_ = 2;
     text_offset_ = 10;
 
     SetEnabled(true);
 }
 
-void HCircles::Process_(SignalBus const &inputs, SignalBus &outputs)
+void DSPatchables::HCircles::Process_(SignalBus const &inputs, SignalBus &outputs)
 {
     // Input 1 Handler
     auto in1 = inputs.GetValue<cv::Mat>(1);
@@ -62,7 +62,8 @@ void HCircles::Process_(SignalBus const &inputs, SignalBus &outputs)
 
     if (!in1->empty()) {
         if (IsEnabled()) {
-            cv::Mat cannyImg, visImg;
+            cv::Mat cannyImg;
+            cv::Mat visImg;
 
             in1->copyTo(cannyImg);
 
@@ -71,17 +72,16 @@ void HCircles::Process_(SignalBus const &inputs, SignalBus &outputs)
                 cv::cvtColor(cannyImg, cannyImg, cv::COLOR_BGR2GRAY);
             }
             std::vector<cv::Vec3f> circles;
-            cv::HoughCircles(cannyImg, circles, cv::HOUGH_GRADIENT, dp_, min_dist_, param1_, param2_, min_radius_, max_radius_);
+            cv::HoughCircles(cannyImg, circles, cv::HOUGH_GRADIENT, dp_, min_dist_, param1_,
+                             param2_, min_radius_, max_radius_);
 
             if (in2) {
                 if (!in2->empty()) {
                     in2->copyTo(visImg);
-                }
-                else {
+                } else {
                     visImg = cv::Mat(cannyImg.rows, cannyImg.cols, CV_8UC3, cv::Scalar(0, 0, 0));
                 }
-            }
-            else {
+            } else {
                 visImg = cv::Mat(cannyImg.rows, cannyImg.cols, CV_8UC3, cv::Scalar(0, 0, 0));
             }
             nlohmann::json json_out;
@@ -95,28 +95,46 @@ void HCircles::Process_(SignalBus const &inputs, SignalBus &outputs)
                 nlohmann::json cTmp;
                 cTmp["x"] = c[0];
                 cTmp["y"] = c[1];
-                cTmp["size"] = c[2] * 2.0f;
+                cTmp["size"] = c[2] * 2.0F;
                 cv::KeyPoint kp;
                 jCircles.emplace_back(cTmp);
                 cv::Point center(cvRound(c[0]), cvRound(c[1]));
                 int radius = cvRound(c[2]);
                 // draw the circle outline
-                if (fill_circle_)
-                    circle(visImg, center, radius, cv::Scalar(circle_color_.z * 255, circle_color_.y * 255, circle_color_.x * 255), -1, 8, 0);
-                else
-                    circle(visImg, center, radius, cv::Scalar(circle_color_.z * 255, circle_color_.y * 255, circle_color_.x * 255), circle_thickness_, 8, 0);
+                if (fill_circle_) {
+                    cv::circle(visImg, center, radius,
+                               cv::Scalar(circle_color_.z * 255, circle_color_.y * 255,
+                                          circle_color_.x * 255),
+                               -1, 8, 0);
+                } else {
+                    circle(visImg, center, radius,
+                           cv::Scalar(circle_color_.z * 255, circle_color_.y * 255,
+                                      circle_color_.x * 255),
+                           circle_thickness_, 8, 0);
+                }
 
                 // draw the circle center
-                if (show_center_)
-                    circle(visImg, center, 3, cv::Scalar(center_color_.z * 255, center_color_.y * 255, center_color_.x * 255), -1, 8, 0);
+                if (show_center_) {
+                    circle(visImg, center, 3,
+                           cv::Scalar(center_color_.z * 255, center_color_.y * 255,
+                                      center_color_.x * 255),
+                           -1, 8, 0);
+                }
 
                 // draw radius test
                 if (show_radius_) {
                     cv::Point textPos;
-                    textPos.x = (center.x - 10) + (int)(sin((float)text_offset_ / 50.0f) * 20.0f);
-                    textPos.y = (center.y + 6) - (int)(cos((float)text_offset_ / 50.0f) * 20.0f);
-                    cv::putText(visImg, std::to_string(radius), textPos, cv::FONT_HERSHEY_SIMPLEX, text_scale_,
-                        cv::Scalar(text_color_.z * 255, text_color_.y * 255, text_color_.x * 255), text_thickness_);
+                    textPos.x =
+                        (center.x - 10) +
+                        static_cast<int>(sin(static_cast<float>(text_offset_) / 50.0F) * 20.0F);
+                    textPos.y =
+                        (center.y + 6) -
+                        static_cast<int>(cos(static_cast<float>(text_offset_) / 50.0F) * 20.0F);
+                    cv::putText(
+                        visImg, std::to_string(radius), textPos, cv::FONT_HERSHEY_SIMPLEX,
+                        text_scale_,
+                        cv::Scalar(text_color_.z * 255, text_color_.y * 255, text_color_.x * 255),
+                        text_thickness_);
                 }
             }
             if (!visImg.empty()) {
@@ -124,59 +142,69 @@ void HCircles::Process_(SignalBus const &inputs, SignalBus &outputs)
                 json_out["data"] = jCircles;
                 outputs.SetValue(1, json_out);
             }
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
 }
 
-bool HCircles::HasGui(int interface)
+bool DSPatchables::HCircles::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
-    if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
-        return true;
-    }
-
-    return false;
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
+    return interface == static_cast<int>(FlowCV::GuiInterfaceType_Controls);
 }
 
-void HCircles::UpdateGui(void *context, int interface)
+void DSPatchables::HCircles::UpdateGui(void *context, int interface)
 {
-    auto *imCurContext = (ImGuiContext *)context;
+    auto *imCurContext = static_cast<ImGuiContext *>(context);
     ImGui::SetCurrentContext(imCurContext);
 
-    if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
+    if (interface == static_cast<int>(FlowCV::GuiInterfaceType_Controls)) {
         ImGui::Text("Detection Settings");
         ImGui::Separator();
-        ImGui::DragFloat(CreateControlString("Inv Acc Res", GetInstanceName()).c_str(), &dp_, 0.1f, 1.0f, 100.0f, "%.2f");
-        ImGui::DragFloat(CreateControlString("Min Dist", GetInstanceName()).c_str(), &min_dist_, 1.0f, 1.0f, 2000.0f, "%.2f");
-        ImGui::DragFloat(CreateControlString("Param 1", GetInstanceName()).c_str(), &param1_, 0.1f, 1.0f, 2000.0f, "%.2f");
-        ImGui::DragFloat(CreateControlString("Param 2", GetInstanceName()).c_str(), &param2_, 0.1f, 1.0f, 2000.0f, "%.2f");
-        ImGui::DragInt(CreateControlString("Min Radius", GetInstanceName()).c_str(), &min_radius_, 0.25f, 0, 1000);
-        ImGui::DragInt(CreateControlString("Max Radius", GetInstanceName()).c_str(), &max_radius_, 0.25f, 0, 1000);
+        ImGui::DragFloat(CreateControlString("Inv Acc Res", GetInstanceName()).c_str(), &dp_, 0.1F,
+                         1.0F, 100.0F, "%.2f");
+        ImGui::DragFloat(CreateControlString("Min Dist", GetInstanceName()).c_str(), &min_dist_,
+                         1.0F, 1.0F, 2000.0F, "%.2f");
+        ImGui::DragFloat(CreateControlString("Param 1", GetInstanceName()).c_str(), &param1_, 0.1F,
+                         1.0F, 2000.0F, "%.2f");
+        ImGui::DragFloat(CreateControlString("Param 2", GetInstanceName()).c_str(), &param2_, 0.1F,
+                         1.0F, 2000.0F, "%.2f");
+        ImGui::DragInt(CreateControlString("Min Radius", GetInstanceName()).c_str(), &min_radius_,
+                       0.25F, 0, 1000);
+        ImGui::DragInt(CreateControlString("Max Radius", GetInstanceName()).c_str(), &max_radius_,
+                       0.25F, 0, 1000);
         ImGui::Separator();
         ImGui::Text("Visualization Settings");
         ImGui::Separator();
-        ImGui::ColorEdit3(CreateControlString("Circle Color", GetInstanceName()).c_str(), (float *)&circle_color_);
-        ImGui::DragInt(CreateControlString("Circle Thickness", GetInstanceName()).c_str(), &circle_thickness_, 0.1f, 1, 50);
-        ImGui::Checkbox(CreateControlString("Fill Circle", GetInstanceName()).c_str(), &fill_circle_);
-        ImGui::ColorEdit3(CreateControlString("Center Color", GetInstanceName()).c_str(), (float *)&center_color_);
-        ImGui::Checkbox(CreateControlString("Show Center", GetInstanceName()).c_str(), &show_center_);
-        ImGui::ColorEdit3(CreateControlString("Text Color", GetInstanceName()).c_str(), (float *)&text_color_);
-        ImGui::Checkbox(CreateControlString("Show Radius", GetInstanceName()).c_str(), &show_radius_);
-        ImGui::DragInt(CreateControlString("Text Offset", GetInstanceName()).c_str(), &text_offset_, 0.25f, 0, 300);
-        ImGui::DragFloat(CreateControlString("Text Scale", GetInstanceName()).c_str(), &text_scale_, 0.01f, 0.1f, 20.0f);
-        ImGui::DragInt(CreateControlString("Text Thickness", GetInstanceName()).c_str(), &text_thickness_, 0.25f, 1, 30);
+        ImGui::ColorEdit3(CreateControlString("Circle Color", GetInstanceName()).c_str(),
+                          reinterpret_cast<float *>(&circle_color_));
+        ImGui::DragInt(CreateControlString("Circle Thickness", GetInstanceName()).c_str(),
+                       &circle_thickness_, 0.1F, 1, 50);
+        ImGui::Checkbox(CreateControlString("Fill Circle", GetInstanceName()).c_str(),
+                        &fill_circle_);
+        ImGui::ColorEdit3(CreateControlString("Center Color", GetInstanceName()).c_str(),
+                          reinterpret_cast<float *>(&center_color_));
+        ImGui::Checkbox(CreateControlString("Show Center", GetInstanceName()).c_str(),
+                        &show_center_);
+        ImGui::ColorEdit3(CreateControlString("Text Color", GetInstanceName()).c_str(),
+                          reinterpret_cast<float *>(&text_color_));
+        ImGui::Checkbox(CreateControlString("Show Radius", GetInstanceName()).c_str(),
+                        &show_radius_);
+        ImGui::DragInt(CreateControlString("Text Offset", GetInstanceName()).c_str(), &text_offset_,
+                       0.25F, 0, 300);
+        ImGui::DragFloat(CreateControlString("Text Scale", GetInstanceName()).c_str(), &text_scale_,
+                         0.01F, 0.1F, 20.0F);
+        ImGui::DragInt(CreateControlString("Text Thickness", GetInstanceName()).c_str(),
+                       &text_thickness_, 0.25F, 1, 30);
     }
 }
 
-std::string HCircles::GetState()
+std::string DSPatchables::HCircles::GetState()
 {
-    using namespace nlohmann;
-
-    json state;
+    nlohmann::json state;
 
     state["dp"] = dp_;
     state["min_dist"] = min_dist_;
@@ -191,17 +219,17 @@ std::string HCircles::GetState()
     state["show_radius"] = show_radius_;
     state["show_center"] = show_center_;
     state["fill_circle"] = fill_circle_;
-    json circColor;
+    nlohmann::json circColor;
     circColor["R"] = circle_color_.x;
     circColor["G"] = circle_color_.y;
     circColor["B"] = circle_color_.z;
     state["circle_color"] = circColor;
-    json centColor;
+    nlohmann::json centColor;
     centColor["R"] = center_color_.x;
     centColor["G"] = center_color_.y;
     centColor["B"] = center_color_.z;
     state["center_color"] = centColor;
-    json txtColor;
+    nlohmann::json txtColor;
     txtColor["R"] = text_color_.x;
     txtColor["G"] = text_color_.y;
     txtColor["B"] = text_color_.z;
@@ -212,11 +240,9 @@ std::string HCircles::GetState()
     return stateSerialized;
 }
 
-void HCircles::SetState(std::string &&json_serialized)
+void DSPatchables::HCircles::SetState(std::string &&json_serialized)
 {
-    using namespace nlohmann;
-
-    json state = json::parse(json_serialized);
+    nlohmann::json state = nlohmann::json::parse(json_serialized);
 
     if (state.contains("dp")) {
         dp_ = state["dp"].get<float>();

@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Bitwise::Bitwise() : Component(ProcessOrder::OutOfOrder)
 {
@@ -23,7 +22,8 @@ Bitwise::Bitwise() : Component(ProcessOrder::OutOfOrder)
     global_inst_counter++;
 
     // 3 inputs
-    SetInputCount_(3, {"in1", "in2", "mask"}, {IoType::Io_Type_CvMat, IoType::Io_Type_CvMat, IoType::Io_Type_CvMat});
+    SetInputCount_(3, {"in1", "in2", "mask"},
+                   {IoType::Io_Type_CvMat, IoType::Io_Type_CvMat, IoType::Io_Type_CvMat});
 
     // 1 outputs
     SetOutputCount_(1, {"out"}, {IoType::Io_Type_CvMat});
@@ -52,8 +52,7 @@ void Bitwise::Process_(SignalBus const &inputs, SignalBus &outputs)
             // Check Mask
             if (!inMask) {
                 mask = cv::Mat(in1->rows, in1->cols, CV_8UC1, 255);
-            }
-            else {
+            } else {
                 inMask->copyTo(mask);
             }
 
@@ -66,13 +65,11 @@ void Bitwise::Process_(SignalBus const &inputs, SignalBus &outputs)
                     cv::bitwise_or(*in1, *in1, frame_out, mask);
                 else if (bitwise_mode_ == 3)
                     cv::bitwise_xor(*in1, *in1, frame_out, mask);
-            }
-            else {
+            } else {
                 cv::Mat frame2;
                 if (in1->size() != in2->size()) {
                     cv::resize(*in2, frame2, in1->size());
-                }
-                else {
+                } else {
                     in2->copyTo(frame2);
                 }
 
@@ -87,8 +84,7 @@ void Bitwise::Process_(SignalBus const &inputs, SignalBus &outputs)
             }
 
             outputs.SetValue(0, frame_out);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -96,8 +92,9 @@ void Bitwise::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Bitwise::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -111,7 +108,8 @@ void Bitwise::UpdateGui(void *context, int interface)
     ImGui::SetCurrentContext(imCurContext);
 
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
-        ImGui::Combo(CreateControlString("Bitwise Mode", GetInstanceName()).c_str(), &bitwise_mode_, "AND\0NOT\0OR\0XOR\0\0");
+        ImGui::Combo(CreateControlString("Bitwise Mode", GetInstanceName()).c_str(), &bitwise_mode_,
+                     "AND\0NOT\0OR\0XOR\0\0");
     }
 }
 

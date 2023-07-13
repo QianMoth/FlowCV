@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 JsonViewer::JsonViewer() : Component(ProcessOrder::OutOfOrder)
 {
@@ -53,8 +52,9 @@ void JsonViewer::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool JsonViewer::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Main) {
         return true;
     }
@@ -71,7 +71,8 @@ void JsonViewer::UpdateGui(void *context, int interface)
     if (interface == (int)FlowCV::GuiInterfaceType_Main) {
         std::string title = "JSON_Viewer_" + std::to_string(GetInstanceCount());
         ImGui::Begin(CreateControlString(title.c_str(), GetInstanceName()).c_str());
-        ImGui::Checkbox(CreateControlString("Show Raw Data", GetInstanceName()).c_str(), &show_raw_out_);
+        ImGui::Checkbox(CreateControlString("Show Raw Data", GetInstanceName()).c_str(),
+                        &show_raw_out_);
         if (show_raw_out_) {
             if (!json_data_.empty()) {
                 ImGui::TextUnformatted(json_data_.dump(4).c_str());
@@ -82,18 +83,19 @@ void JsonViewer::UpdateGui(void *context, int interface)
                     ImGui::EndPopup();
                 }
             }
-        }
-        else {
+        } else {
             if (!json_data_.empty()) {
                 if (json_data_.contains("data")) {
                     int colCnt = 0;
                     if (!json_data_["data"].empty()) {
-                        for (nlohmann::json::iterator it = json_data_["data"].at(0).begin(); it != json_data_["data"].at(0).end(); ++it)
+                        for (nlohmann::json::iterator it = json_data_["data"].at(0).begin();
+                             it != json_data_["data"].at(0).end(); ++it)
                             colCnt++;
                         if (colCnt > 0) {
                             ImGui::Columns(colCnt, "json");
                             ImGui::Separator();
-                            for (nlohmann::json::iterator it = json_data_["data"].at(0).begin(); it != json_data_["data"].at(0).end(); ++it) {
+                            for (nlohmann::json::iterator it = json_data_["data"].at(0).begin();
+                                 it != json_data_["data"].at(0).end(); ++it) {
                                 ImGui::Text("%s", it.key().c_str());
                                 ImGui::NextColumn();
                             }
@@ -110,8 +112,7 @@ void JsonViewer::UpdateGui(void *context, int interface)
                                             value = "true";
                                         else
                                             value = "false";
-                                    }
-                                    else if (it->is_string())
+                                    } else if (it->is_string())
                                         value = it->get<std::string>();
                                     else if (it->is_array())
                                         value = "<Array Data>";

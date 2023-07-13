@@ -3,6 +3,7 @@
 //
 
 #include "dnn_text_detection.hpp"
+
 #include <fstream>
 #include <sstream>
 
@@ -11,8 +12,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 TextDetection::TextDetection() : Component(ProcessOrder::OutOfOrder)
 {
@@ -58,14 +58,15 @@ TextDetection::TextDetection() : Component(ProcessOrder::OutOfOrder)
 
 void TextDetection::InitDnn_()
 {
-
     try {
         net_ = std::make_unique<cv::dnn::TextDetectionModel_DB>(model_path_);
         net_->setPreferableBackend(current_backend_);
         net_->setPreferableTarget(current_target_);
-        net_->setBinaryThreshold(bin_thresh_).setPolygonThreshold(poly_thresh_).setUnclipRatio(unclip_ratio_).setMaxCandidates(max_candidates_);
-    }
-    catch (...) {
+        net_->setBinaryThreshold(bin_thresh_)
+            .setPolygonThreshold(poly_thresh_)
+            .setUnclipRatio(unclip_ratio_)
+            .setMaxCandidates(max_candidates_);
+    } catch (...) {
         std::cerr << "DNN Initialization Error" << std::endl;
         net_load_error = true;
         is_initialized_ = false;
@@ -95,19 +96,20 @@ void TextDetection::Process_(SignalBus const &inputs, SignalBus &outputs)
             if (pre_proc_resize_) {
                 if (model_res_[0] > 0 && model_res_[1] > 0) {
                     cv::resize(*in1, frame, modelSize);
-                }
-                else
+                } else
                     frame = orig;
-            }
-            else
+            } else
                 frame = orig;
 
             try {
-                net_->setBinaryThreshold(bin_thresh_).setPolygonThreshold(poly_thresh_).setUnclipRatio(unclip_ratio_).setMaxCandidates(max_candidates_);
-                net_->setInputParams(scale_, modelSize, cv::Scalar(mean_[0], mean_[1], mean_[2]), swap_rb_, false);
+                net_->setBinaryThreshold(bin_thresh_)
+                    .setPolygonThreshold(poly_thresh_)
+                    .setUnclipRatio(unclip_ratio_)
+                    .setMaxCandidates(max_candidates_);
+                net_->setInputParams(scale_, modelSize, cv::Scalar(mean_[0], mean_[1], mean_[2]),
+                                     swap_rb_, false);
                 net_->detect(frame, results);
-            }
-            catch (std::exception &e) {
+            } catch (std::exception &e) {
                 std::cerr << GetInstanceName() << ", Error Computing DNN" << std::endl;
                 std::cerr << e.what() << std::endl;
                 return;
@@ -131,8 +133,7 @@ void TextDetection::Process_(SignalBus const &inputs, SignalBus &outputs)
                         float SY = (float)in1->rows / float(frame.rows);
                         jPoint["x"] = (int)((float)p.x * SX);
                         jPoint["y"] = (int)((float)p.y * SY);
-                    }
-                    else {
+                    } else {
                         jPoint["x"] = p.x;
                         jPoint["y"] = p.y;
                     }
@@ -143,7 +144,9 @@ void TextDetection::Process_(SignalBus const &inputs, SignalBus &outputs)
             }
 
             if (draw_detections_)
-                polylines(frame, results, true, cv::Scalar(bbox_color_.z * 255, bbox_color_.y * 255, bbox_color_.x * 255), bbox_thickness_);
+                polylines(frame, results, true,
+                          cv::Scalar(bbox_color_.z * 255, bbox_color_.y * 255, bbox_color_.x * 255),
+                          bbox_thickness_);
 
             if (pre_proc_resize_) {
                 cv::resize(frame, orig, cv::Size(in1->cols, in1->rows));
@@ -153,8 +156,7 @@ void TextDetection::Process_(SignalBus const &inputs, SignalBus &outputs)
                 json_out["data"] = detected;
             outputs.SetValue(1, json_out);
             outputs.SetValue(0, orig);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -162,7 +164,8 @@ void TextDetection::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool TextDetection::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -175,21 +178,24 @@ void TextDetection::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         if (!model_path_.empty()) {
             std::string button_str;
             if (net_load_error)
                 ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Error Initializing Network");
             if (needs_reinit_ && is_initialized_)
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Network Needs To Be Reinitialized!");
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+                                   "Network Needs To Be Reinitialized!");
 
             if (is_initialized_)
                 button_str = "Reinitialize Network";
             else {
                 button_str = "Initialize Network";
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Network Needs To Be Initialized!");
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+                                   "Network Needs To Be Initialized!");
             }
             if (ImGui::Button(CreateControlString(button_str.c_str(), GetInstanceName()).c_str())) {
                 std::lock_guard<std::mutex> lk(io_mutex_);
@@ -199,7 +205,10 @@ void TextDetection::UpdateGui(void *context, int interface)
             if (ImGui::Combo(
                     CreateControlString("Backend", GetInstanceName()).c_str(), &dnn_backend_idx_,
                     [](void *data, int idx, const char **out_text) {
-                        *out_text = ((const std::vector<std::pair<std::string, cv::dnn::Backend>> *)data)->at(idx).first.c_str();
+                        *out_text =
+                            ((const std::vector<std::pair<std::string, cv::dnn::Backend>> *)data)
+                                ->at(idx)
+                                .first.c_str();
                         return true;
                     },
                     (void *)&backend_list_, (int)backend_list_.size())) {
@@ -215,7 +224,10 @@ void TextDetection::UpdateGui(void *context, int interface)
             if (ImGui::Combo(
                     CreateControlString("Target", GetInstanceName()).c_str(), &dnn_target_idx_,
                     [](void *data, int idx, const char **out_text) {
-                        *out_text = ((const std::vector<std::pair<std::string, cv::dnn::Target>> *)data)->at(idx).first.c_str();
+                        *out_text =
+                            ((const std::vector<std::pair<std::string, cv::dnn::Target>> *)data)
+                                ->at(idx)
+                                .first.c_str();
                         return true;
                     },
                     (void *)&target_list_, (int)target_list_.size())) {
@@ -243,44 +255,58 @@ void TextDetection::UpdateGui(void *context, int interface)
         if (show_model_dialog_)
             ImGui::OpenPopup(CreateControlString("Set Model", GetInstanceName()).c_str());
 
-        if (model_dialog_.showFileDialog(CreateControlString("Set Model", GetInstanceName()), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
-                ImVec2(700, 310), ".caffemodel,.bin,.onnx,.pb,.pth,.weights,.t7,.net", &show_model_dialog_)) {
+        if (model_dialog_.showFileDialog(
+                CreateControlString("Set Model", GetInstanceName()),
+                imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310),
+                ".caffemodel,.bin,.onnx,.pb,.pth,.weights,.t7,.net", &show_model_dialog_)) {
             model_path_ = model_dialog_.selected_path;
             show_model_dialog_ = false;
             needs_reinit_ = true;
         }
         ImGui::Separator();
         ImGui::SetNextItemWidth(70);
-        ImGui::DragInt(CreateControlString("Max Candidates", GetInstanceName()).c_str(), &max_candidates_, 0.5f, 1, 500);
+        ImGui::DragInt(CreateControlString("Max Candidates", GetInstanceName()).c_str(),
+                       &max_candidates_, 0.5f, 1, 500);
         ImGui::SetNextItemWidth(180);
-        ImGui::DragFloat3(CreateControlString("Mean", GetInstanceName()).c_str(), mean_, 0.1f, 0.0f, 500.0f, "%0.2f");
+        ImGui::DragFloat3(CreateControlString("Mean", GetInstanceName()).c_str(), mean_, 0.1f, 0.0f,
+                          500.0f, "%0.2f");
         ImGui::SetNextItemWidth(100);
-        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &scale_, 0.0001f, 0.0f, 10.0f, "%0.7f");
+        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &scale_, 0.0001f,
+                         0.0f, 10.0f, "%0.7f");
         ImGui::SetNextItemWidth(70);
-        if (ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &model_res_[0], 0.5f, 224, 1000)) {
+        if (ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &model_res_[0],
+                           0.5f, 224, 1000)) {
             needs_reinit_ = true;
         }
         ImGui::SameLine();
         ImGui::SetNextItemWidth(70);
-        if (ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &model_res_[1], 0.5f, 224, 1000)) {
+        if (ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &model_res_[1],
+                           0.5f, 224, 1000)) {
             needs_reinit_ = true;
         }
         ImGui::SetNextItemWidth(80);
-        ImGui::DragFloat(CreateControlString("Binary Threshold", GetInstanceName()).c_str(), &bin_thresh_, 0.01f, 0.0f, 1.0f, "%0.2f");
+        ImGui::DragFloat(CreateControlString("Binary Threshold", GetInstanceName()).c_str(),
+                         &bin_thresh_, 0.01f, 0.0f, 1.0f, "%0.2f");
         ImGui::SetNextItemWidth(80);
-        ImGui::DragFloat(CreateControlString("Poly Threshold", GetInstanceName()).c_str(), &poly_thresh_, 0.01f, 0.0f, 1.0f, "%0.2f");
+        ImGui::DragFloat(CreateControlString("Poly Threshold", GetInstanceName()).c_str(),
+                         &poly_thresh_, 0.01f, 0.0f, 1.0f, "%0.2f");
         ImGui::SetNextItemWidth(80);
-        ImGui::DragFloat(CreateControlString("Unclip Ratio", GetInstanceName()).c_str(), &unclip_ratio_, 0.01f, 0.0f, 5.0f, "%0.2f");
+        ImGui::DragFloat(CreateControlString("Unclip Ratio", GetInstanceName()).c_str(),
+                         &unclip_ratio_, 0.01f, 0.0f, 5.0f, "%0.2f");
         ImGui::Separator();
         ImGui::Checkbox(CreateControlString("RGB", GetInstanceName()).c_str(), &swap_rb_);
-        ImGui::Checkbox(CreateControlString("Preprocess Resize", GetInstanceName()).c_str(), &pre_proc_resize_);
+        ImGui::Checkbox(CreateControlString("Preprocess Resize", GetInstanceName()).c_str(),
+                        &pre_proc_resize_);
         ImGui::Separator();
-        ImGui::Checkbox(CreateControlString("Draw Detections", GetInstanceName()).c_str(), &draw_detections_);
+        ImGui::Checkbox(CreateControlString("Draw Detections", GetInstanceName()).c_str(),
+                        &draw_detections_);
         if (draw_detections_) {
             ImGui::SetNextItemWidth(80);
-            ImGui::DragInt(CreateControlString("BBox Thickness", GetInstanceName()).c_str(), &bbox_thickness_, 0.1f, 1, 10);
+            ImGui::DragInt(CreateControlString("BBox Thickness", GetInstanceName()).c_str(),
+                           &bbox_thickness_, 0.1f, 1, 10);
             ImGui::Separator();
-            ImGui::ColorEdit3(CreateControlString("BBox Color", GetInstanceName()).c_str(), (float *)&bbox_color_);
+            ImGui::ColorEdit3(CreateControlString("BBox Color", GetInstanceName()).c_str(),
+                              (float *)&bbox_color_);
         }
     }
 }

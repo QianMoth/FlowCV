@@ -9,11 +9,9 @@ using namespace DSPatchables;
 
 int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables::internal
-{
+namespace DSPatch::DSPatchables::internal {
 class ImageLoader
-{
-};
+{};
 }  // namespace DSPatch::DSPatchables::internal
 
 ImageLoader::ImageLoader() : Component(ProcessOrder::InOrder), p(new internal::ImageLoader())
@@ -36,24 +34,29 @@ ImageLoader::ImageLoader() : Component(ProcessOrder::InOrder), p(new internal::I
     fps_ = 30;
     fps_index_ = 7;
     last_time_ = std::chrono::steady_clock::now();
-    fps_time_ = (1.0f / (float)fps_) * 1000.0f;
+    fps_time_ = (1.0F / static_cast<float>(fps_)) * 1000.0F;
 
     SetEnabled(true);
 }
 
 void ImageLoader::Process_(SignalBus const &inputs, SignalBus &outputs)
 {
-    if (!IsEnabled())
+    if (!IsEnabled()) {
         SetEnabled(true);
+    }
 
     if (io_mutex_.try_lock()) {  // Try lock so other threads will skip if locked instead of waiting
         if (!frame_.empty()) {
             bool should_wait = true;
             while (should_wait) {
-                std::chrono::steady_clock::time_point current_time_ = std::chrono::steady_clock::now();
-                auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ - last_time_).count();
-                if (delta >= (uint32_t)fps_time_)
+                std::chrono::steady_clock::time_point current_time_ =
+                    std::chrono::steady_clock::now();
+                auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ -
+                                                                                   last_time_)
+                                 .count();
+                if (delta >= static_cast<uint32_t>(fps_time_)) {
                     should_wait = false;
+                }
             }
             outputs.SetValue(0, frame_);
         }
@@ -64,33 +67,33 @@ void ImageLoader::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool ImageLoader::HasGui(int interface)
 {
-    if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
-        return true;
-    }
-
-    return false;
+    return interface == static_cast<int>(FlowCV::GuiInterfaceType_Controls);
 }
 
 void ImageLoader::UpdateGui(void *context, int interface)
 {
-    auto *imCurContext = (ImGuiContext *)context;
+    auto *imCurContext = static_cast<ImGuiContext *>(context);
     ImGui::SetCurrentContext(imCurContext);
 
-    if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
+    if (interface == static_cast<int>(FlowCV::GuiInterfaceType_Controls)) {
         if (ImGui::Button(CreateControlString("Load Image", GetInstanceName()).c_str())) {
             show_file_dialog_ = true;
         }
         ImGui::Text("Loaded Image:");
-        if (image_file_.empty())
+        if (image_file_.empty()) {
             ImGui::Text("[None]");
-        else
+        } else {
             ImGui::TextWrapped("%s", image_file_.c_str());
+        }
 
-        if (show_file_dialog_)
+        if (show_file_dialog_) {
             ImGui::OpenPopup(CreateControlString("Load Image", GetInstanceName()).c_str());
+        }
 
-        if (file_dialog_.showFileDialog(CreateControlString("Load Image", GetInstanceName()), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
-                ImVec2(700, 310), ".png,.tga,.jpg,.tif", &show_file_dialog_)) {
+        if (file_dialog_.showFileDialog(CreateControlString("Load Image", GetInstanceName()),
+                                        imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
+                                        ImVec2(700, 310), ".png,.tga,.jpg,.tif",
+                                        &show_file_dialog_)) {
             std::lock_guard<std::mutex> lk(io_mutex_);
             image_file_ = file_dialog_.selected_path;
             frame_ = cv::imread(image_file_, true);
@@ -98,18 +101,17 @@ void ImageLoader::UpdateGui(void *context, int interface)
         }
         ImGui::SetNextItemWidth(80);
         const int fpsValues[] = {1, 3, 5, 10, 15, 20, 25, 30, 60, 120};
-        if (ImGui::Combo(CreateControlString("Output FPS", GetInstanceName()).c_str(), &fps_index_, " 1\0 3\0 5\0 10\0 15\0 20\0 25\0 30\0 60\0 120\0\0")) {
+        if (ImGui::Combo(CreateControlString("Output FPS", GetInstanceName()).c_str(), &fps_index_,
+                         " 1\0 3\0 5\0 10\0 15\0 20\0 25\0 30\0 60\0 120\0\0")) {
             fps_ = fpsValues[fps_index_];
-            fps_time_ = (1.0f / (float)fps_) * 1000.0f;
+            fps_time_ = (1.0F / static_cast<float>(fps_)) * 1000.0F;
         }
     }
 }
 
 std::string ImageLoader::GetState()
 {
-    using namespace nlohmann;
-
-    json state;
+    nlohmann::json state;
 
     state["image_path"] = image_file_;
     state["fps"] = fps_;
@@ -122,9 +124,7 @@ std::string ImageLoader::GetState()
 
 void ImageLoader::SetState(std::string &&json_serialized)
 {
-    using namespace nlohmann;
-
-    json state = json::parse(json_serialized);
+    nlohmann::json state = nlohmann::json::parse(json_serialized);
 
     if (state.contains("image_path")) {
         if (!state["image_path"].empty()) {
@@ -133,8 +133,10 @@ void ImageLoader::SetState(std::string &&json_serialized)
             frame_ = cv::imread(image_file_, true);
         }
     }
-    if (state.contains("fps"))
+    if (state.contains("fps")) {
         fps_ = state["fps"].get<int>();
-    if (state.contains("fps_index"))
+    }
+    if (state.contains("fps_index")) {
         fps_index_ = state["fps_index"].get<int>();
+    }
 }

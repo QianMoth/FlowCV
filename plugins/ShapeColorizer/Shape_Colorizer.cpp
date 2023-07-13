@@ -3,6 +3,7 @@
 //
 
 #include "Shape_Colorizer.hpp"
+
 #include <math.h>
 
 using namespace DSPatch;
@@ -10,12 +11,14 @@ using namespace DSPatchables;
 
 int32_t global_inst_counter = 0;
 
-template<typename I> std::string n2hexstr(I w, size_t hex_len = sizeof(I) << 1)
+template <typename I>
+std::string n2hexstr(I w, size_t hex_len = sizeof(I) << 1)
 {
     static const char *digits = "0123456789ABCDEF";
     std::string rc(hex_len, '0');
-    for (size_t i = 0, j = (hex_len - 1) * 4; i < hex_len; ++i, j -= 4)
-        rc[i] = digits[(w >> j) & 0x0f];
+    for (size_t i = 0, j = (hex_len - 1) * 4; i < hex_len; ++i, j -= 4) {
+        rc[i] = digits[(w >> j) & 0x0F];
+    }
     return rc;
 }
 
@@ -23,14 +26,29 @@ cv::Vec3f ColorToLab(float R, float G, float B)
 {
     // http://www.brucelindbloom.com
 
-    double r, g, b, X, Y, Z, fx, fy, fz, xr, yr, zr;
-    double Ls, fas, fbs;
-    double eps = 216.0f / 24389.0f;
-    double k = 24389.0f / 27.0f;
+    double r;
+    double g;
+    double b;
+    double X;
+    double Y;
+    double Z;
+    double fx;
+    double fy;
+    double fz;
+    double xr;
+    double yr;
+    double zr;
 
-    double Xr = 0.964221f;  // reference white D50
-    double Yr = 1.0f;
-    double Zr = 0.825211f;
+    double Ls;
+    double fas;
+    double fbs;
+
+    double eps = 216.0F / 24389.0F;
+    double k = 24389.0F / 27.0F;
+
+    double Xr = 0.964221F;  // reference white D50
+    double Yr = 1.0F;
+    double Zr = 0.825211F;
 
     // RGB to XYZ
     r = R;  // R 0..1
@@ -38,44 +56,50 @@ cv::Vec3f ColorToLab(float R, float G, float B)
     b = B;  // B 0..1
 
     // assuming sRGB (D65)
-    if (r <= 0.04045)
+    if (r <= 0.04045) {
         r = r / 12;
-    else
-        r = (float)pow((r + 0.055) / 1.055, 2.4);
+    } else {
+        r = static_cast<float>(pow((r + 0.055) / 1.055, 2.4));
+    }
 
-    if (g <= 0.04045)
+    if (g <= 0.04045) {
         g = g / 12;
-    else
-        g = (float)pow((g + 0.055) / 1.055, 2.4);
+    } else {
+        g = static_cast<float>(pow((g + 0.055) / 1.055, 2.4));
+    }
 
-    if (b <= 0.04045)
+    if (b <= 0.04045) {
         b = b / 12;
-    else
-        b = (float)pow((b + 0.055) / 1.055, 2.4);
+    } else {
+        b = static_cast<float>(pow((b + 0.055) / 1.055, 2.4));
+    }
 
-    X = 0.436052025f * r + 0.385081593f * g + 0.143087414f * b;
-    Y = 0.222491598f * r + 0.71688606f * g + 0.060621486f * b;
-    Z = 0.013929122f * r + 0.097097002f * g + 0.71418547f * b;
+    X = 0.436052025F * r + 0.385081593F * g + 0.143087414F * b;
+    Y = 0.222491598F * r + 0.71688606F * g + 0.060621486F * b;
+    Z = 0.013929122F * r + 0.097097002F * g + 0.71418547F * b;
 
     // XYZ to Lab
     xr = X / Xr;
     yr = Y / Yr;
     zr = Z / Zr;
 
-    if (xr > eps)
-        fx = (float)pow(xr, 1 / 3.0);
-    else
-        fx = (float)((k * xr + 16.0) / 116.0);
+    if (xr > eps) {
+        fx = static_cast<float>(pow(xr, 1 / 3.0));
+    } else {
+        fx = static_cast<float>((k * xr + 16.0) / 116.0);
+    }
 
-    if (yr > eps)
-        fy = (float)pow(yr, 1 / 3.0);
-    else
-        fy = (float)((k * yr + 16.0) / 116.0);
+    if (yr > eps) {
+        fy = static_cast<float>(pow(yr, 1 / 3.0));
+    } else {
+        fy = static_cast<float>((k * yr + 16.0) / 116.0);
+    }
 
-    if (zr > eps)
-        fz = (float)pow(zr, 1 / 3.0);
-    else
-        fz = (float)((k * zr + 16.0) / 116);
+    if (zr > eps) {
+        fz = static_cast<float>(pow(zr, 1 / 3.0));
+    } else {
+        fz = static_cast<float>((k * zr + 16.0) / 116);
+    }
 
     Ls = (116 * fy) - 16;
     fas = 500 * (fx - fy);
@@ -89,14 +113,13 @@ cv::Vec3f ColorToLab(float R, float G, float B)
     return lab;
 }
 
-namespace DSPatch::DSPatchables::internal
-{
+namespace DSPatch::DSPatchables::internal {
 class ShapeColorizer
-{
-};
+{};
 }  // namespace DSPatch::DSPatchables::internal
 
-ShapeColorizer::ShapeColorizer() : Component(ProcessOrder::OutOfOrder), p(new internal::ShapeColorizer())
+ShapeColorizer::ShapeColorizer()
+    : Component(ProcessOrder::OutOfOrder), p(new internal::ShapeColorizer())
 {
     // Name and Category
     SetComponentName_("Shape_Colorizer");
@@ -152,11 +175,12 @@ void ShapeColorizer::Process_(SignalBus const &inputs, SignalBus &outputs)
             cv::Point pos;
             pos.x = (w - 265) / 2;
             pos.y = h / 2;
-            cv::putText(frame, "Need to supply input frame for reference", pos, cv::HersheyFonts::FONT_HERSHEY_SIMPLEX, 0.4f, cv::Scalar(0, 0, 255), 1);
-            if (!frame.empty())
+            cv::putText(frame, "Need to supply input frame for reference", pos,
+                        cv::HersheyFonts::FONT_HERSHEY_SIMPLEX, 0.4F, cv::Scalar(0, 0, 255), 1);
+            if (!frame.empty()) {
                 outputs.SetValue(0, frame);
-        }
-        else {
+            }
+        } else {
             cv::Mat frame;
             in1->copyTo(frame);
             cv::Mat matFrame(h, w, CV_8UC3, cv::Scalar(0, 0, 0));
@@ -175,19 +199,24 @@ void ShapeColorizer::Process_(SignalBus const &inputs, SignalBus &outputs)
                             cv::Mat mat_8U;
                             cv::cvtColor(matFrame, mat_8U, cv::COLOR_BGR2GRAY);
                             cv::Rect crop;
-                            int x2, y2;
+                            int x2;
+                            int y2;
                             crop.x = pos.x - rad;
                             crop.y = pos.y - rad;
                             x2 = pos.x + rad;
                             y2 = pos.y + rad;
-                            if (crop.x < 0)
+                            if (crop.x < 0) {
                                 crop.x = 0;
-                            if (crop.y < 0)
+                            }
+                            if (crop.y < 0) {
                                 crop.y = 0;
-                            if (x2 >= frame.cols)
+                            }
+                            if (x2 >= frame.cols) {
                                 x2 = frame.cols - 1;
-                            if (y2 >= frame.rows)
+                            }
+                            if (y2 >= frame.rows) {
                                 y2 = frame.rows - 1;
+                            }
                             crop.width = x2 - crop.x;
                             crop.height = y2 - crop.y;
                             cv::Mat roi = frame(crop);
@@ -197,15 +226,16 @@ void ShapeColorizer::Process_(SignalBus const &inputs, SignalBus &outputs)
                             if (method_ == 1) {
                                 ImVec4 hsv;
                                 ImVec4 rgb;
-                                ImGui::ColorConvertRGBtoHSV(m[2] / 255.0f, m[1] / 255.0f, m[0] / 255.0f, hsv.x, hsv.y, hsv.z);
-                                hsv.y = 1.0f;
-                                hsv.z = 1.0f;
-                                ImGui::ColorConvertHSVtoRGB(hsv.x, hsv.y, hsv.z, rgb.x, rgb.y, rgb.z);
+                                ImGui::ColorConvertRGBtoHSV(m[2] / 255.0F, m[1] / 255.0F,
+                                                            m[0] / 255.0F, hsv.x, hsv.y, hsv.z);
+                                hsv.y = 1.0F;
+                                hsv.z = 1.0F;
+                                ImGui::ColorConvertHSVtoRGB(hsv.x, hsv.y, hsv.z, rgb.x, rgb.y,
+                                                            rgb.z);
                                 m[2] = rgb.x * 255;
                                 m[1] = rgb.y * 255;
                                 m[0] = rgb.z * 255;
-                            }
-                            else if (method_ == 2) {
+                            } else if (method_ == 2) {
                                 bool foundMatch = false;
                                 for (auto &c : color_match_list_) {
                                     cv::Scalar match(c.col.z * 255, c.col.y * 255, c.col.x * 255);
@@ -214,23 +244,24 @@ void ShapeColorizer::Process_(SignalBus const &inputs, SignalBus &outputs)
                                     if (dist_method_ == 0) {
                                         cv::Vec4d diff = match - m;
                                         distMeasure = cv::norm(diff);
-                                    }
-                                    else if (dist_method_ == 1) {
+                                    } else if (dist_method_ == 1) {
                                         cv::Vec3f lab1 = ColorToLab(c.col.x, c.col.y, c.col.z);
-                                        cv::Vec3f lab2 = ColorToLab(m[2] / 255.0f, m[1] / 255.0f, m[0] / 255.0f);
-                                        distMeasure = sqrt(pow(lab2[0] - lab1[0], 2) + pow(lab2[1] - lab1[1], 2) + pow(lab2[2] - lab1[2], 2));
+                                        cv::Vec3f lab2 =
+                                            ColorToLab(m[2] / 255.0F, m[1] / 255.0F, m[0] / 255.0F);
+                                        distMeasure = sqrt(pow(lab2[0] - lab1[0], 2) +
+                                                           pow(lab2[1] - lab1[1], 2) +
+                                                           pow(lab2[2] - lab1[2], 2));
                                     }
                                     if (abs(distMeasure) < match_threshold_) {
                                         if (d.contains("dist")) {
                                             float oldDist = d["dist"].get<float>();
                                             if (distMeasure < oldDist) {
                                                 m = match;
-                                                d["dist"] = (float)distMeasure;
+                                                d["dist"] = static_cast<float>(distMeasure);
                                                 d["class_id"] = c.tag;
                                                 foundMatch = true;
                                             }
-                                        }
-                                        else {
+                                        } else {
                                             m = match;
                                             d["dist"] = distMeasure;
                                             d["class_id"] = c.tag;
@@ -243,7 +274,8 @@ void ShapeColorizer::Process_(SignalBus const &inputs, SignalBus &outputs)
                                     d["class_id"] = "None";
                                 }
                             }
-                            uint32_t col = ((int)m[2] << 16) + ((int)m[1] << 8) + (int)m[0];
+                            uint32_t col = (static_cast<int>(m[2]) << 16) +
+                                           (static_cast<int>(m[1]) << 8) + static_cast<int>(m[0]);
                             std::string hex = "#";
                             hex += n2hexstr<uint32_t>(col, 6);
                             d["color"] = hex;
@@ -251,34 +283,41 @@ void ShapeColorizer::Process_(SignalBus const &inputs, SignalBus &outputs)
                                 cv::circle(frame, pos, rad, m, -1);
                                 if (show_labels_) {
                                     if (method_ != 2) {
-                                        cv::putText(frame, hex, cv::Point(pos.x - rad, pos.y), cv::FONT_HERSHEY_PLAIN, 0.65, cv::Scalar(255, 255, 255), 1.0);
-                                    }
-                                    else {
+                                        cv::putText(frame, hex, cv::Point(pos.x - rad, pos.y),
+                                                    cv::FONT_HERSHEY_PLAIN, 0.65,
+                                                    cv::Scalar(255, 255, 255), 1.0);
+                                    } else {
                                         if (d.contains("class_id")) {
                                             if (ignore_none_) {
-                                                if (d["class_id"].get<std::string>() == "None")
+                                                if (d["class_id"].get<std::string>() == "None") {
                                                     continue;
+                                                }
                                             }
-                                            cv::putText(frame, d["class_id"].get<std::string>(), cv::Point(pos.x - (rad * 0.5f), pos.y), cv::FONT_HERSHEY_PLAIN,
-                                                0.65, cv::Scalar(255, 255, 255), 1.0);
+                                            cv::putText(frame, d["class_id"].get<std::string>(),
+                                                        cv::Point(pos.x - (rad * 0.5F), pos.y),
+                                                        cv::FONT_HERSHEY_PLAIN, 0.65,
+                                                        cv::Scalar(255, 255, 255), 1.0);
                                         }
                                     }
                                 }
-                            }
-                            else {
+                            } else {
                                 cv::circle(matFrame, pos, rad, m, -1);
                                 if (show_labels_) {
                                     if (method_ != 2) {
-                                        cv::putText(matFrame, hex, cv::Point(pos.x - rad, pos.y), cv::FONT_HERSHEY_PLAIN, 0.65, cv::Scalar(255, 255, 255), 1.0);
-                                    }
-                                    else {
+                                        cv::putText(matFrame, hex, cv::Point(pos.x - rad, pos.y),
+                                                    cv::FONT_HERSHEY_PLAIN, 0.65,
+                                                    cv::Scalar(255, 255, 255), 1.0);
+                                    } else {
                                         if (d.contains("class_id")) {
                                             if (ignore_none_) {
-                                                if (d["class_id"].get<std::string>() == "None")
+                                                if (d["class_id"].get<std::string>() == "None") {
                                                     continue;
+                                                }
                                             }
-                                            cv::putText(matFrame, d["class_id"].get<std::string>(), cv::Point(pos.x - (rad * 0.5f), pos.y),
-                                                cv::FONT_HERSHEY_PLAIN, 0.65, cv::Scalar(255, 255, 255), 1.0);
+                                            cv::putText(matFrame, d["class_id"].get<std::string>(),
+                                                        cv::Point(pos.x - (rad * 0.5F), pos.y),
+                                                        cv::FONT_HERSHEY_PLAIN, 0.65,
+                                                        cv::Scalar(255, 255, 255), 1.0);
                                         }
                                     }
                                 }
@@ -289,47 +328,49 @@ void ShapeColorizer::Process_(SignalBus const &inputs, SignalBus &outputs)
                 outputs.SetValue(1, json_data_);
             }
             if (overlay_) {
-                if (!frame.empty())
+                if (!frame.empty()) {
                     outputs.SetValue(0, frame);
-            }
-            else {
-                if (!matFrame.empty())
+                }
+            } else {
+                if (!matFrame.empty()) {
                     outputs.SetValue(0, matFrame);
+                }
             }
         }
-    }
-    else {
+    } else {
         outputs.SetValue(0, *in1);
     }
 }
 
 bool ShapeColorizer::HasGui(int interface)
 {
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
-    if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
-        return true;
-    }
-
-    return false;
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
+    return interface == static_cast<int>(FlowCV::GuiInterfaceType_Controls);
 }
 
 void ShapeColorizer::UpdateGui(void *context, int interface)
 {
-    auto *imCurContext = (ImGuiContext *)context;
+    auto *imCurContext = static_cast<ImGuiContext *>(context);
     ImGui::SetCurrentContext(imCurContext);
 
-    if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
-        ImGui::Combo(CreateControlString("Color Method", GetInstanceName()).c_str(), &method_, "Mean\0Max\0Closest\0\0");
+    if (interface == static_cast<int>(FlowCV::GuiInterfaceType_Controls)) {
+        ImGui::Combo(CreateControlString("Color Method", GetInstanceName()).c_str(), &method_,
+                     "Mean\0Max\0Closest\0\0");
         ImGui::Checkbox(CreateControlString("Overlay", GetInstanceName()).c_str(), &overlay_);
-        ImGui::Checkbox(CreateControlString("Show Labels", GetInstanceName()).c_str(), &show_labels_);
-        ImGui::Checkbox(CreateControlString("Ignore None", GetInstanceName()).c_str(), &ignore_none_);
+        ImGui::Checkbox(CreateControlString("Show Labels", GetInstanceName()).c_str(),
+                        &show_labels_);
+        ImGui::Checkbox(CreateControlString("Ignore None", GetInstanceName()).c_str(),
+                        &ignore_none_);
         if (method_ == 2) {
             ImGui::Separator();
             ImGui::SetNextItemWidth(100);
-            ImGui::Combo(CreateControlString("Distance Method", GetInstanceName()).c_str(), &dist_method_, "RGB\0CIE76\0\0");
+            ImGui::Combo(CreateControlString("Distance Method", GetInstanceName()).c_str(),
+                         &dist_method_, "RGB\0CIE76\0\0");
             ImGui::SetNextItemWidth(80);
-            ImGui::DragInt(CreateControlString("Match Threshold", GetInstanceName()).c_str(), &match_threshold_, 0.25f, 1, 255);
+            ImGui::DragInt(CreateControlString("Match Threshold", GetInstanceName()).c_str(),
+                           &match_threshold_, 0.25F, 1, 255);
             ImGui::Separator();
             ImGui::TextUnformatted("Color Match List:");
             ImGui::Separator();
@@ -338,7 +379,7 @@ void ShapeColorizer::UpdateGui(void *context, int interface)
                 c.ctl_label = "Color##";
                 c.ctl_label += std::to_string(ctl_cnt_);
                 c.ctl_label += GetInstanceName();
-                c.col = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+                c.col = ImVec4(0.5F, 0.5F, 0.5F, 1.0F);
                 c.text_label = "Label##";
                 c.text_label += std::to_string(ctl_cnt_);
                 c.text_label += GetInstanceName();
@@ -360,8 +401,10 @@ void ShapeColorizer::UpdateGui(void *context, int interface)
                     color_match_list_.erase(color_match_list_.begin() + i);
                     continue;
                 }
-                ImGui::ColorEdit3(color_match_list_.at(i).ctl_label.c_str(), (float *)&color_match_list_.at(i).col);
-                ImGui::InputText(color_match_list_.at(i).text_label.c_str(), color_match_list_.at(i).tag, 32);
+                ImGui::ColorEdit3(color_match_list_.at(i).ctl_label.c_str(),
+                                  reinterpret_cast<float *>(&color_match_list_.at(i).col));
+                ImGui::InputText(color_match_list_.at(i).text_label.c_str(),
+                                 color_match_list_.at(i).tag, 32);
             }
         }
     }
@@ -369,9 +412,7 @@ void ShapeColorizer::UpdateGui(void *context, int interface)
 
 std::string ShapeColorizer::GetState()
 {
-    using namespace nlohmann;
-
-    json state;
+    nlohmann::json state;
 
     state["overlay"] = overlay_;
     state["show_labels"] = show_labels_;
@@ -379,10 +420,10 @@ std::string ShapeColorizer::GetState()
     state["threshold"] = match_threshold_;
     state["dist_method"] = dist_method_;
     state["ignore_none"] = ignore_none_;
-    json colorList;
+    nlohmann::json colorList;
     for (auto &c : color_match_list_) {
-        json colorEntry;
-        json color;
+        nlohmann::json colorEntry;
+        nlohmann::json color;
         color["R"] = c.col.x;
         color["G"] = c.col.y;
         color["B"] = c.col.z;
@@ -390,8 +431,9 @@ std::string ShapeColorizer::GetState()
         colorEntry["label"] = c.tag;
         colorList.emplace_back(colorEntry);
     }
-    if (!colorList.empty())
+    if (!colorList.empty()) {
         state["color_match"] = colorList;
+    }
 
     std::string stateSerialized = state.dump(4);
 
@@ -400,22 +442,26 @@ std::string ShapeColorizer::GetState()
 
 void ShapeColorizer::SetState(std::string &&json_serialized)
 {
-    using namespace nlohmann;
+    nlohmann::json state = nlohmann::json::parse(json_serialized);
 
-    json state = json::parse(json_serialized);
-
-    if (state.contains("overlay"))
+    if (state.contains("overlay")) {
         overlay_ = state["overlay"].get<bool>();
-    if (state.contains("ignore_none"))
+    }
+    if (state.contains("ignore_none")) {
         ignore_none_ = state["ignore_none"].get<bool>();
-    if (state.contains("dist_method"))
+    }
+    if (state.contains("dist_method")) {
         dist_method_ = state["dist_method"].get<int>();
-    if (state.contains("show_labels"))
+    }
+    if (state.contains("show_labels")) {
         show_labels_ = state["show_labels"].get<bool>();
-    if (state.contains("method"))
+    }
+    if (state.contains("method")) {
         method_ = state["method"].get<int>();
-    if (state.contains("threshold"))
+    }
+    if (state.contains("threshold")) {
         match_threshold_ = state["threshold"].get<int>();
+    }
     if (state.contains("color_match")) {
         color_match_list_.clear();
         ctl_cnt_ = 1;

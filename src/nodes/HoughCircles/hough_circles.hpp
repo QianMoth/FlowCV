@@ -2,8 +2,8 @@
 // Plugin HoughCircles
 //
 
-#ifndef FLOWCV_PLUGIN_HOUGH_CIRCLES_HPP_
-#define FLOWCV_PLUGIN_HOUGH_CIRCLES_HPP_
+#pragma once
+
 #include <DSPatch.h>
 
 #include <nlohmann/json.hpp>
@@ -12,8 +12,7 @@
 #include "imgui_opencv.hpp"
 #include "imgui_wrapper.hpp"
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 class HCircles final : public Component
 {
@@ -47,5 +46,3 @@ class HCircles final : public Component
 };
 
 }  // namespace DSPatch::DSPatchables
-
-#endif  // FLOWCV_PLUGIN_HOUGH_CIRCLES_HPP_

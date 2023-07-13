@@ -14,8 +14,7 @@
 #include "imgui_opencv.hpp"
 #include "imgui_wrapper.hpp"
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 class TextRecognition final : public Component
 {
   public:

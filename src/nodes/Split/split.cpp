@@ -9,8 +9,7 @@ using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 Split::Split() : Component(ProcessOrder::OutOfOrder)
 {
@@ -26,7 +25,9 @@ Split::Split() : Component(ProcessOrder::OutOfOrder)
     SetInputCount_(1, {"in"}, {IoType::Io_Type_CvMat});
 
     // 4 outputs
-    SetOutputCount_(4, {"r", "g", "b", "a"}, {IoType::Io_Type_CvMat, IoType::Io_Type_CvMat, IoType::Io_Type_CvMat, IoType::Io_Type_CvMat});
+    SetOutputCount_(4, {"r", "g", "b", "a"},
+                    {IoType::Io_Type_CvMat, IoType::Io_Type_CvMat, IoType::Io_Type_CvMat,
+                     IoType::Io_Type_CvMat});
 
     is_color_ = false;
 
@@ -64,7 +65,8 @@ void Split::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool Split::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }

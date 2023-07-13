@@ -1,8 +1,7 @@
 #pragma once
 #include <imgui.h>
 
-namespace ax::Drawing
-{
+namespace ax::Drawing {
 
 enum class IconType : ImU32
 {
@@ -14,6 +13,7 @@ enum class IconType : ImU32
     Diamond
 };
 
-void DrawIcon(ImDrawList *drawList, const ImVec2 &a, const ImVec2 &b, IconType type, bool filled, ImU32 color, ImU32 innerColor);
+void DrawIcon(ImDrawList *drawList, const ImVec2 &a, const ImVec2 &b, IconType type, bool filled,
+              ImU32 color, ImU32 innerColor);
 
 }  // namespace ax::Drawing

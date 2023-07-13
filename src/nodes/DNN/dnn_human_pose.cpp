@@ -3,16 +3,17 @@
 //
 
 #include "dnn_human_pose.hpp"
-#include "dnn_human_pose_helper.hpp"
+
 #include <fstream>
+
+#include "dnn_human_pose_helper.hpp"
 
 using namespace DSPatch;
 using namespace DSPatchables;
 
 static int32_t global_inst_counter = 0;
 
-namespace DSPatch::DSPatchables
-{
+namespace DSPatch::DSPatchables {
 
 HumanPose::HumanPose() : Component(ProcessOrder::OutOfOrder)
 {
@@ -63,8 +64,7 @@ void HumanPose::InitDnn_()
             if (lt.find("Concat") != std::string::npos)
                 has_concat_output_ = true;
         }
-    }
-    catch (...) {
+    } catch (...) {
         std::cerr << "DNN Initialization Error" << std::endl;
         net_load_error = true;
         is_initialized_ = false;
@@ -103,33 +103,34 @@ void HumanPose::Process_(SignalBus const &inputs, SignalBus &outputs)
             if (pre_proc_resize_) {
                 if (model_res_[0] > 0 && model_res_[1] > 0) {
                     cv::resize(*in1, frame, modelSize);
-                }
-                else
+                } else
                     frame = orig;
-            }
-            else
+            } else
                 frame = orig;
 
             try {
-                blob = cv::dnn::blobFromImage(frame, scale_, modelSize, cv::Scalar(mean_[0], mean_[1], mean_[2]), swap_rb_, false);
+                blob = cv::dnn::blobFromImage(frame, scale_, modelSize,
+                                              cv::Scalar(mean_[0], mean_[1], mean_[2]), swap_rb_,
+                                              false);
                 net_->setInput(blob);
                 if (has_concat_output_) {
                     result = net_->forward();
-                    splitNetOutputBlobToParts(result, cv::Size(frame.cols, frame.rows), netOutputParts);
-                }
-                else {
+                    splitNetOutputBlobToParts(result, cv::Size(frame.cols, frame.rows),
+                                              netOutputParts);
+                } else {
                     if (out_names_.size() == 2) {
                         std::vector<cv::Mat> netOutTmp;
                         std::vector<std::vector<cv::Mat>> outBlobArray;
                         net_->forward(outBlobArray, out_names_);
                         result = outBlobArray.at(1).at(0);
-                        splitNetOutputBlobToParts(outBlobArray.at(1).at(0), cv::Size(frame.cols, frame.rows), netOutputParts);
-                        splitNetOutputBlobToParts(outBlobArray.at(0).at(0), cv::Size(frame.cols, frame.rows), netOutTmp);
+                        splitNetOutputBlobToParts(outBlobArray.at(1).at(0),
+                                                  cv::Size(frame.cols, frame.rows), netOutputParts);
+                        splitNetOutputBlobToParts(outBlobArray.at(0).at(0),
+                                                  cv::Size(frame.cols, frame.rows), netOutTmp);
                         for (auto &img : netOutTmp) {
                             netOutputParts.emplace_back(std::move(img));
                         }
-                    }
-                    else {
+                    } else {
                         std::cerr << "Wrong number of layers or no Concat Layer" << std::endl;
                         return;
                     }
@@ -138,8 +139,7 @@ void HumanPose::Process_(SignalBus const &inputs, SignalBus &outputs)
                     has_paf_output_ = false;
                     force_single_mode_ = true;
                 }
-            }
-            catch (std::exception &e) {
+            } catch (std::exception &e) {
                 std::cerr << GetInstanceName() << ", Error Computing DNN" << std::endl;
                 std::cerr << e.what() << std::endl;
                 return;
@@ -170,17 +170,20 @@ void HumanPose::Process_(SignalBus const &inputs, SignalBus &outputs)
                 if (draw_joints_) {
                     for (int i = 0; i < poseInfo.nparts; ++i) {
                         for (int j = 0; j < detectedKeypoints.at(i).size(); ++j) {
-                            cv::circle(frame, detectedKeypoints.at(i).at(j).point, 3, JOINT_COLORS.at(i), -1);
+                            cv::circle(frame, detectedKeypoints.at(i).at(j).point, 3,
+                                       JOINT_COLORS.at(i), -1);
                         }
                     }
                 }
 
                 std::vector<std::vector<ValidPair>> validPairs;
                 std::set<int> invalidPairs;
-                getValidPairs(netOutputParts, detectedKeypoints, validPairs, invalidPairs, conf_thresh_, poseInfo.midx);
+                getValidPairs(netOutputParts, detectedKeypoints, validPairs, invalidPairs,
+                              conf_thresh_, poseInfo.midx);
 
                 std::vector<std::vector<int>> personwiseKeypoints;
-                getPersonwiseKeypoints(validPairs, invalidPairs, personwiseKeypoints, poseInfo.midx);
+                getPersonwiseKeypoints(validPairs, invalidPairs, personwiseKeypoints,
+                                       poseInfo.midx);
 
                 for (int i = 0; i < personwiseKeypoints.size(); i++) {
                     nlohmann::json jPose;
@@ -190,14 +193,16 @@ void HumanPose::Process_(SignalBus const &inputs, SignalBus &outputs)
                         if (j >= POSE_PAIRS.at(poseInfo.midx).size())
                             continue;
                         const std::pair<int, int> &posePair = POSE_PAIRS.at(poseInfo.midx).at(j);
-                        if (posePair.first >= personwiseKeypoints.at(i).size() || posePair.second >= personwiseKeypoints.at(i).size())
+                        if (posePair.first >= personwiseKeypoints.at(i).size() ||
+                            posePair.second >= personwiseKeypoints.at(i).size())
                             continue;
                         int indexA = personwiseKeypoints.at(i).at(posePair.first);
                         int indexB = personwiseKeypoints.at(i).at(posePair.second);
                         int indexC = personwiseKeypoints.at(i).at(j);
                         nlohmann::json kpPos;
                         nlohmann::json kp;
-                        if (indexA == -1 || indexB == -1 || indexC > keyPointsList.size() || indexA >= keyPointsList.size() || indexB >= keyPointsList.size()) {
+                        if (indexA == -1 || indexB == -1 || indexC > keyPointsList.size() ||
+                            indexA >= keyPointsList.size() || indexB >= keyPointsList.size()) {
                             kpPos["x"] = -1;
                             kpPos["y"] = -1;
                             kp[KEYPOINT_NAMES.at(poseInfo.midx).at(j)] = kpPos;
@@ -217,8 +222,7 @@ void HumanPose::Process_(SignalBus const &inputs, SignalBus &outputs)
                     jPose["keypoints"] = jKeyPoints;
                     jPoses.emplace_back(jPose);
                 }
-            }
-            else {
+            } else {
                 int H = result.size[2];
                 int W = result.size[3];
                 float SX = float(frame.cols) / (float)W;
@@ -245,8 +249,7 @@ void HumanPose::Process_(SignalBus const &inputs, SignalBus &outputs)
                         kpPos["y"] = -1;
                         kp[KEYPOINT_NAMES.at(poseInfo.midx).at(n)] = kpPos;
                         jKeyPoints.emplace_back(kp);
-                    }
-                    else {
+                    } else {
                         kpPos["x"] = (int)(p.x * SX);
                         kpPos["y"] = (int)(p.y * SY);
                         kp[KEYPOINT_NAMES.at(poseInfo.midx).at(n)] = kpPos;
@@ -286,8 +289,7 @@ void HumanPose::Process_(SignalBus const &inputs, SignalBus &outputs)
                 json_out["data"] = jPoses;
             outputs.SetValue(1, json_out);
             outputs.SetValue(0, orig);
-        }
-        else {
+        } else {
             outputs.SetValue(0, *in1);
         }
     }
@@ -295,7 +297,8 @@ void HumanPose::Process_(SignalBus const &inputs, SignalBus &outputs)
 
 bool HumanPose::HasGui(int interface)
 {
-    // This is where you tell the system if your node has any of the following interfaces: Main, Control or Other
+    // This is where you tell the system if your node has any of the following interfaces: Main,
+    // Control or Other
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         return true;
     }
@@ -308,21 +311,24 @@ void HumanPose::UpdateGui(void *context, int interface)
     auto *imCurContext = (ImGuiContext *)context;
     ImGui::SetCurrentContext(imCurContext);
 
-    // When Creating Strings for Controls use: CreateControlString("Text Here", GetInstanceCount()).c_str()
-    // This will ensure a unique control name for ImGui with multiple instance of the Plugin
+    // When Creating Strings for Controls use: CreateControlString("Text Here",
+    // GetInstanceCount()).c_str() This will ensure a unique control name for ImGui with multiple
+    // instance of the Plugin
     if (interface == (int)FlowCV::GuiInterfaceType_Controls) {
         if (!model_path_.empty() && !config_path_.empty()) {
             std::string button_str;
             if (net_load_error)
                 ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Error Initializing Network");
             if (needs_reinit_ && is_initialized_)
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Network Needs To Be Reinitialized!");
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+                                   "Network Needs To Be Reinitialized!");
 
             if (is_initialized_)
                 button_str = "Reinitialize Network";
             else {
                 button_str = "Initialize Network";
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Network Needs To Be Initialized!");
+                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f),
+                                   "Network Needs To Be Initialized!");
             }
             if (ImGui::Button(CreateControlString(button_str.c_str(), GetInstanceName()).c_str())) {
                 std::lock_guard<std::mutex> lk(io_mutex_);
@@ -332,7 +338,10 @@ void HumanPose::UpdateGui(void *context, int interface)
             if (ImGui::Combo(
                     CreateControlString("Backend", GetInstanceName()).c_str(), &dnn_backend_idx_,
                     [](void *data, int idx, const char **out_text) {
-                        *out_text = ((const std::vector<std::pair<std::string, cv::dnn::Backend>> *)data)->at(idx).first.c_str();
+                        *out_text =
+                            ((const std::vector<std::pair<std::string, cv::dnn::Backend>> *)data)
+                                ->at(idx)
+                                .first.c_str();
                         return true;
                     },
                     (void *)&backend_list_, (int)backend_list_.size())) {
@@ -348,7 +357,10 @@ void HumanPose::UpdateGui(void *context, int interface)
             if (ImGui::Combo(
                     CreateControlString("Target", GetInstanceName()).c_str(), &dnn_target_idx_,
                     [](void *data, int idx, const char **out_text) {
-                        *out_text = ((const std::vector<std::pair<std::string, cv::dnn::Target>> *)data)->at(idx).first.c_str();
+                        *out_text =
+                            ((const std::vector<std::pair<std::string, cv::dnn::Target>> *)data)
+                                ->at(idx)
+                                .first.c_str();
                         return true;
                     },
                     (void *)&target_list_, (int)target_list_.size())) {
@@ -377,8 +389,10 @@ void HumanPose::UpdateGui(void *context, int interface)
         if (show_model_dialog_)
             ImGui::OpenPopup(CreateControlString("Set Model", GetInstanceName()).c_str());
 
-        if (model_dialog_.showFileDialog(CreateControlString("Set Model", GetInstanceName()), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
-                ImVec2(700, 310), ".caffemodel,.bin,.onnx,.pb,.pth,.weights,.t7,.net", &show_model_dialog_)) {
+        if (model_dialog_.showFileDialog(
+                CreateControlString("Set Model", GetInstanceName()),
+                imgui_addons::ImGuiFileBrowser::DialogMode::OPEN, ImVec2(700, 310),
+                ".caffemodel,.bin,.onnx,.pb,.pth,.weights,.t7,.net", &show_model_dialog_)) {
             model_path_ = model_dialog_.selected_path;
             show_model_dialog_ = false;
             needs_reinit_ = true;
@@ -396,33 +410,45 @@ void HumanPose::UpdateGui(void *context, int interface)
         if (show_config_dialog_)
             ImGui::OpenPopup(CreateControlString("Set Config", GetInstanceName()).c_str());
 
-        if (config_dialog_.showFileDialog(CreateControlString("Set Config", GetInstanceName()), imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
-                ImVec2(700, 310), ".prototxt,.txt,.pbtxt,.yml,.cfg,.xml", &show_config_dialog_)) {
+        if (config_dialog_.showFileDialog(CreateControlString("Set Config", GetInstanceName()),
+                                          imgui_addons::ImGuiFileBrowser::DialogMode::OPEN,
+                                          ImVec2(700, 310), ".prototxt,.txt,.pbtxt,.yml,.cfg,.xml",
+                                          &show_config_dialog_)) {
             config_path_ = config_dialog_.selected_path;
             show_config_dialog_ = false;
             needs_reinit_ = true;
         }
         ImGui::Separator();
         ImGui::SetNextItemWidth(120);
-        ImGui::Combo(CreateControlString("Dataset Mode", GetInstanceName()).c_str(), &dataset_mode_, "COCO\0MPII\0Hand\0\0");
+        ImGui::Combo(CreateControlString("Dataset Mode", GetInstanceName()).c_str(), &dataset_mode_,
+                     "COCO\0MPII\0Hand\0\0");
         ImGui::Separator();
         ImGui::SetNextItemWidth(180);
-        ImGui::DragFloat3(CreateControlString("Mean", GetInstanceName()).c_str(), mean_, 0.1f, 0.0f, 500.0f, "%0.2f");
+        ImGui::DragFloat3(CreateControlString("Mean", GetInstanceName()).c_str(), mean_, 0.1f, 0.0f,
+                          500.0f, "%0.2f");
         ImGui::SetNextItemWidth(100);
-        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &scale_, 0.0001f, 0.0f, 10.0f, "%0.7f");
+        ImGui::DragFloat(CreateControlString("Scale", GetInstanceName()).c_str(), &scale_, 0.0001f,
+                         0.0f, 10.0f, "%0.7f");
         ImGui::SetNextItemWidth(70);
-        ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &model_res_[0], 0.5f, 224, 1000);
+        ImGui::DragInt(CreateControlString("Width", GetInstanceName()).c_str(), &model_res_[0],
+                       0.5f, 224, 1000);
         ImGui::SameLine();
         ImGui::SetNextItemWidth(70);
-        ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &model_res_[1], 0.5f, 224, 1000);
+        ImGui::DragInt(CreateControlString("Height", GetInstanceName()).c_str(), &model_res_[1],
+                       0.5f, 224, 1000);
         ImGui::SetNextItemWidth(80);
-        ImGui::DragFloat(CreateControlString("Conf. Threshold", GetInstanceName()).c_str(), &conf_thresh_, 0.01f, 0.0f, 1.0f, "%0.2f");
+        ImGui::DragFloat(CreateControlString("Conf. Threshold", GetInstanceName()).c_str(),
+                         &conf_thresh_, 0.01f, 0.0f, 1.0f, "%0.2f");
         ImGui::Checkbox(CreateControlString("RGB", GetInstanceName()).c_str(), &swap_rb_);
         if (has_paf_output_)
-            ImGui::Checkbox(CreateControlString("Force Single Detection Mode", GetInstanceName()).c_str(), &force_single_mode_);
-        ImGui::Checkbox(CreateControlString("Preprocess Resize", GetInstanceName()).c_str(), &pre_proc_resize_);
+            ImGui::Checkbox(
+                CreateControlString("Force Single Detection Mode", GetInstanceName()).c_str(),
+                &force_single_mode_);
+        ImGui::Checkbox(CreateControlString("Preprocess Resize", GetInstanceName()).c_str(),
+                        &pre_proc_resize_);
         ImGui::Separator();
-        ImGui::Checkbox(CreateControlString("Draw Joints", GetInstanceName()).c_str(), &draw_joints_);
+        ImGui::Checkbox(CreateControlString("Draw Joints", GetInstanceName()).c_str(),
+                        &draw_joints_);
     }
 }
 

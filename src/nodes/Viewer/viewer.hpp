@@ -4,11 +4,13 @@
 
 #ifndef FLOWCV_VIEWER_HPP_
 #define FLOWCV_VIEWER_HPP_
-#include <mutex>
 #include <DSPatch.h>
-#include "FlowCV_Types.hpp"
-#include "imgui_wrapper.hpp"
+
+#include <mutex>
+
+#include "Types.hpp"
 #include "imgui_opencv.hpp"
+#include "imgui_wrapper.hpp"
 
 namespace DSPatch::DSPatchables
 {

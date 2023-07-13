@@ -5,12 +5,14 @@
 #ifndef FLOWCV_PLUGIN_TCP_SEND_HPP_
 #define FLOWCV_PLUGIN_TCP_SEND_HPP_
 #include <DSPatch.h>
-#include "FlowCV_Types.hpp"
-#include "imgui_wrapper.hpp"
-#include "imgui_opencv.hpp"
-#include <nlohmann/json.hpp>
+
 #include <asio2/external/asio.hpp>
 #include <asio2/tcp/tcp_client.hpp>
+#include <nlohmann/json.hpp>
+
+#include "Types.hpp"
+#include "imgui_opencv.hpp"
+#include "imgui_wrapper.hpp"
 
 namespace DSPatch::DSPatchables
 {

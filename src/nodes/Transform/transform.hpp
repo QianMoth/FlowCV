@@ -5,11 +5,13 @@
 #ifndef FLOWCV_PLUGIN_TRANSFORM_HPP_
 #define FLOWCV_PLUGIN_TRANSFORM_HPP_
 #include <DSPatch.h>
-#include "FlowCV_Types.hpp"
-#include "FlowCV_Properties.hpp"
-#include "imgui_wrapper.hpp"
-#include "imgui_opencv.hpp"
+
 #include <nlohmann/json.hpp>
+
+#include "Properties.hpp"
+#include "Types.hpp"
+#include "imgui_opencv.hpp"
+#include "imgui_wrapper.hpp"
 
 namespace DSPatch::DSPatchables
 {

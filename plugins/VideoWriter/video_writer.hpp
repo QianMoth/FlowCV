@@ -6,11 +6,13 @@
 #define FLOWCV_VIDEO_WRITER_HPP_
 
 #include <DSPatch.h>
-#include "FlowCV_Types.hpp"
-#include "imgui_wrapper.hpp"
-#include "imgui_opencv.hpp"
-#include <nlohmann/json.hpp>
 #include <ImGuiFileBrowser.h>
+
+#include <nlohmann/json.hpp>
+
+#include "Types.hpp"
+#include "imgui_opencv.hpp"
+#include "imgui_wrapper.hpp"
 
 namespace DSPatch::DSPatchables
 {

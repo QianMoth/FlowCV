@@ -4,16 +4,16 @@
 
 #include <spdlog/spdlog.h>
 
+#include <FlowCV/CoreApplication.hpp>
+#include <FlowCV/FlowCV_Manager.hpp>
+#include <FlowCV/Properties.hpp>
+#include <FlowCV/Settings.hpp>
 #include <chrono>
 #include <cmdline/cmdline>
 #include <csignal>
 #include <filesystem>
 #include <iostream>
 #include <thread>
-
-#include "core/CoreApplication.h"
-#include "managers/FlowCV_Manager.hpp"
-#include "utils/settings.h"
 
 #ifdef __linux__
 #include <libgen.h>
@@ -25,7 +25,7 @@
 #include <mach-o/dyld.h>
 #endif
 
-#define APP_VERSION "0.1.3"
+#include "config.h"
 
 unsigned int g_bTerminate = 0;
 
@@ -58,14 +58,14 @@ int main(int argc, char *argv[])
 
     // 命令行解析器
     cmdline::parser cmdParser;
-    cmdParser.set_program_name(std::string{"FlowCV Node Editor "} + APP_VERSION);
+    cmdParser.set_program_name(std::string(PROJECT_NAME) + " " + PROJECT_VER);
     // 执行flow文件
-    cmdParser.add<std::string>("flow", 'f', "Flow File", false);
+    cmdParser.add<std::string>("flow", 'f', "Flow File", true);
     cmdParser.add<std::string>("cfg", 'c', "Default Config File Override", false);
 
     cmdParser.parse_check(argc, argv);
 
-    spdlog::info("FlowCV Processing Engine - v{}", APP_VERSION);
+    spdlog::info("FlowCV Processing Engine - v{}", PROJECT_VER);
 
     // ===========================================================================
 

@@ -5,11 +5,13 @@
 #ifndef FLOWCV_PLUGIN_DEPTH_VIEWER_3D_HPP_
 #define FLOWCV_PLUGIN_DEPTH_VIEWER_3D_HPP_
 #include <DSPatch.h>
-#include "FlowCV_Types.hpp"
-#include "imgui_wrapper.hpp"
-#include "imgui_opencv.hpp"
-#include "imgui_3d_opengl.hpp"
+
 #include <nlohmann/json.hpp>
+
+#include "Types.hpp"
+#include "imgui_3d_opengl.hpp"
+#include "imgui_opencv.hpp"
+#include "imgui_wrapper.hpp"
 
 struct colorVertNorm
 {

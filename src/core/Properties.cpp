@@ -2,7 +2,8 @@
 // FlowCV Node Properties
 //
 
-#include "FlowCV_Properties.hpp"
+#include "Properties.hpp"
+
 #include "imgui.h"
 #include "imgui_instance_helper.hpp"
 

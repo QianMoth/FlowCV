@@ -2,8 +2,10 @@
 // FlowCV Common Types
 //
 
-#ifndef FLOWCV_TYPES_HPP_
-#define FLOWCV_TYPES_HPP_
+#pragma once
+
+#include <map>
+#include <string>
 
 namespace FlowCV
 {
@@ -35,5 +37,3 @@ namespace DSPatch
 ///@return const std::map<DSPatch::Category, const char *>&
 const std::map<DSPatch::Category, const char *> &getCategories();
 }  // namespace DSPatch
-
-#endif  // FLOWCV_TYPES_HPP_

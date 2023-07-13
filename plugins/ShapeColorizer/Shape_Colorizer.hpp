@@ -6,10 +6,12 @@
 #define FLOWCV_PLUGIN_SHAPE_COLORIZER_HPP_
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <DSPatch.h>
-#include "FlowCV_Types.hpp"
-#include "imgui_wrapper.hpp"
-#include "imgui_opencv.hpp"
+
 #include <nlohmann/json.hpp>
+
+#include "Types.hpp"
+#include "imgui_opencv.hpp"
+#include "imgui_wrapper.hpp"
 
 namespace DSPatch::DSPatchables
 {

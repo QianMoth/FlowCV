@@ -6,11 +6,13 @@
 #define FLOWCV_VIDEO_CAPTURE_HPP_
 
 #include <DSPatch.h>
-#include "FlowCV_Types.hpp"
-#include "imgui_wrapper.hpp"
-#include "imgui_opencv.hpp"
+
 #include <nlohmann/json.hpp>
+
+#include "Types.hpp"
 #include "camera_enumerator.hpp"
+#include "imgui_opencv.hpp"
+#include "imgui_wrapper.hpp"
 
 namespace DSPatch::DSPatchables
 {

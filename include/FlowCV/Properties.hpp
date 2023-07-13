@@ -2,15 +2,16 @@
 // FlowCV Node Properties
 //
 
-#ifndef FLOWCV_PROPERTY_MANAGER_HPP_
-#define FLOWCV_PROPERTY_MANAGER_HPP_
+#pragma once
 
-#include <vector>
-#include <string>
+#include <map>
 #include <memory>
 #include <mutex>
-#include <map>
 #include <nlohmann/json.hpp>
+#include <string>
+#include <vector>
+
+#include "Export.hpp"
 
 namespace FlowCV
 {
@@ -46,7 +47,7 @@ struct DataStruct
     bool changed;
 };
 
-class FlowCV_Properties
+class FLOW_EDITOR_PUBLIC FlowCV_Properties
 {
   public:
     FlowCV_Properties();
@@ -90,5 +91,5 @@ class FlowCV_Properties
     std::mutex mutex_lock_;
 
 };  // End Class Node_Properties
+
 }  // End Namespace FlowCV
-#endif  // FLOWCV_PROPERTY_MANAGER_HPP_

@@ -5,10 +5,12 @@
 #ifndef FLOWCV_PLUGIN_ABS_DIFF_HPP_
 #define FLOWCV_PLUGIN_ABS_DIFF_HPP_
 #include <DSPatch.h>
-#include "FlowCV_Types.hpp"
-#include "imgui_wrapper.hpp"
-#include "imgui_opencv.hpp"
+
 #include <nlohmann/json.hpp>
+
+#include "Types.hpp"
+#include "imgui_opencv.hpp"
+#include "imgui_wrapper.hpp"
 
 namespace DSPatch::DSPatchables
 {

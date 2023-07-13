@@ -5,12 +5,14 @@
 #ifndef FLOWCV_PLUGIN_DNN_OBJECT_DETECTION_HPP_
 #define FLOWCV_PLUGIN_DNN_OBJECT_DETECTION_HPP_
 #include <DSPatch.h>
-#include "FlowCV_Types.hpp"
-#include "imgui_wrapper.hpp"
-#include "imgui_opencv.hpp"
-#include <nlohmann/json.hpp>
 #include <ImGuiFileBrowser.h>
+
+#include <nlohmann/json.hpp>
+
+#include "Types.hpp"
 #include "dnn_backend_helper.hpp"
+#include "imgui_opencv.hpp"
+#include "imgui_wrapper.hpp"
 
 namespace DSPatch::DSPatchables
 {

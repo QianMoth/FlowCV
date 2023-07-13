@@ -1,4 +1,4 @@
-#include "CoreApplication.h"
+#include "CoreApplication.hpp"
 
 #include <filesystem>
 #include <string>

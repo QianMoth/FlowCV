@@ -4,9 +4,11 @@
 
 #ifndef FLOWCV_INTERNAL_NODE_MANAGER_HPP_
 #define FLOWCV_INTERNAL_NODE_MANAGER_HPP_
-#include <iostream>
 #include <DSPatch.h>
-#include "FlowCV_Types.hpp"
+
+#include <iostream>
+
+#include "Types.hpp"
 
 namespace FlowCV
 {
